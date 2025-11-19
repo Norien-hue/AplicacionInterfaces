@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="254.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewUser">
+   <children>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
+         <children>
+            <Label text="Nombre" />
+            <TextField prefHeight="26.0" prefWidth="212.0" />
+         </children>
+      </VBox>
+      <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="228.0">
+         <children>
+            <Label text="Contraseña" />
+            <PasswordField prefHeight="26.0" prefWidth="30.0" />
+         </children>
+      </VBox>
+      <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
+         <children>
+            <Label text="Repetir contraseña" />
+            <PasswordField prefHeight="26.0" prefWidth="266.0" />
+         </children>
+      </VBox>
+      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="56.0" prefWidth="254.0">
+         <children>
+            <Label text="Rol" />
+            <HBox prefHeight="22.0" prefWidth="254.0" spacing="20.0">
+               <children>
+                  <RadioButton mnemonicParsing="false" text="Admin">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="role" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <RadioButton mnemonicParsing="false" text="User" toggleGroup="$role" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="234.0" spacing="10.0">
+         <children>
+            <Button mnemonicParsing="false" text="Aceptar" />
+            <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

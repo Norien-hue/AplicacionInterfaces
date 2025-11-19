@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="324.0" prefWidth="242.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.SettingsController">
+   <children>
+      <VBox prefHeight="54.0" prefWidth="222.0">
+         <children>
+            <Label text="Nombre">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <TextField fx:id="txtFld_nombre" />
+         </children>
+      </VBox>
+      <VBox layoutX="20.0" layoutY="20.0" prefHeight="54.0" prefWidth="222.0">
+         <children>
+            <Label text="Contraseña">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Button fx:id="btn_passwd" mnemonicParsing="false" onAction="#launch_cambiarPwd" text="Cambiar contraseña" />
+         </children>
+      </VBox>
+      <VBox layoutX="20.0" layoutY="90.0" prefHeight="54.0" prefWidth="222.0">
+         <children>
+            <Label text="Cambio de rol">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Button fx:id="btn_cambio" mnemonicParsing="false" text="Solicitar cambio" />
+         </children>
+      </VBox>
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="168.0" prefWidth="222.0" spacing="10.0">
+         <children>
+            <Button fx:id="btn_accept" mnemonicParsing="false" text="Confirmar cambios" />
+            <Button fx:id="btn_cancel" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>
