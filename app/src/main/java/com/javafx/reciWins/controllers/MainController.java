@@ -4,15 +4,19 @@ import com.javafx.model.Producto;
 import com.javafx.model.Transaccion;
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
+import com.javafx.reciWins.utiles.SQLstatementStorage;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -282,5 +286,48 @@ public class MainController implements Initializable {
     @FXML
     void launch_scan(ActionEvent event) {
         StartWin.lanzarEscanear();
+    }
+
+    @FXML
+    void borrarProducto(ActionEvent event) {
+        Producto e = tablaProductos.getSelectionModel().getSelectedItem();
+        if(e!=null){
+            SQLstatementStorage.storeStatement("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
+            tablaProductos.getItems().remove(e);
+        }else{
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setHeaderText("Error de seleccion");
+            alerta.setContentText("Selecciona un elemento");
+            alerta.showAndWait();
+        }
+    }
+
+    @FXML
+    void borrarTransaccion(ActionEvent event) {
+        Transaccion e = tablaTransacciones.getSelectionModel().getSelectedItem();
+        if(e!=null){
+            SQLstatementStorage.storeStatement("DELETE FROM Recicla WHERE Fecha = '"+e.getFecha()+"' AND Hora = '"+ e.getHora()+"'");
+            tablaTransacciones.getItems().remove(e);
+            System.out.println(e.getFecha()+" y "+e.getHora());
+        }else{
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setHeaderText("Error de seleccion");
+            alerta.setContentText("Selecciona un elemento");
+            alerta.showAndWait();
+        }
+    }
+
+    @FXML
+    void borrarUsuario(ActionEvent event) {
+        Usuario e = tablaUsuario.getSelectionModel().getSelectedItem();
+        if(e!=null){
+            SQLstatementStorage.storeStatement("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
+            tablaUsuario.getItems().remove(e);
+        }else{
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setHeaderText("Error de seleccion");
+            alerta.setContentText("Selecciona un elemento");
+            alerta.showAndWait();
+        }
     }
 }

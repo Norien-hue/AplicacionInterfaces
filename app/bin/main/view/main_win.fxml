@@ -131,7 +131,7 @@
                               <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="248.0" spacing="5.0">
                                  <children>
                                     <Label text="Nombre:" />
-                                    <Label text="NombreBD" />
+                                    <Label fx:id="nombreBD" text="NombreBD" />
                                  </children>
                                  <padding>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -180,7 +180,7 @@
                <content>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
-                        <AnchorPane fx:id="tab_product" prefHeight="200.0" prefWidth="200.0" visible="false">
+                        <AnchorPane fx:id="tab_product" prefHeight="200.0" prefWidth="200.0">
                            <children>
                               <TableView fx:id="tablaProductos" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="590.0">
                                  <columns>
@@ -194,7 +194,7 @@
                               <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="589.0" spacing="5.0">
                                  <children>
                                     <Button fx:id="btn_addProducto" mnemonicParsing="false" onAction="#launch_newProducto" text="Crear producto" />
-                                    <Button mnemonicParsing="false" text="Borrar producto" />
+                                    <Button mnemonicParsing="false" onAction="#borrarProducto" text="Borrar producto" />
                                     <Button fx:id="btn_modProducto" layoutX="397.0" layoutY="59.0" mnemonicParsing="false" onAction="#launch_modProducto" text="Modificar producto" />
                                  </children>
                               </HBox>
@@ -214,13 +214,13 @@
                               <HBox alignment="BOTTOM_RIGHT" layoutX="21.0" layoutY="14.0" prefHeight="74.0" prefWidth="589.0" spacing="5.0">
                                  <children>
                                     <Button fx:id="btn_addTransaccion" mnemonicParsing="false" onAction="#launch_newTransaccion" text="Crear transacción" />
-                                    <Button mnemonicParsing="false" text="Borrar transacción" />
+                                    <Button mnemonicParsing="false" onAction="#borrarTransaccion" text="Borrar transacción" />
                                     <Button fx:id="btn_modTransaccion" layoutX="375.0" layoutY="59.0" mnemonicParsing="false" onAction="#launch_modTransaccion" text="Modificar transacción" />
                                  </children>
                               </HBox>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="tab_usuario" prefHeight="200.0" prefWidth="200.0">
+                        <AnchorPane fx:id="tab_usuario" prefHeight="200.0" prefWidth="200.0" visible="false">
                            <children>
                               <TableView fx:id="tablaUsuario" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="590.0">
                                  <columns>
@@ -234,7 +234,7 @@
                               <HBox alignment="BOTTOM_RIGHT" layoutX="14.0" layoutY="13.0" prefHeight="69.0" prefWidth="598.0" spacing="10.0">
                                  <children>
                                     <Button fx:id="btn_addUsuario" mnemonicParsing="false" onAction="#launch_newUser" text="Crear usuario" />
-                                    <Button mnemonicParsing="false" text="Borrar usuario" />
+                                    <Button mnemonicParsing="false" onAction="#borrarUsuario" text="Borrar usuario" />
                                     <Button fx:id="btn_modUsuario" mnemonicParsing="false" onAction="#launch_modUsuario" text="Modificar usuario" />
                                  </children>
                               </HBox>
