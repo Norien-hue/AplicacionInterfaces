@@ -223,15 +223,15 @@ public class MainController implements Initializable {
         }
     }
 
-    @FXML
-    void launch_modProducto(ActionEvent event) {
-        StartWin.lanzarModProducto();
-    }
+    // @FXML
+    // void launch_modProducto(ActionEvent event) {
+    //     StartWin.lanzarModProducto();
+    // }
 
-    @FXML
-    void launch_modTransaccion(ActionEvent event) {
-        StartWin.lanzarModTransaccion();
-    }
+    // @FXML
+    // void launch_modTransaccion(ActionEvent event) {
+    //     StartWin.lanzarModTransaccion();
+    // }
 
     @FXML
     void launch_modUsuario(ActionEvent event) {
@@ -383,4 +383,47 @@ public class MainController implements Initializable {
             System.out.println("???");
         }
     }
+
+    @FXML
+void launch_modProducto(ActionEvent event) {
+    Producto m = tablaProductos.getSelectionModel().getSelectedItem();
+    if(m != null) {
+        StorageSharer.itemStorage.add(m.getTipo());
+        StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
+        StorageSharer.itemStorage.add(m.getNombre());
+        StorageSharer.itemStorage.add(m.getEmisionesReducibles() + "");
+        StorageSharer.itemStorage.add(m.getMaterial());
+        StorageSharer.itemToMod = m;
+        StorageSharer.itemPre = m;
+        
+        StartWin.lanzarModProducto();
+    } else {
+        Alert alerta = new Alert(AlertType.WARNING);
+        alerta.setHeaderText("Error de selección");
+        alerta.setContentText("Selecciona un producto");
+        alerta.showAndWait();
+    }
 }
+
+@FXML
+void launch_modTransaccion(ActionEvent event) {
+    Transaccion m = tablaTransacciones.getSelectionModel().getSelectedItem();
+    if(m != null) {
+        StorageSharer.itemStorage.add(m.getIdUsuario() + "");
+        StorageSharer.itemStorage.add(m.getTipo());
+        StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
+        StorageSharer.itemStorage.add(m.getFecha().toString());
+        StorageSharer.itemStorage.add(m.getHora().toString());
+        StorageSharer.itemToMod = m;
+        StorageSharer.itemPre = m;
+        
+        StartWin.lanzarModTransaccion();
+    } else {
+        Alert alerta = new Alert(AlertType.WARNING);
+        alerta.setHeaderText("Error de selección");
+        alerta.setContentText("Selecciona una transacción");
+        alerta.showAndWait();
+    }
+}
+}
+

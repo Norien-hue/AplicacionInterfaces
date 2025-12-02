@@ -3,50 +3,49 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="254.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewTransaccion">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="420.0" prefWidth="254.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewTransaccion">
    <children>
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
-            <Label text="ID_Usuario" />
-            <TextField prefHeight="26.0" prefWidth="212.0" />
+            <Label text="ID Usuario" />
+            <TextField fx:id="idUsuarioTransaccion" prefHeight="26.0" prefWidth="212.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="228.0">
          <children>
             <Label text="Tipo" />
-            <PasswordField prefHeight="26.0" prefWidth="30.0" />
+            <TextField fx:id="tipoTransaccion" prefHeight="26.0" prefWidth="30.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
-            <Label text="Codigo" />
-            <PasswordField prefHeight="26.0" prefWidth="266.0" />
+            <Label text="Código Barras" />
+            <TextField fx:id="codigoTransaccion" prefHeight="26.0" prefWidth="266.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="56.0" prefWidth="254.0">
+      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="86.0" prefWidth="254.0" spacing="5.0">
          <children>
             <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
                <children>
-                  <Label text="Fecha" />
-                  <PasswordField prefHeight="26.0" prefWidth="266.0" />
+                  <Label text="Fecha (YYYY-MM-DD)" />
+                  <TextField fx:id="fechaTransaccion" prefHeight="26.0" prefWidth="266.0" promptText="2024-01-15" />
                </children>
             </VBox>
             <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
                <children>
-                  <Label text="Hora" />
-                  <PasswordField prefHeight="26.0" prefWidth="266.0" />
+                  <Label text="Hora (HH:MM)" />
+                  <TextField fx:id="horaTransaccion" prefHeight="26.0" prefWidth="266.0" promptText="14:30" />
                </children>
             </VBox>
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="234.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" text="Aceptar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#crearTransaccion" text="Aceptar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>
