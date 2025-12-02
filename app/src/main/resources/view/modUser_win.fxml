@@ -13,25 +13,25 @@
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="276.0">
          <children>
             <Label text="ID_usuario" />
-            <TextField prefHeight="26.0" prefWidth="260.0" />
+            <TextField fx:id="idModUsuario" prefHeight="26.0" prefWidth="260.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="276.0">
          <children>
             <Label text="Nombre" />
-            <TextField prefWidth="268.0" />
+            <TextField fx:id="nombreModUsuario" prefWidth="268.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="56.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
          <children>
             <Label text="Emisiones" />
-            <TextField prefHeight="26.0" prefWidth="258.0" />
+            <TextField fx:id="emisionesModUsuario" prefHeight="26.0" prefWidth="258.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="101.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
          <children>
             <Label text="TAP" />
-            <TextField />
+            <TextField fx:id="tapModUsuario" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="147.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="45.0" prefWidth="299.0">
@@ -39,15 +39,15 @@
             <Label text="Rol" />
             <HBox prefHeight="18.0" prefWidth="299.0" spacing="15.0">
                <children>
-                  <RadioButton mnemonicParsing="false" text="Admin" />
-                  <RadioButton mnemonicParsing="false" text="User" />
+                  <RadioButton fx:id="adminRoleUsuarioMod" mnemonicParsing="false" text="Admin" />
+                  <RadioButton fx:id="userRoleUsuarioMod" mnemonicParsing="false" text="User" />
                </children>
             </HBox>
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" text="Confirmar" />
+            <Button fx:id="modUsuarioConfirmar" mnemonicParsing="false" onAction="#modUsuarioPulsado" text="Confirmar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>

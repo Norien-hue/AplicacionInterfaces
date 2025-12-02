@@ -15,6 +15,8 @@ javafx {
 dependencies {
     //No es necesario incluir las dependencias porque ya lo hace el plugin por nosotros
     implementation 'mysql:mysql-connector-java:8.0.32'
+    // https://mvnrepository.com/artifact/org.controlsfx/controlsfx
+implementation("org.controlsfx:controlsfx:11.2.2")
 }
 
 java { //Se indica la versión de JDK que ha de utilizar
@@ -24,7 +26,7 @@ java { //Se indica la versión de JDK que ha de utilizar
 }
 
 application { //Definimos clase principal del proyecto
-    mainClass = 'com.javafx.A_holamundofxml.Main'
+    mainClass = 'com.javafx.reciWins.start.StartWin.main'
 }
 
 sourceSets {
@@ -34,6 +36,12 @@ sourceSets {
         includes = ["**/*.fxml","**/*.png","**/*.properties"]  //Importante para poder abrir una extensión no reconocida
     }
   }
+}
+
+run {
+    jvmArgs = [
+        '--add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls'
+    ]
 }
 
 

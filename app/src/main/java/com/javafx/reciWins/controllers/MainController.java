@@ -5,6 +5,7 @@ import com.javafx.model.Transaccion;
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
 import com.javafx.reciWins.utiles.SQLstatementStorage;
+import com.javafx.reciWins.utiles.StorageSharer;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -139,13 +140,21 @@ public class MainController implements Initializable {
         colTAPUsuario.setCellValueFactory(new PropertyValueFactory<>("tap"));
     }
 
+    @FXML
+    void saveClicked(ActionEvent event) {
+        SQLstatementStorage.executeStatements();
+        tablaProductos.refresh();
+        tablaUsuario.refresh();
+        tablaTransacciones.refresh();
+    }
+
     private void cargarDatosProductos() {
         try {
             String query = "SELECT * FROM Productos";
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery(query);
 
-            ObservableList<Producto> data = FXCollections.observableArrayList();
+            tablaProductosObservable = FXCollections.observableArrayList();
 
             while (rs.next()) {
                 Producto producto = new Producto(
@@ -155,10 +164,10 @@ public class MainController implements Initializable {
                     rs.getFloat("Emisiones_Reducibles"),
                     rs.getString("Material")
                 );
-                data.add(producto);
+                tablaProductosObservable.add(producto);
             }
 
-            tablaProductos.setItems(data);
+            tablaProductos.setItems(tablaProductosObservable);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -170,7 +179,7 @@ public class MainController implements Initializable {
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery(query);
 
-            ObservableList<Transaccion> data = FXCollections.observableArrayList();
+            tablaTransaccionesObservable = FXCollections.observableArrayList();
 
             while (rs.next()) {
                 Transaccion transaccion = new Transaccion(
@@ -180,10 +189,10 @@ public class MainController implements Initializable {
                     rs.getDate("Fecha"),
                     rs.getTime("Hora")
                 );
-                data.add(transaccion);
+                tablaTransaccionesObservable.add(transaccion);
             }
 
-            tablaTransacciones.setItems(data);
+            tablaTransacciones.setItems(tablaTransaccionesObservable);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -195,7 +204,7 @@ public class MainController implements Initializable {
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery(query);
 
-            ObservableList<Usuario> data = FXCollections.observableArrayList();
+            tablaUsuarioObservable = FXCollections.observableArrayList();
 
             while (rs.next()) {
                 Usuario usuario = new Usuario(
@@ -205,10 +214,10 @@ public class MainController implements Initializable {
                     rs.getString("Nombre"),
                     rs.getInt("TAP")
                 );
-                data.add(usuario);
+                tablaUsuarioObservable.add(usuario);
             }
 
-            tablaUsuario.setItems(data);
+            tablaUsuario.setItems(tablaUsuarioObservable);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -226,6 +235,16 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modUsuario(ActionEvent event) {
+        Usuario m = tablaUsuario.getSelectionModel().getSelectedItem();
+        StorageSharer.itemStorage.add(m.getIdUsuario()+"");
+        StorageSharer.itemStorage.add(m.getNombre());
+        StorageSharer.itemStorage.add(m.getPermisos());
+        StorageSharer.itemStorage.add(m.getTap()+"");
+        StorageSharer.itemStorage.add(m.getEmisionesReducidas()+"");
+        StorageSharer.itemToMod = m;
+        
+        StorageSharer.itemPre = m;
+
         StartWin.lanzarModUser();
     }
 
@@ -293,7 +312,8 @@ public class MainController implements Initializable {
         Producto e = tablaProductos.getSelectionModel().getSelectedItem();
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
-            tablaProductos.getItems().remove(e);
+            tablaProductosObservable.remove(e);
+            // tablaProductosObservable.set(0, new Producto(e.getTipo(), e.getNumeroBarras(), "Prueba", 0, e.getMaterial())); //QUE POR QUE AQUI SI ACTUALIZA LA TABLEVIEW
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -307,7 +327,7 @@ public class MainController implements Initializable {
         Transaccion e = tablaTransacciones.getSelectionModel().getSelectedItem();
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Recicla WHERE Fecha = '"+e.getFecha()+"' AND Hora = '"+ e.getHora()+"'");
-            tablaTransacciones.getItems().remove(e);
+            tablaTransaccionesObservable.remove(e);
             System.out.println(e.getFecha()+" y "+e.getHora());
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
@@ -322,12 +342,45 @@ public class MainController implements Initializable {
         Usuario e = tablaUsuario.getSelectionModel().getSelectedItem();
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
-            tablaUsuario.getItems().remove(e);
+            tablaUsuarioObservable.remove(e);
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
             alerta.setContentText("Selecciona un elemento");
             alerta.showAndWait();
+        }
+    }
+
+    public static ObservableList<Usuario> tablaUsuarioObservable;
+    public static ObservableList<Producto> tablaProductosObservable;
+    public static ObservableList<Transaccion> tablaTransaccionesObservable;
+
+    public static void modItem(){
+        Object o = StorageSharer.itemToMod;
+        Object op = StorageSharer.itemPre;
+        if(o instanceof Usuario && op instanceof Usuario){
+            int reps = tablaUsuarioObservable.size();
+            for(int i = 0; i<reps ; i++ ){
+                if(tablaUsuarioObservable.get(i).equals(op)){
+                    tablaUsuarioObservable.set(i,(Usuario) o);
+                }
+            }
+        }else if(o instanceof Producto && op instanceof Producto){
+            int reps = tablaProductosObservable.size();
+            for(int i = 0; i<reps ; i++ ){
+                if(tablaProductosObservable.get(i).equals(op)){
+                    tablaProductosObservable.set(i,(Producto) o);
+                }
+            }
+        }else if(o instanceof Transaccion && op instanceof Transaccion){
+            int reps = tablaTransaccionesObservable.size();
+            for(int i = 0; i<reps ; i++ ){
+                if(tablaTransaccionesObservable.get(i).equals(op)){
+                    tablaTransaccionesObservable.set(i,(Transaccion) o);
+                }
+            }
+        }else{
+            System.out.println("???");
         }
     }
 }

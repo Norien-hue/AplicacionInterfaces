@@ -78,7 +78,7 @@
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_save" mnemonicParsing="false" prefHeight="31.0" prefWidth="70.0" text="Save">
+                  <Button fx:id="btn_save" mnemonicParsing="false" onAction="#saveClicked" prefHeight="31.0" prefWidth="70.0" text="Save">
                      <graphic>
                         <ImageView fitHeight="23.0" fitWidth="67.0" pickOnBounds="true" preserveRatio="true">
                            <image>

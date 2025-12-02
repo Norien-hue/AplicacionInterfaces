@@ -9,14 +9,19 @@ import com.javafx.reciWins.start.StartWin;
 public class SQLstatementStorage {
     private static ArrayList<String> preparedStatements = new ArrayList<>();
 
-    private static boolean executeStatement(){
-        String currentSentence = preparedStatements.removeFirst();
+    public static boolean executeStatements(){
+
+        for(int i = 0; i<preparedStatements.size(); i++){
+            String currentSentence = preparedStatements.get(i);
         
-        try {
-            StartWin.conn.createStatement().execute(currentSentence);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            try {
+                StartWin.conn.createStatement().execute(currentSentence);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+        
+        preparedStatements.clear();
 
         return true;
     }
@@ -27,9 +32,5 @@ public class SQLstatementStorage {
 
     public static void clearStorage(){
         preparedStatements.clear();
-    }
-
-    public static void executeEverything(){
-        preparedStatements.forEach((e) -> executeStatement());;
     }
 }
