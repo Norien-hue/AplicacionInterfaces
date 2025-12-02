@@ -19,13 +19,13 @@
       <VBox prefHeight="44.0" prefWidth="250.0">
          <children>
             <Label text="Nombre" />
-            <TextField />
+            <TextField fx:id="nombreUsuario" />
          </children>
       </VBox>
       <VBox layoutX="20.0" layoutY="83.0" prefHeight="83.0" prefWidth="250.0">
          <children>
             <Label text="Contraseña" />
-            <PasswordField />
+            <PasswordField fx:id="contraseniaUsuario" />
          </children>
       </VBox>
       <VBox alignment="BOTTOM_LEFT" prefHeight="144.0" prefWidth="274.0">

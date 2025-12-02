@@ -55,9 +55,7 @@ public class NewUser implements Initializable {
             String contrasenia = contraseniaUsuario.getText();
             String role = userRoleUsuario.isSelected() ? "cliente" : "administrador";
             
-            // Hashear la contraseña (simulación básica con BCrypt pattern)
-            // En producción deberías usar BCrypt real: BCrypt.hashpw(contrasenia, BCrypt.gensalt())
-            String hashContrasenia = "$2y$10$" + contrasenia.hashCode(); // TEMPORAL - usa BCrypt en producción
+            String hashContrasenia = "$2y$10$" + contrasenia.hashCode(); 
             
             SQLstatementStorage.storeStatement(
                 "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('" 
@@ -68,14 +66,16 @@ public class NewUser implements Initializable {
                 + "NULL)"
             );
             
-            // Para la ObservableList necesitamos el ID autogenerado
-            // Como INSERT no devuelve el ID inmediatamente, dejamos que el refresh lo cargue
-            // O puedes hacer una consulta SELECT MAX(Id_Usuario) después del INSERT
-            
-            Alert success = new Alert(AlertType.INFORMATION);
-            success.setHeaderText("Usuario creado");
-            success.setContentText("El usuario se creará al hacer clic en 'Save'");
-            success.showAndWait();
+            // AÑADIR ESTAS 7 LÍNEAS:
+            Usuario nuevoUsuario = new Usuario(
+                0,
+                0.0f,
+                role,
+                nombre,
+                0
+            );
+            MainController.tablaUsuarioObservable.add(nuevoUsuario);
+            // FIN DE LAS LÍNEAS AÑADIDAS
             
             ((Stage)btn_cancelar.getScene().getWindow()).close();
         }

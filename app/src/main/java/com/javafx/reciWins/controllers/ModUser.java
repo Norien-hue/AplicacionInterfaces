@@ -2,10 +2,8 @@ package com.javafx.reciWins.controllers;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.ResourceBundle;
 
-import com.javafx.model.Transaccion;
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
 import com.javafx.reciWins.utiles.SQLstatementStorage;
@@ -22,7 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
-public class ModUser implements Initializable{
+public class ModUser implements Initializable {
 
     @FXML
     private RadioButton adminRoleUsuarioMod;
@@ -50,25 +48,28 @@ public class ModUser implements Initializable{
 
     @FXML
     void kill(ActionEvent event) {
-        StorageSharer.itemStorage.forEach(e -> System.out.println(e) ); //TODO : eliminar esto, es para debug solo
         StorageSharer.itemStorage.clear();
-        StorageSharer.itemStorage.forEach(e -> System.out.println(e) ); //TODO : eliminar esto, es para debug solo
+        StorageSharer.itemToMod = null;
+        StorageSharer.itemPre = null;
         ((Stage)btn_cancelar.getScene().getWindow()).close();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Cargar datos del usuario seleccionado
         idModUsuario.setText(StorageSharer.itemStorage.get(0));
         nombreModUsuario.setText(StorageSharer.itemStorage.get(1));
 
-        String role  = StorageSharer.itemStorage.get(2);
-        if(role.equals("cliente")){
-            userRoleUsuarioMod.selectedProperty().set(true);
-        }else{
-            adminRoleUsuarioMod.selectedProperty().set(true);
+        String role = StorageSharer.itemStorage.get(2);
+        if(role.equalsIgnoreCase("cliente")) {
+            userRoleUsuarioMod.setSelected(true);
+        } else {
+            adminRoleUsuarioMod.setSelected(true);
         }
+        
         tapModUsuario.setText(StorageSharer.itemStorage.get(3));
-        emisionesModUsuario.setText(StorageSharer.itemStorage.get(4)); //TODO: cambiar esto por que es un valor calculado en realidad y por ende debo hacer que la bd se encargue de eso
+        emisionesModUsuario.setText(StorageSharer.itemStorage.get(4));
+        
         Platform.runLater(() -> {
             ((Stage)btn_cancelar.getScene().getWindow()).getIcons().add(StartWin.icon);
         });
@@ -76,57 +77,100 @@ public class ModUser implements Initializable{
 
     @FXML
     void modUsuarioPulsado(ActionEvent event) {
-        launchAlertsModUser(); //TODO: Imp if para poner todo si esto devuelve false si y si no error
-        String role = userRoleUsuarioMod.isSelected() ? "cliente" : "admin";
-        SQLstatementStorage.storeStatement("UPDATE Usuarios SET Nombre = '"+ nombreModUsuario.getText() +"', Permisos = '"+ role +"', TAP = '"+ tapModUsuario.getText() +"', Emisiones_Reducidas = '"+ emisionesModUsuario.getText() +"' WHERE Id_Usuario = '"+ idModUsuario.getText() +"'");
-        //TODO: eliminar este debug todo su explendor
-        if(StorageSharer.itemPre instanceof Usuario){
-            System.out.println(StorageSharer.itemPre);
-            System.out.println((Usuario)StorageSharer.itemPre);
+        if(!launchAlertsModUser()) {
+            int id = Integer.parseInt(idModUsuario.getText().trim());
+            String nombre = nombreModUsuario.getText().trim();
+            String role = userRoleUsuarioMod.isSelected() ? "cliente" : "administrador";
+            int tap = Integer.parseInt(tapModUsuario.getText().trim());
+            float emisiones = Float.parseFloat(emisionesModUsuario.getText().trim());
+            
+            SQLstatementStorage.storeStatement(
+                "UPDATE Usuarios SET " +
+                "Nombre = '" + nombre + "', " +
+                "Permisos = '" + role + "', " +
+                "TAP = '" + tap + "', " +
+                "Emisiones_Reducidas = '" + emisiones + "' " +
+                "WHERE Id_Usuario = '" + id + "'"
+            );
+            
+            // Crear el usuario modificado
+            StorageSharer.itemToMod = new Usuario(id, emisiones, role, nombre, tap);
+            
+            // Actualizar en la tabla observable
+            MainController.modItem();
+            
+            // Limpiar referencias
+            StorageSharer.itemToMod = null;
+            StorageSharer.itemPre = null;
+            StorageSharer.itemStorage.clear();
+            
+            ((Stage)btn_cancelar.getScene().getWindow()).close();
         }
-        if(StorageSharer.itemToMod instanceof Usuario){
-            System.out.println(StorageSharer.itemToMod);
-            System.out.println((Usuario)StorageSharer.itemToMod);
-        }
-        MainController.modItem();
-        StorageSharer.itemToMod = null;
-        StorageSharer.itemStorage.clear();
-        ((Stage)btn_cancelar.getScene().getWindow()).close();
     }
 
-    private static boolean checkAlert = false; 
+    private static boolean checkAlert = false;
+    private static String alertMessage = "";
 
-    private void checkForAlertModUser(){
-
+    private void checkForAlertModUser() {
+        alertMessage = "";
+        
         ArrayList<TextField> camposTexto = new ArrayList<>();
-
-        camposTexto.add(idModUsuario);
         camposTexto.add(nombreModUsuario);
-        camposTexto.add(tapModUsuario);
-        camposTexto.add(emisionesModUsuario);
 
-        camposTexto.forEach((e) -> {
-            if(e.getText().contains("@") || e.getText().contains("?") || e.getText().contains("=") || e.getText().contains("'") || e.getText().contains("\"") || e.getText().contains("|") || e.getText().contains("&") || e.getText().contains("*") || e.getText().contains("+") || e.getText().contains("\\") || e.getText().strip().equals("")){
+        // Validar campos de texto (nombre)
+        for(TextField campo : camposTexto) {
+            if(campo.getText().contains("@") || campo.getText().contains("?") || 
+               campo.getText().contains("=") || campo.getText().contains("'") || 
+               campo.getText().contains("\"") || campo.getText().contains("|") || 
+               campo.getText().contains("&") || campo.getText().contains("*") || 
+               campo.getText().contains("+") || campo.getText().contains("\\") || 
+               campo.getText().strip().equals("")) {
                 checkAlert = true;
+                alertMessage = "El nombre contiene caracteres inválidos o está vacío";
+                return;
             }
-        });
+        }
+
+        // Validar que TAP sea numérico
+        try {
+            Integer.parseInt(tapModUsuario.getText().trim());
+        } catch (NumberFormatException e) {
+            checkAlert = true;
+            alertMessage = "El TAP debe ser un número entero válido";
+            return;
+        }
+
+        // Validar que Emisiones sea numérico
+        try {
+            Float.parseFloat(emisionesModUsuario.getText().trim());
+        } catch (NumberFormatException e) {
+            checkAlert = true;
+            alertMessage = "Las emisiones deben ser un número válido";
+            return;
+        }
+
+        // Validar que se haya seleccionado un rol
+        if(!adminRoleUsuarioMod.isSelected() && !userRoleUsuarioMod.isSelected()) {
+            checkAlert = true;
+            alertMessage = "Debes seleccionar un rol (Admin o User)";
+            return;
+        }
     }
 
-    private boolean launchAlertsModUser(){
+    private boolean launchAlertsModUser() {
         checkForAlertModUser();
+        boolean ret = false;
 
-        boolean ret = false; 
-
-        if(checkAlert){
+        if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
-            a.setHeaderText("Campo invalido");
-            a.setContentText("O se introdujeron solo espacios o se han usado algunos de los siguentes caracteres en algun campo: @, ?, =, ', \", |, *, &, |, *, + or \\");
+            a.setHeaderText("Campo inválido");
+            a.setContentText(alertMessage + "\n\nNo uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\");
             a.showAndWait();
             ret = true;
-        }        
+        }
 
         checkAlert = false;
-
+        alertMessage = "";
         return ret;
     }
 }
