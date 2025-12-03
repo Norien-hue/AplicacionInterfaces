@@ -16,7 +16,7 @@ dependencies {
     //No es necesario incluir las dependencias porque ya lo hace el plugin por nosotros
     implementation 'mysql:mysql-connector-java:8.0.32'
     // https://mvnrepository.com/artifact/org.controlsfx/controlsfx
-implementation("org.controlsfx:controlsfx:11.2.2")
+    implementation("org.controlsfx:controlsfx:11.2.2")
 }
 
 java { //Se indica la versión de JDK que ha de utilizar
@@ -43,8 +43,4 @@ run {
         '--add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls'
     ]
 }
-
-
-
-
 

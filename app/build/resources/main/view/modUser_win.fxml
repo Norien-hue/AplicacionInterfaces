@@ -2,68 +2,57 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.control.SpinnerValueFactory?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="350.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.ModUser">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="299.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.ModUser">
    <children>
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="276.0">
          <children>
             <Label text="ID_usuario" />
-            <TextField fx:id="idField" prefHeight="26.0" prefWidth="260.0" editable="false" />
+            <TextField fx:id="idModUsuario" prefHeight="26.0" prefWidth="260.0" editable="false" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="276.0">
          <children>
             <Label text="Nombre" />
-            <TextField fx:id="nombreField" prefWidth="268.0" />
+            <TextField fx:id="nombreModUsuario" prefWidth="268.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="56.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
          <children>
-            <Label text="Emisiones Reducidas" />
-            <TextField fx:id="emisionesField" prefHeight="26.0" prefWidth="258.0" />
+            <Label text="Emisiones" />
+            <TextField fx:id="emisionesModUsuario" prefHeight="26.0" prefWidth="258.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="101.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
          <children>
             <Label text="TAP" />
-            <TextField fx:id="tapField" />
+            <TextField fx:id="tapModUsuario" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="147.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="45.0" prefWidth="299.0">
          <children>
             <Label text="Rol" />
-            <ComboBox fx:id="rolComboBox" prefWidth="150.0" />
-         </children>
-      </VBox>
-      <VBox layoutX="10.0" layoutY="200.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
-         <children>
-            <Label text="Fecha Reciclaje" />
-            <DatePicker fx:id="fechaPicker" prefHeight="26.0" prefWidth="258.0" />
-         </children>
-      </VBox>
-      <VBox layoutX="10.0" layoutY="250.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
-         <children>
-            <Label text="Hora Reciclaje" />
-            <HBox spacing="5.0">
+            <HBox prefHeight="18.0" prefWidth="299.0" spacing="15.0">
                <children>
-                  <Spinner fx:id="horaSpinner" prefWidth="70.0" />
-                  <Label text=":" />
-                  <Spinner fx:id="minutoSpinner" prefWidth="70.0" />
+                  <RadioButton fx:id="adminRoleUsuarioMod" mnemonicParsing="false" text="Admin">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="roleGroup" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <RadioButton fx:id="userRoleUsuarioMod" mnemonicParsing="false" text="User" toggleGroup="$roleGroup" />
                </children>
             </HBox>
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_confirmar" mnemonicParsing="false" onAction="#confirmar" text="Confirmar" />
+            <Button fx:id="modUsuarioConfirmar" mnemonicParsing="false" onAction="#modUsuarioPulsado" text="Confirmar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>

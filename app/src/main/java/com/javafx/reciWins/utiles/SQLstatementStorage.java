@@ -7,7 +7,7 @@ import com.javafx.reciWins.start.StartWin;
 
 
 public class SQLstatementStorage {
-    private static ArrayList<String> preparedStatements = new ArrayList<>();
+    public static ArrayList<String> preparedStatements = new ArrayList<>();
 
     public static boolean executeStatements(){
 

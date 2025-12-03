@@ -63,7 +63,7 @@ public class LoginController {
         
         try {
             // Consultar el usuario en la base de datos
-            String query = "SELECT Hash_Contraseña FROM Usuarios WHERE Nombre = ?";
+            String query = "SELECT Id_Usuario, Hash_Contraseña FROM Usuarios WHERE Nombre = ?";
             PreparedStatement pst = StartWin.conn.prepareStatement(query);
             pst.setString(1, nombre);
             
@@ -71,13 +71,16 @@ public class LoginController {
             
             if(rs.next()) {
                 String hashAlmacenado = rs.getString("Hash_Contraseña");
+                int idUsuario = rs.getInt("Id_Usuario");
                 
                 // Generar el hash de la contraseña ingresada
                 String hashIngresado = "$2y$10$" + contrasenia.hashCode();
                 
                 // Comparar los hashes
                 if(hashAlmacenado.equals(hashIngresado)) {
-                    // Login exitoso
+                    // Login exitoso - establecer el id_user estático en MainController
+                    MainController.id_user = idUsuario;
+                    System.out.println("Login exitoso. ID Usuario: " + idUsuario);
                     return true;
                 } else {
                     mostrarError("Contraseña incorrecta", "La contraseña ingresada no es correcta.");
@@ -101,5 +104,4 @@ public class LoginController {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
-
 }

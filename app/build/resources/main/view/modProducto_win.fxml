@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -13,36 +12,36 @@
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
             <Label text="Nombre" />
-            <TextField prefHeight="26.0" prefWidth="212.0" />
+            <TextField fx:id="nombreProducto" prefHeight="26.0" prefWidth="212.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="228.0">
          <children>
-            <Label text="Codigo_Barras" />
-            <PasswordField prefHeight="26.0" prefWidth="30.0" />
+            <Label text="Código Barras" />
+            <TextField fx:id="codigoBarrasProducto" prefHeight="26.0" prefWidth="30.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
             <Label text="Tipo" />
-            <PasswordField prefHeight="26.0" prefWidth="266.0" />
+            <TextField fx:id="tipoProducto" prefHeight="26.0" prefWidth="266.0" />
          </children>
       </VBox>
       <VBox layoutX="20.0" layoutY="137.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
             <Label text="Emisiones" />
-            <PasswordField prefHeight="26.0" prefWidth="266.0" />
+            <TextField fx:id="emisionesProducto" prefHeight="26.0" prefWidth="266.0" />
          </children>
       </VBox>
       <VBox layoutX="20.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
-            <Label text="Materiales" />
-            <PasswordField prefHeight="26.0" prefWidth="266.0" />
+            <Label text="Material" />
+            <TextField fx:id="materialesProducto" prefHeight="26.0" prefWidth="266.0" />
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="234.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" text="Aceptar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#modificarProducto" text="Aceptar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>

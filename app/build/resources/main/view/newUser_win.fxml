@@ -15,19 +15,19 @@
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
             <Label text="Nombre" />
-            <TextField prefHeight="26.0" prefWidth="212.0" />
+            <TextField fx:id="nombreUsuario" prefHeight="26.0" prefWidth="212.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="228.0">
          <children>
             <Label text="Contraseña" />
-            <PasswordField prefHeight="26.0" prefWidth="30.0" />
+            <PasswordField fx:id="contraseniaUsuario" prefHeight="26.0" prefWidth="30.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
          <children>
             <Label text="Repetir contraseña" />
-            <PasswordField prefHeight="26.0" prefWidth="266.0" />
+            <PasswordField fx:id="repetirContraseniaUsuario" prefHeight="26.0" prefWidth="266.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="56.0" prefWidth="254.0">
@@ -35,19 +35,19 @@
             <Label text="Rol" />
             <HBox prefHeight="22.0" prefWidth="254.0" spacing="20.0">
                <children>
-                  <RadioButton mnemonicParsing="false" text="Admin">
+                  <RadioButton fx:id="adminRoleUsuario" mnemonicParsing="false" text="Admin">
                      <toggleGroup>
                         <ToggleGroup fx:id="role" />
                      </toggleGroup>
                   </RadioButton>
-                  <RadioButton mnemonicParsing="false" text="User" toggleGroup="$role" />
+                  <RadioButton fx:id="userRoleUsuario" mnemonicParsing="false" text="User" toggleGroup="$role" />
                </children>
             </HBox>
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="234.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" text="Aceptar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#crearUsuario" text="Aceptar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>

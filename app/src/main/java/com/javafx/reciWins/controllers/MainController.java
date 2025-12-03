@@ -14,6 +14,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -24,9 +26,12 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.sql.*;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
+
+    public static int id_user; 
 
     @FXML private Button btn_addProducto;
     @FXML private Button btn_addTransaccion;
@@ -44,6 +49,12 @@ public class MainController implements Initializable {
     @FXML private AnchorPane tab_product;
     @FXML private AnchorPane tab_transaccion;
     @FXML private AnchorPane tab_usuario;
+    
+    // Labels para la pestaña personal
+    @FXML private Label nombreBD;
+    @FXML private Label saldoBD;
+    @FXML private Label tapBD;
+    @FXML private Label rolBD;
 
     // TableView y columnas para Productos
     @FXML 
@@ -114,6 +125,9 @@ public class MainController implements Initializable {
         cargarDatosProductos();
         cargarDatosTransacciones();
         cargarDatosUsuarios();
+        
+        // Cargar datos del usuario actual en la pestaña personal
+        cargarDatosUsuarioActual();
     }
 
     private void configurarColumnasProductos() {
@@ -140,12 +154,60 @@ public class MainController implements Initializable {
         colTAPUsuario.setCellValueFactory(new PropertyValueFactory<>("tap"));
     }
 
+    // Método para cargar los datos del usuario actual en la pestaña personal
+    private void cargarDatosUsuarioActual() {
+        try {
+            String query = "SELECT * FROM Usuarios WHERE Id_Usuario = ?";
+            PreparedStatement pst = conn.prepareStatement(query);
+            pst.setInt(1, id_user);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                nombreBD.setText(rs.getString("Nombre"));
+                saldoBD.setText(String.format("%.1f", rs.getFloat("Emisiones_Reducidas")) + " kg CO₂");
+                tapBD.setText(String.valueOf(rs.getInt("TAP")));
+                rolBD.setText(rs.getString("Permisos"));
+            } else {
+                nombreBD.setText("Usuario no encontrado");
+                saldoBD.setText("0.0 kg CO₂");
+                tapBD.setText("0");
+                rolBD.setText("N/A");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            nombreBD.setText("Error");
+            saldoBD.setText("0.0 kg CO₂");
+            tapBD.setText("0");
+            rolBD.setText("N/A");
+        }
+    }
+
     @FXML
     void saveClicked(ActionEvent event) {
-        SQLstatementStorage.executeStatements();
-        tablaProductos.refresh();
-        tablaUsuario.refresh();
-        tablaTransacciones.refresh();
+        if(SQLstatementStorage.preparedStatements.size()>0){
+           SQLstatementStorage.executeStatements();
+
+            Alert a = new Alert(AlertType.INFORMATION);
+
+            a.setHeaderText("Cambios guardados");
+            a.setContentText("Se ha guardado correctamente los cambios");
+
+            a.showAndWait();
+
+            tablaProductos.refresh();
+            tablaUsuario.refresh();
+            tablaTransacciones.refresh();
+            
+            // Actualizar los datos del usuario actual después de guardar
+            cargarDatosUsuarioActual();
+        }else{
+            Alert a = new Alert(AlertType.WARNING);
+
+            a.setHeaderText("No hay cambios");
+            a.setContentText("No se pudieron guardar cambios, no hay cambios");
+
+            a.showAndWait();
+        }
     }
 
     private void cargarDatosProductos() {
@@ -223,16 +285,6 @@ public class MainController implements Initializable {
         }
     }
 
-    // @FXML
-    // void launch_modProducto(ActionEvent event) {
-    //     StartWin.lanzarModProducto();
-    // }
-
-    // @FXML
-    // void launch_modTransaccion(ActionEvent event) {
-    //     StartWin.lanzarModTransaccion();
-    // }
-
     @FXML
     void launch_modUsuario(ActionEvent event) {
         Usuario m = tablaUsuario.getSelectionModel().getSelectedItem();
@@ -250,7 +302,19 @@ public class MainController implements Initializable {
 
     @FXML
     void kill_unsafe(ActionEvent event) {
-        ((Stage)this.btn_exit.getScene().getWindow()).close();
+        if(SQLstatementStorage.preparedStatements.size()>0){
+            Alert a = new Alert(AlertType.CONFIRMATION);
+            a.setHeaderText("Cambios sin guardar");
+            a.setContentText("¿Esta seguro de que quiere salir de la applicación sin guardar?");
+
+            Optional<ButtonType> botonPulado = a.showAndWait();
+
+            if(botonPulado.isPresent()){
+                if(botonPulado.get().equals(ButtonType.OK)){
+                    ((Stage)this.btn_exit.getScene().getWindow()).close();
+                }
+            }
+        }
     }
 
     @FXML
@@ -313,7 +377,6 @@ public class MainController implements Initializable {
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
             tablaProductosObservable.remove(e);
-            // tablaProductosObservable.set(0, new Producto(e.getTipo(), e.getNumeroBarras(), "Prueba", 0, e.getMaterial())); //QUE POR QUE AQUI SI ACTUALIZA LA TABLEVIEW
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -385,45 +448,44 @@ public class MainController implements Initializable {
     }
 
     @FXML
-void launch_modProducto(ActionEvent event) {
-    Producto m = tablaProductos.getSelectionModel().getSelectedItem();
-    if(m != null) {
-        StorageSharer.itemStorage.add(m.getTipo());
-        StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
-        StorageSharer.itemStorage.add(m.getNombre());
-        StorageSharer.itemStorage.add(m.getEmisionesReducibles() + "");
-        StorageSharer.itemStorage.add(m.getMaterial());
-        StorageSharer.itemToMod = m;
-        StorageSharer.itemPre = m;
-        
-        StartWin.lanzarModProducto();
-    } else {
-        Alert alerta = new Alert(AlertType.WARNING);
-        alerta.setHeaderText("Error de selección");
-        alerta.setContentText("Selecciona un producto");
-        alerta.showAndWait();
+    void launch_modProducto(ActionEvent event) {
+        Producto m = tablaProductos.getSelectionModel().getSelectedItem();
+        if(m != null) {
+            StorageSharer.itemStorage.add(m.getTipo());
+            StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
+            StorageSharer.itemStorage.add(m.getNombre());
+            StorageSharer.itemStorage.add(m.getEmisionesReducibles() + "");
+            StorageSharer.itemStorage.add(m.getMaterial());
+            StorageSharer.itemToMod = m;
+            StorageSharer.itemPre = m;
+            
+            StartWin.lanzarModProducto();
+        } else {
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setHeaderText("Error de selección");
+            alerta.setContentText("Selecciona un producto");
+            alerta.showAndWait();
+        }
+    }
+
+    @FXML
+    void launch_modTransaccion(ActionEvent event) {
+        Transaccion m = tablaTransacciones.getSelectionModel().getSelectedItem();
+        if(m != null) {
+            StorageSharer.itemStorage.add(m.getIdUsuario() + "");
+            StorageSharer.itemStorage.add(m.getTipo());
+            StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
+            StorageSharer.itemStorage.add(m.getFecha().toString());
+            StorageSharer.itemStorage.add(m.getHora().toString());
+            StorageSharer.itemToMod = m;
+            StorageSharer.itemPre = m;
+            
+            StartWin.lanzarModTransaccion();
+        } else {
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setHeaderText("Error de selección");
+            alerta.setContentText("Selecciona una transacción");
+            alerta.showAndWait();
+        }
     }
 }
-
-@FXML
-void launch_modTransaccion(ActionEvent event) {
-    Transaccion m = tablaTransacciones.getSelectionModel().getSelectedItem();
-    if(m != null) {
-        StorageSharer.itemStorage.add(m.getIdUsuario() + "");
-        StorageSharer.itemStorage.add(m.getTipo());
-        StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
-        StorageSharer.itemStorage.add(m.getFecha().toString());
-        StorageSharer.itemStorage.add(m.getHora().toString());
-        StorageSharer.itemToMod = m;
-        StorageSharer.itemPre = m;
-        
-        StartWin.lanzarModTransaccion();
-    } else {
-        Alert alerta = new Alert(AlertType.WARNING);
-        alerta.setHeaderText("Error de selección");
-        alerta.setContentText("Selecciona una transacción");
-        alerta.showAndWait();
-    }
-}
-}
-
