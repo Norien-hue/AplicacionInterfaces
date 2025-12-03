@@ -420,7 +420,7 @@ public class MainController implements Initializable {
     public static ObservableList<Producto> tablaProductosObservable;
     public static ObservableList<Transaccion> tablaTransaccionesObservable;
 
-    // Nuevo método para obtener tipos de productos únicos
+    // NUEVO: Método para obtener tipos de productos únicos
     public static ObservableList<String> getTiposProductos() {
         ObservableList<String> tipos = FXCollections.observableArrayList();
         if (tablaProductosObservable != null) {
@@ -434,6 +434,49 @@ public class MainController implements Initializable {
             FXCollections.sort(tipos); // Orden alfabético
         }
         return tipos;
+    }
+
+    // NUEVO: Método para obtener códigos de barras únicos
+    public static ObservableList<Long> getCodigosBarras() {
+        ObservableList<Long> codigos = FXCollections.observableArrayList();
+        if (tablaProductosObservable != null) {
+            Set<Long> codigoSet = new HashSet<>();
+            for (Producto p : tablaProductosObservable) {
+                codigoSet.add(p.getNumeroBarras());
+            }
+            codigos.addAll(codigoSet);
+            codigos.sort((a, b) -> Long.compare(a, b)); // Orden numérico
+        }
+        return codigos;
+    }
+
+    // NUEVO: Método para obtener nombres de usuarios únicos (para búsqueda)
+    public static ObservableList<String> getNombresUsuarios() {
+        ObservableList<String> nombres = FXCollections.observableArrayList();
+        if (tablaUsuarioObservable != null) {
+            for (Usuario u : tablaUsuarioObservable) {
+                String display = u.getIdUsuario() + " - " + u.getNombre();
+                nombres.add(display);
+            }
+            FXCollections.sort(nombres);
+        }
+        return nombres;
+    }
+
+    // NUEVO: Método para obtener ID de usuario desde texto de búsqueda
+    public static int obtenerIdUsuarioDesdeBusqueda(String busqueda) {
+        if (busqueda == null || busqueda.trim().isEmpty()) return -1;
+        
+        // Formato: "ID - Nombre"
+        String[] partes = busqueda.split(" - ");
+        if (partes.length > 0) {
+            try {
+                return Integer.parseInt(partes[0].trim());
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
     }
 
     public static void modItem(){

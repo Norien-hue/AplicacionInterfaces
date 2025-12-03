@@ -9,35 +9,35 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="420.0" prefWidth="300.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewTransaccion">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="320.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewTransaccion">
    <children>
-      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="280.0">
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
-            <Label text="ID Usuario" />
-            <TextField fx:id="idUsuarioTransaccion" prefHeight="26.0" prefWidth="280.0" />
+            <Label text="Usuario (ID - Nombre)" />
+            <ComboBox fx:id="usuarioTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="280.0">
+      <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
             <Label text="Tipo" />
-            <ComboBox fx:id="tipoTransaccion" prefHeight="26.0" prefWidth="280.0" editable="false" />
+            <ComboBox fx:id="tipoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="false" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="280.0">
+      <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
             <Label text="Código Barras" />
-            <TextField fx:id="codigoTransaccion" prefHeight="26.0" prefWidth="280.0" />
+            <ComboBox fx:id="codigoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="280.0" spacing="5.0">
+      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="300.0" spacing="5.0">
          <children>
-            <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="280.0">
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
                <children>
                   <Label text="Fecha" />
-                  <DatePicker fx:id="fechaTransaccion" prefHeight="26.0" prefWidth="280.0" />
+                  <DatePicker fx:id="fechaTransaccion" prefHeight="26.0" prefWidth="300.0" />
                </children>
             </VBox>
-            <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="280.0">
+            <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
                <children>
                   <Label text="Hora (HH:MM:SS)" />
                   <HBox spacing="5.0">
@@ -53,7 +53,7 @@
             </VBox>
          </children>
       </VBox>
-      <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="280.0" spacing="10.0">
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="300.0" spacing="10.0">
          <children>
             <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#crearTransaccion" text="Aceptar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />

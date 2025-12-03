@@ -14,7 +14,9 @@ import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,13 +34,13 @@ public class ModTransaccion implements Initializable {
     private Button btn_cancelar;
     
     @FXML
-    private TextField idUsuarioTransaccion;
+    private ComboBox<String> usuarioTransaccion;
     
     @FXML
     private ComboBox<String> tipoTransaccion;
     
     @FXML
-    private TextField codigoTransaccion;
+    private ComboBox<String> codigoTransaccion;
     
     @FXML
     private DatePicker fechaTransaccion;
@@ -64,9 +66,10 @@ public class ModTransaccion implements Initializable {
     @FXML
     void modificarTransaccion(ActionEvent event) {
         if(!launchAlertsModTransaccion()) {
-            int idUsuario = Integer.parseInt(idUsuarioTransaccion.getText().trim());
+            // Obtener ID de usuario desde la búsqueda (formato: "ID - Nombre")
+            int idUsuario = MainController.obtenerIdUsuarioDesdeBusqueda(usuarioTransaccion.getValue());
             String tipo = tipoTransaccion.getValue();
-            long codigoBarras = Long.parseLong(codigoTransaccion.getText().trim());
+            long codigoBarras = Long.parseLong(codigoTransaccion.getValue());
             
             // Obtener fecha del DatePicker
             LocalDate localFecha = fechaTransaccion.getValue();
@@ -107,23 +110,49 @@ public class ModTransaccion implements Initializable {
         ObservableList<String> tipos = MainController.getTiposProductos();
         tipoTransaccion.setItems(tipos);
         
-        // Cargar datos existentes
-        idUsuarioTransaccion.setText(StorageSharer.itemStorage.get(0));
+        // Cargar códigos de barras existentes con autocompletado
+        ObservableList<Long> codigosBarrasLong = MainController.getCodigosBarras();
+        ObservableList<String> codigosBarrasStr = FXCollections.observableArrayList();
+        for (Long codigo : codigosBarrasLong) {
+            codigosBarrasStr.add(codigo.toString());
+        }
         
-        // Establecer el tipo seleccionado
-        String tipoExistente = StorageSharer.itemStorage.get(1);
-        tipoTransaccion.setValue(tipoExistente);
+        // Configurar autocompletado para códigos de barras
+        FilteredList<String> filteredCodigos = new FilteredList<>(codigosBarrasStr, p -> true);
+        codigoTransaccion.setItems(filteredCodigos);
+        configurarAutocompletado(codigoTransaccion, filteredCodigos);
         
-        codigoTransaccion.setText(StorageSharer.itemStorage.get(2));
+        // Cargar usuarios existentes con autocompletado
+        ObservableList<String> nombresUsuarios = MainController.getNombresUsuarios();
+        FilteredList<String> filteredUsuarios = new FilteredList<>(nombresUsuarios, p -> true);
+        usuarioTransaccion.setItems(filteredUsuarios);
+        configurarAutocompletado(usuarioTransaccion, filteredUsuarios);
+        
+        // Cargar datos existentes de la transacción
+        String idUsuarioOriginal = StorageSharer.itemStorage.get(0);
+        String tipoOriginal = StorageSharer.itemStorage.get(1);
+        String codigoOriginal = StorageSharer.itemStorage.get(2);
+        String fechaOriginal = StorageSharer.itemStorage.get(3);
+        String horaOriginal = StorageSharer.itemStorage.get(4);
+        
+        // Buscar el usuario correspondiente para mostrarlo
+        for (String usuario : nombresUsuarios) {
+            if (usuario.startsWith(idUsuarioOriginal + " - ")) {
+                usuarioTransaccion.setValue(usuario);
+                break;
+            }
+        }
+        
+        // Establecer tipo y código de barras
+        tipoTransaccion.setValue(tipoOriginal);
+        codigoTransaccion.setValue(codigoOriginal);
         
         // Cargar fecha
-        String fechaStr = StorageSharer.itemStorage.get(3);
-        LocalDate fecha = LocalDate.parse(fechaStr);
+        LocalDate fecha = LocalDate.parse(fechaOriginal);
         fechaTransaccion.setValue(fecha);
         
         // Cargar hora (formato HH:MM:SS)
-        String horaStr = StorageSharer.itemStorage.get(4);
-        String[] partesHora = horaStr.split(":");
+        String[] partesHora = horaOriginal.split(":");
         if(partesHora.length >= 3) {
             horaTransaccion.setText(partesHora[0]);
             minutoTransaccion.setText(partesHora[1]);
@@ -139,18 +168,52 @@ public class ModTransaccion implements Initializable {
         });
     }
 
+    // Método para configurar autocompletado en un ComboBox
+    private void configurarAutocompletado(ComboBox<String> comboBox, FilteredList<String> filteredItems) {
+        comboBox.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
+            final String selected = comboBox.getSelectionModel().getSelectedItem();
+            
+            if (newValue == null || newValue.trim().isEmpty()) {
+                filteredItems.setPredicate(p -> true);
+                comboBox.hide();
+                return;
+            }
+            
+            if (selected == null || !selected.equals(newValue)) {
+                filteredItems.setPredicate(p -> p.toLowerCase().contains(newValue.toLowerCase().trim()));
+                comboBox.setVisibleRowCount(5);
+                comboBox.show();
+            } else {
+                filteredItems.setPredicate(p -> true);
+            }
+        });
+        
+        // Posicionar cursor al final al seleccionar
+        comboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                comboBox.getEditor().positionCaret(comboBox.getEditor().getText().length());
+            }
+        });
+    }
+
     private static boolean checkAlert = false;
     private static String alertMessage = "";
 
     private void checkForAlertModTransaccion() {
         alertMessage = "";
         
-        // Validar ID Usuario
-        try {
-            Integer.parseInt(idUsuarioTransaccion.getText().trim());
-        } catch (NumberFormatException e) {
+        // Validar usuario
+        if(usuarioTransaccion.getValue() == null || usuarioTransaccion.getValue().trim().isEmpty()) {
             checkAlert = true;
-            alertMessage = "El ID Usuario debe ser un número entero válido";
+            alertMessage = "Debes seleccionar un usuario";
+            return;
+        }
+        
+        // Validar que el formato del usuario sea correcto y obtener ID
+        int idUsuario = MainController.obtenerIdUsuarioDesdeBusqueda(usuarioTransaccion.getValue());
+        if(idUsuario == -1) {
+            checkAlert = true;
+            alertMessage = "Formato de usuario inválido. Debe ser: 'ID - Nombre'";
             return;
         }
 
@@ -162,8 +225,14 @@ public class ModTransaccion implements Initializable {
         }
 
         // Validar código de barras
+        if(codigoTransaccion.getValue() == null || codigoTransaccion.getValue().trim().isEmpty()) {
+            checkAlert = true;
+            alertMessage = "Debes seleccionar un código de barras";
+            return;
+        }
+        
         try {
-            Long.parseLong(codigoTransaccion.getText().trim());
+            Long.parseLong(codigoTransaccion.getValue().trim());
         } catch (NumberFormatException e) {
             checkAlert = true;
             alertMessage = "El código de barras debe ser un número válido";
@@ -212,7 +281,7 @@ public class ModTransaccion implements Initializable {
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
             a.setHeaderText("Error en los campos");
-            a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- Los valores de hora son válidos (HH:0-23, MM:0-59, SS:0-59)\n- Has seleccionado un tipo de producto existente");
+            a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- Los valores de hora son válidos (HH:0-23, MM:0-59, SS:0-59)\n- Has seleccionado un usuario, tipo y código de barras válidos");
             a.showAndWait();
             ret = true;
         }
