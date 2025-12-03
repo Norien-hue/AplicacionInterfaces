@@ -56,7 +56,6 @@ public class ModUser implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Cargar datos del usuario seleccionado
         idModUsuario.setText(StorageSharer.itemStorage.get(0));
         nombreModUsuario.setText(StorageSharer.itemStorage.get(1));
 
@@ -93,13 +92,10 @@ public class ModUser implements Initializable {
                 "WHERE Id_Usuario = '" + id + "'"
             );
             
-            // Crear el usuario modificado
             StorageSharer.itemToMod = new Usuario(id, emisiones, role, nombre, tap);
             
-            // Actualizar en la tabla observable
             MainController.modItem();
             
-            // Limpiar referencias
             StorageSharer.itemToMod = null;
             StorageSharer.itemPre = null;
             StorageSharer.itemStorage.clear();
@@ -117,7 +113,6 @@ public class ModUser implements Initializable {
         ArrayList<TextField> camposTexto = new ArrayList<>();
         camposTexto.add(nombreModUsuario);
 
-        // Validar campos de texto (nombre)
         for(TextField campo : camposTexto) {
             if(campo.getText().contains("@") || campo.getText().contains("?") || 
                campo.getText().contains("=") || campo.getText().contains("'") || 
@@ -131,7 +126,6 @@ public class ModUser implements Initializable {
             }
         }
 
-        // Validar que TAP sea numérico
         try {
             Integer.parseInt(tapModUsuario.getText().trim());
         } catch (NumberFormatException e) {
@@ -140,7 +134,6 @@ public class ModUser implements Initializable {
             return;
         }
 
-        // Validar que Emisiones sea numérico
         try {
             Float.parseFloat(emisionesModUsuario.getText().trim());
         } catch (NumberFormatException e) {
@@ -149,7 +142,6 @@ public class ModUser implements Initializable {
             return;
         }
 
-        // Validar que se haya seleccionado un rol
         if(!adminRoleUsuarioMod.isSelected() && !userRoleUsuarioMod.isSelected()) {
             checkAlert = true;
             alertMessage = "Debes seleccionar un rol (Admin o User)";

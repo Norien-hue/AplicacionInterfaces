@@ -39,7 +39,6 @@ public class StartWin extends Application {
         primeraEscena.setTitle("Reci Inventario");
         primeraEscena.show();
 
-        //no me pregunte esto, he sido incapaz de conectar por mis propios medios igual para cuando lea esto ya me habre estudiado que hacen estas cosas
         try {
             Properties props = new Properties();
             URL configUrl = getClass().getResource("/configuration.properties");
@@ -60,7 +59,6 @@ public class StartWin extends Application {
     }
     //dios todo esto era mucho mas facil de lo que parecia solo que da error por alguna razon si intento cargarlo de golpe en ugar de dividirlo entre new FXML y luego load?¿
 
-    // public static Image icono(){}
 
     public static void mostrarRegistro(){
         try {

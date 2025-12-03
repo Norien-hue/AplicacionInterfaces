@@ -58,7 +58,7 @@ public class ModTransaccion implements Initializable {
     private TextField segundoTransaccion;
     
     @FXML
-    private TextField emisionesTransaccion; // Nuevo campo
+    private TextField emisionesTransaccion; 
     
     @FXML
     private Button btn_aceptar;
@@ -72,12 +72,10 @@ public class ModTransaccion implements Initializable {
     @FXML
     void modificarTransaccion(ActionEvent event) {
         if(!launchAlertsModTransaccion()) {
-            // Obtener ID de usuario desde la búsqueda (formato: "ID - Nombre")
             int idUsuario = MainController.obtenerIdUsuarioDesdeBusqueda(usuarioTransaccion.getValue());
             String tipo = tipoTransaccion.getValue();
             long codigoBarras = Long.parseLong(codigoTransaccion.getValue());
             
-            // VALIDACIÓN: Verificar que el producto exista
             if(!productoExisteEnBD(tipo, codigoBarras)) {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setHeaderText("Producto no encontrado");
@@ -87,23 +85,18 @@ public class ModTransaccion implements Initializable {
                 return;
             }
             
-            // Obtener emisiones del NUEVO producto
             float nuevasEmisiones = obtenerEmisionesProducto(tipo, codigoBarras);
             
-            // Obtener emisiones del producto ORIGINAL
             String tipoOriginal = StorageSharer.itemStorage.get(1);
             String codigoOriginal = StorageSharer.itemStorage.get(2);
             long codigoBarrasOriginal = Long.parseLong(codigoOriginal);
             float emisionesOriginales = obtenerEmisionesProducto(tipoOriginal, codigoBarrasOriginal);
             
-            // Obtener ID de usuario ORIGINAL
             int idUsuarioOriginal = Integer.parseInt(StorageSharer.itemStorage.get(0));
             
-            // Obtener fecha del DatePicker
             LocalDate localFecha = fechaTransaccion.getValue();
             Date fecha = Date.valueOf(localFecha);
             
-            // Construir hora a partir de los tres campos
             int hora = Integer.parseInt(horaTransaccion.getText().trim());
             int minuto = Integer.parseInt(minutoTransaccion.getText().trim());
             int segundo = Integer.parseInt(segundoTransaccion.getText().trim());
@@ -114,9 +107,7 @@ public class ModTransaccion implements Initializable {
             String fechaOriginal = StorageSharer.itemStorage.get(3);
             String horaOriginal = StorageSharer.itemStorage.get(4);
             
-            // Lógica para actualizar emisiones
             
-            // Caso 1: Mismo usuario, producto diferente → Ajustar emisiones
             if(idUsuario == idUsuarioOriginal) {
                 float diferencia = nuevasEmisiones - emisionesOriginales;
                 if(diferencia != 0) {
@@ -124,25 +115,20 @@ public class ModTransaccion implements Initializable {
                         "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
                         + diferencia + " WHERE Id_Usuario = " + idUsuario
                     );
-                    // Actualizar observable
                     MainController.actualizarEmisionesUsuarioObservable(idUsuario, diferencia);
                 }
             }
-            // Caso 2: Usuario diferente → Restar al original, sumar al nuevo
             else {
-                // Restar emisiones del usuario original
                 SQLstatementStorage.storeStatement(
                     "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - " 
                     + emisionesOriginales + " WHERE Id_Usuario = " + idUsuarioOriginal
                 );
                 
-                // Sumar emisiones al nuevo usuario
                 SQLstatementStorage.storeStatement(
                     "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
                     + nuevasEmisiones + " WHERE Id_Usuario = " + idUsuario
                 );
                 
-                // Actualizar observables de ambos usuarios
                 MainController.actualizarEmisionesUsuarioObservable(idUsuarioOriginal, -emisionesOriginales);
                 MainController.actualizarEmisionesUsuarioObservable(idUsuario, nuevasEmisiones);
             }
@@ -167,36 +153,30 @@ public class ModTransaccion implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Cargar tipos de productos existentes
         ObservableList<String> tipos = MainController.getTiposProductos();
         tipoTransaccion.setItems(tipos);
         
-        // Cargar códigos de barras existentes con autocompletado
         ObservableList<Long> codigosBarrasLong = MainController.getCodigosBarras();
         ObservableList<String> codigosBarrasStr = FXCollections.observableArrayList();
         for (Long codigo : codigosBarrasLong) {
             codigosBarrasStr.add(codigo.toString());
         }
         
-        // Configurar autocompletado para códigos de barras
         FilteredList<String> filteredCodigos = new FilteredList<>(codigosBarrasStr, p -> true);
         codigoTransaccion.setItems(filteredCodigos);
         configurarAutocompletado(codigoTransaccion, filteredCodigos);
         
-        // Cargar usuarios existentes con autocompletado
         ObservableList<String> nombresUsuarios = MainController.getNombresUsuarios();
         FilteredList<String> filteredUsuarios = new FilteredList<>(nombresUsuarios, p -> true);
         usuarioTransaccion.setItems(filteredUsuarios);
         configurarAutocompletado(usuarioTransaccion, filteredUsuarios);
         
-        // Cargar datos existentes de la transacción
         String idUsuarioOriginal = StorageSharer.itemStorage.get(0);
         String tipoOriginal = StorageSharer.itemStorage.get(1);
         String codigoOriginal = StorageSharer.itemStorage.get(2);
         String fechaOriginal = StorageSharer.itemStorage.get(3);
         String horaOriginal = StorageSharer.itemStorage.get(4);
         
-        // Buscar el usuario correspondiente para mostrarlo
         for (String usuario : nombresUsuarios) {
             if (usuario.startsWith(idUsuarioOriginal + " - ")) {
                 usuarioTransaccion.setValue(usuario);
@@ -204,15 +184,12 @@ public class ModTransaccion implements Initializable {
             }
         }
         
-        // Establecer tipo y código de barras
         tipoTransaccion.setValue(tipoOriginal);
         codigoTransaccion.setValue(codigoOriginal);
         
-        // Cargar fecha
         LocalDate fecha = LocalDate.parse(fechaOriginal);
         fechaTransaccion.setValue(fecha);
         
-        // Cargar hora (formato HH:MM:SS)
         String[] partesHora = horaOriginal.split(":");
         if(partesHora.length >= 3) {
             horaTransaccion.setText(partesHora[0]);
@@ -224,14 +201,11 @@ public class ModTransaccion implements Initializable {
             segundoTransaccion.setText("00");
         }
         
-        // Configurar campo de emisiones
         emisionesTransaccion.setEditable(false);
-        // Cargar emisiones del producto original
         long codigoBarrasOriginal = Long.parseLong(codigoOriginal);
         float emisionesOriginales = obtenerEmisionesProducto(tipoOriginal, codigoBarrasOriginal);
         emisionesTransaccion.setText(String.format("%.1f", emisionesOriginales));
         
-        // Añadir listeners para actualizar emisiones cuando cambie el producto
         tipoTransaccion.valueProperty().addListener((obs, oldVal, newVal) -> actualizarEmisiones());
         codigoTransaccion.valueProperty().addListener((obs, oldVal, newVal) -> actualizarEmisiones());
         
@@ -240,7 +214,6 @@ public class ModTransaccion implements Initializable {
         });
     }
 
-    // Método para configurar autocompletado en un ComboBox
     private void configurarAutocompletado(ComboBox<String> comboBox, FilteredList<String> filteredItems) {
         comboBox.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
             final String selected = comboBox.getSelectionModel().getSelectedItem();
@@ -260,7 +233,6 @@ public class ModTransaccion implements Initializable {
             }
         });
         
-        // Posicionar cursor al final al seleccionar
         comboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 comboBox.getEditor().positionCaret(comboBox.getEditor().getText().length());
@@ -268,7 +240,6 @@ public class ModTransaccion implements Initializable {
         });
     }
 
-    // Método para actualizar el campo de emisiones cuando se selecciona un producto
     private void actualizarEmisiones() {
         String tipo = tipoTransaccion.getValue();
         String codigo = codigoTransaccion.getValue();
@@ -292,14 +263,12 @@ public class ModTransaccion implements Initializable {
     private void checkForAlertModTransaccion() {
         alertMessage = "";
         
-        // Validar usuario
         if(usuarioTransaccion.getValue() == null || usuarioTransaccion.getValue().trim().isEmpty()) {
             checkAlert = true;
             alertMessage = "Debes seleccionar un usuario";
             return;
         }
         
-        // Validar que el formato del usuario sea correcto y obtener ID
         int idUsuario = MainController.obtenerIdUsuarioDesdeBusqueda(usuarioTransaccion.getValue());
         if(idUsuario == -1) {
             checkAlert = true;
@@ -307,21 +276,18 @@ public class ModTransaccion implements Initializable {
             return;
         }
         
-        // NUEVA VALIDACIÓN: Verificar que el usuario exista en la BD
         if(!usuarioExisteEnBD(idUsuario)) {
             checkAlert = true;
             alertMessage = "El usuario con ID " + idUsuario + " no existe en la base de datos";
             return;
         }
 
-        // Validar que se haya seleccionado un tipo
         if(tipoTransaccion.getValue() == null || tipoTransaccion.getValue().trim().isEmpty()) {
             checkAlert = true;
             alertMessage = "Debes seleccionar un tipo de producto";
             return;
         }
 
-        // Validar código de barras
         if(codigoTransaccion.getValue() == null || codigoTransaccion.getValue().trim().isEmpty()) {
             checkAlert = true;
             alertMessage = "Debes seleccionar un código de barras";
@@ -336,14 +302,12 @@ public class ModTransaccion implements Initializable {
             return;
         }
 
-        // Validar fecha
         if(fechaTransaccion.getValue() == null) {
             checkAlert = true;
             alertMessage = "Debes seleccionar una fecha";
             return;
         }
 
-        // Validar hora
         try {
             int hora = Integer.parseInt(horaTransaccion.getText().trim());
             int minuto = Integer.parseInt(minutoTransaccion.getText().trim());
@@ -388,7 +352,6 @@ public class ModTransaccion implements Initializable {
         return ret;
     }
 
-    // MÉTODO: Verificar si un producto existe en la BD
     private boolean productoExisteEnBD(String tipo, long codigoBarras) {
         try {
             String query = "SELECT COUNT(*) FROM Productos WHERE Tipo = ? AND Numero_barras = ?";
@@ -406,7 +369,6 @@ public class ModTransaccion implements Initializable {
         return false;
     }
     
-    // MÉTODO NUEVO: Verificar si un usuario existe en la BD
     private boolean usuarioExisteEnBD(int idUsuario) {
         try {
             String query = "SELECT COUNT(*) FROM Usuarios WHERE Id_Usuario = ?";
@@ -423,7 +385,6 @@ public class ModTransaccion implements Initializable {
         return false;
     }
     
-    // MÉTODO NUEVO: Obtener emisiones reducibles de un producto
     private float obtenerEmisionesProducto(String tipo, long codigoBarras) {
         try {
             String query = "SELECT Emisiones_Reducibles FROM Productos WHERE Tipo = ? AND Numero_barras = ?";

@@ -66,7 +66,6 @@ public class NewUser implements Initializable {
                 + "NULL)"
             );
             
-            // AÑADIR ESTAS 7 LÍNEAS:
             Usuario nuevoUsuario = new Usuario(
                 0,
                 0.0f,
@@ -75,7 +74,6 @@ public class NewUser implements Initializable {
                 0
             );
             MainController.tablaUsuarioObservable.add(nuevoUsuario);
-            // FIN DE LAS LÍNEAS AÑADIDAS
             
             ((Stage)btn_cancelar.getScene().getWindow()).close();
         }
@@ -83,7 +81,6 @@ public class NewUser implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Por defecto seleccionar "User"
         userRoleUsuario.setSelected(true);
         
         Platform.runLater(() -> {
@@ -97,7 +94,6 @@ public class NewUser implements Initializable {
     private void checkForAlertNewUser() {
         alertMessage = "";
         
-        // Validar nombre
         if(nombreUsuario.getText().contains("@") || nombreUsuario.getText().contains("?") || 
            nombreUsuario.getText().contains("=") || nombreUsuario.getText().contains("'") || 
            nombreUsuario.getText().contains("\"") || nombreUsuario.getText().contains("|") || 
@@ -109,7 +105,6 @@ public class NewUser implements Initializable {
             return;
         }
         
-        // Validar que las contraseñas no estén vacías
         if(contraseniaUsuario.getText().strip().equals("") || 
            repetirContraseniaUsuario.getText().strip().equals("")) {
             checkAlert = true;
@@ -117,21 +112,18 @@ public class NewUser implements Initializable {
             return;
         }
         
-        // Validar que las contraseñas coincidan
         if(!contraseniaUsuario.getText().equals(repetirContraseniaUsuario.getText())) {
             checkAlert = true;
             alertMessage = "Las contraseñas no coinciden";
             return;
         }
         
-        // Validar longitud mínima de contraseña
         if(contraseniaUsuario.getText().length() < 6) {
             checkAlert = true;
             alertMessage = "La contraseña debe tener al menos 6 caracteres";
             return;
         }
         
-        // Validar que se haya seleccionado un rol
         if(!adminRoleUsuario.isSelected() && !userRoleUsuario.isSelected()) {
             checkAlert = true;
             alertMessage = "Debes seleccionar un rol (Admin o User)";

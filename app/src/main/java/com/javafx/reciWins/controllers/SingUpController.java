@@ -49,7 +49,6 @@ public class SingUpController {
             String nombre = nombreSingUp.getText().trim();
             String contrasenia = passwdSingUp.getText();
             
-            // Verificar si el usuario ya existe
             if(usuarioExiste(nombre)) {
                 Alert error = new Alert(AlertType.ERROR);
                 error.setHeaderText("Usuario ya existe");
@@ -58,11 +57,8 @@ public class SingUpController {
                 return;
             }
             
-            // Hashear la contraseña (simulación básica)
-            // En producción usa: BCrypt.hashpw(contrasenia, BCrypt.gensalt())
             String hashContrasenia = "$2y$10$" + contrasenia.hashCode();
             
-            // Por defecto los nuevos usuarios son "cliente"
             String role = "cliente";
             
             String insertQuery = "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('" 
@@ -73,22 +69,18 @@ public class SingUpController {
                 + "NULL)";
             
             try {
-                // Ejecutar el INSERT
                 Statement stmt = StartWin.conn.createStatement();
                 stmt.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
                 
-                // Recuperar el ID autogenerado
                 ResultSet rs = stmt.getGeneratedKeys();
                 if(rs.next()) {
                     int nuevoId = rs.getInt(1);
                     
-                    // Mostrar mensaje de éxito
                     Alert success = new Alert(AlertType.INFORMATION);
                     success.setHeaderText("Registro exitoso");
                     success.setContentText("¡Bienvenido " + nombre + "! Tu cuenta ha sido creada exitosamente.\nID de usuario: " + nuevoId);
                     success.showAndWait();
                     
-                    // Cambiar a la pantalla de login
                     StartWin.mostrarLogin();
                 } else {
                     throw new SQLException("No se pudo obtener el ID generado");
@@ -109,17 +101,14 @@ public class SingUpController {
         ((Stage)this.btn_cancelSingUp.getScene().getWindow()).close();
     }
     
-    // Validar que los campos sean correctos
     private boolean validarCampos() {
         boolean hayError = false;
         String mensaje = "";
         
-        // Validar que el nombre no esté vacío
         if(nombreSingUp.getText().trim().isEmpty()) {
             hayError = true;
             mensaje = "El nombre de usuario no puede estar vacío";
         }
-        // Validar caracteres especiales en el nombre
         else if(nombreSingUp.getText().contains("@") || nombreSingUp.getText().contains("?") || 
            nombreSingUp.getText().contains("=") || nombreSingUp.getText().contains("'") || 
            nombreSingUp.getText().contains("\"") || nombreSingUp.getText().contains("|") || 
@@ -129,17 +118,14 @@ public class SingUpController {
             hayError = true;
             mensaje = "El nombre de usuario no puede contener espacios ni caracteres especiales: @, ?, =, ', \", |, *, &, +, \\";
         }
-        // Validar que las contraseñas no estén vacías
         else if(passwdSingUp.getText().isEmpty() || repPasswdSingUp.getText().isEmpty()) {
             hayError = true;
             mensaje = "Las contraseñas no pueden estar vacías";
         }
-        // Validar que las contraseñas coincidan
         else if(!passwdSingUp.getText().equals(repPasswdSingUp.getText())) {
             hayError = true;
             mensaje = "Las contraseñas no coinciden";
         }
-        // Validar longitud mínima de contraseña
         else if(passwdSingUp.getText().length() < 6) {
             hayError = true;
             mensaje = "La contraseña debe tener al menos 6 caracteres";
@@ -155,7 +141,6 @@ public class SingUpController {
         return hayError;
     }
     
-    // Verificar si un usuario ya existe en la base de datos
     private boolean usuarioExiste(String nombre) {
         try {
             String query = "SELECT COUNT(*) FROM Usuarios WHERE Nombre = '" + nombre + "'";

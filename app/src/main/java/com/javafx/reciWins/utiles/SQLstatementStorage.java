@@ -17,7 +17,6 @@ public class SQLstatementStorage {
     }
 
     public static void executeStatements() {
-        // Ordenar sentencias para evitar violaciones de FK
         List<String> productos = new ArrayList<>();
         List<String> usuarios = new ArrayList<>();
         List<String> recicla = new ArrayList<>();
@@ -43,38 +42,31 @@ public class SQLstatementStorage {
                 recicla.add(statement);
             }
             else {
-                // Otros tipos de sentencias
                 otros.add(statement);
             }
         }
         
-        // Ejecutar en el orden correcto para mantener integridad referencial
         try {
-            // 1. Productos primero (las transacciones dependen de ellos)
             for (String stmt : productos) {
                 Statement s = conn.createStatement();
                 s.executeUpdate(stmt);
             }
             
-            // 2. Usuarios (las transacciones también dependen de ellos)
             for (String stmt : usuarios) {
                 Statement s = conn.createStatement();
                 s.executeUpdate(stmt);
             }
             
-            // 3. Recicla (depende de Productos y Usuarios)
             for (String stmt : recicla) {
                 Statement s = conn.createStatement();
                 s.executeUpdate(stmt);
             }
             
-            // 4. Otros tipos
             for (String stmt : otros) {
                 Statement s = conn.createStatement();
                 s.executeUpdate(stmt);
             }
             
-            // Limpiar la lista después de ejecutar
             preparedStatements.clear();
             
         } catch (SQLException e) {
