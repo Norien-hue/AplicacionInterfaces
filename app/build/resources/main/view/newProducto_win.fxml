@@ -2,44 +2,45 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="254.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewProducto">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="280.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewProducto">
    <children>
-      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
             <Label text="Nombre" />
-            <TextField fx:id="nombreProducto" prefHeight="26.0" prefWidth="212.0" />
+            <TextField fx:id="nombreProducto" prefHeight="26.0" prefWidth="260.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="228.0">
+      <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
             <Label text="Código Barras" />
-            <TextField fx:id="codigoBarrasProducto" prefHeight="26.0" prefWidth="30.0" />
+            <TextField fx:id="codigoBarrasProducto" prefHeight="26.0" prefWidth="260.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
+      <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
             <Label text="Tipo" />
-            <TextField fx:id="tipoProducto" prefHeight="26.0" prefWidth="266.0" />
+            <ComboBox fx:id="tipoProducto" prefHeight="26.0" prefWidth="260.0" editable="true" />
          </children>
       </VBox>
-      <VBox layoutX="20.0" layoutY="137.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
+      <VBox layoutX="20.0" layoutY="137.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
             <Label text="Emisiones" />
-            <TextField fx:id="emisionesProducto" prefHeight="26.0" prefWidth="266.0" />
+            <TextField fx:id="emisionesProducto" prefHeight="26.0" prefWidth="260.0" />
          </children>
       </VBox>
-      <VBox layoutX="20.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="227.0">
+      <VBox layoutX="20.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
             <Label text="Material" />
-            <TextField fx:id="materialesProducto" prefHeight="26.0" prefWidth="266.0" />
+            <TextField fx:id="materialesProducto" prefHeight="26.0" prefWidth="260.0" />
          </children>
       </VBox>
-      <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="234.0" spacing="10.0">
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="260.0" spacing="10.0">
          <children>
             <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#crearProducto" text="Aceptar" />
             <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />

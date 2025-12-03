@@ -26,8 +26,10 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.sql.*;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public class MainController implements Initializable {
 
@@ -417,6 +419,22 @@ public class MainController implements Initializable {
     public static ObservableList<Usuario> tablaUsuarioObservable;
     public static ObservableList<Producto> tablaProductosObservable;
     public static ObservableList<Transaccion> tablaTransaccionesObservable;
+
+    // Nuevo método para obtener tipos de productos únicos
+    public static ObservableList<String> getTiposProductos() {
+        ObservableList<String> tipos = FXCollections.observableArrayList();
+        if (tablaProductosObservable != null) {
+            Set<String> tipoSet = new HashSet<>();
+            for (Producto p : tablaProductosObservable) {
+                if (p.getTipo() != null && !p.getTipo().trim().isEmpty()) {
+                    tipoSet.add(p.getTipo());
+                }
+            }
+            tipos.addAll(tipoSet);
+            FXCollections.sort(tipos); // Orden alfabético
+        }
+        return tipos;
+    }
 
     public static void modItem(){
         Object o = StorageSharer.itemToMod;
