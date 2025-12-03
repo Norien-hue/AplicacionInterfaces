@@ -14,7 +14,7 @@
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="276.0">
          <children>
             <Label text="ID_usuario" />
-            <TextField fx:id="idModUsuario" prefHeight="26.0" prefWidth="260.0" editable="false" />
+            <TextField fx:id="idModUsuario" editable="false" prefHeight="26.0" prefWidth="260.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="276.0">
@@ -26,7 +26,7 @@
       <VBox layoutX="10.0" layoutY="56.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">
          <children>
             <Label text="Emisiones" />
-            <TextField fx:id="emisionesModUsuario" prefHeight="26.0" prefWidth="258.0" />
+            <TextField fx:id="emisionesModUsuario" disable="true" editable="false" prefHeight="26.0" prefWidth="258.0" />
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="101.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="46.0" prefWidth="274.0">

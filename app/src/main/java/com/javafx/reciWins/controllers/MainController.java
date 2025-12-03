@@ -7,6 +7,7 @@ import com.javafx.reciWins.start.StartWin;
 import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
@@ -130,6 +132,25 @@ public class MainController implements Initializable {
         
         // Cargar datos del usuario actual en la pestaña personal
         cargarDatosUsuarioActual();
+        
+        // NUEVO: Configurar tooltips
+        configurarTooltips();
+    }
+
+    // NUEVO MÉTODO: Configurar tooltips para los botones
+    private void configurarTooltips() {
+        btn_personal.setTooltip(new Tooltip("Personal"));
+        btn_users.setTooltip(new Tooltip("Usuarios"));
+        btn_products.setTooltip(new Tooltip("Productos"));
+        btn_transactions.setTooltip(new Tooltip("Transacciones"));
+        btn_settings.setTooltip(new Tooltip("Ajustes"));
+    }
+
+    // NUEVO MÉTODO: Deseleccionar todos los elementos de las tablas
+    private void deseleccionarTodos() {
+        tablaProductos.getSelectionModel().clearSelection();
+        tablaTransacciones.getSelectionModel().clearSelection();
+        tablaUsuario.getSelectionModel().clearSelection();
     }
 
     private void configurarColumnasProductos() {
@@ -202,6 +223,9 @@ public class MainController implements Initializable {
             
             // Actualizar los datos del usuario actual después de guardar
             cargarDatosUsuarioActual();
+            
+            // NUEVO: Deseleccionar después de guardar
+            deseleccionarTodos();
         }else{
             Alert a = new Alert(AlertType.WARNING);
 
@@ -290,16 +314,25 @@ public class MainController implements Initializable {
     @FXML
     void launch_modUsuario(ActionEvent event) {
         Usuario m = tablaUsuario.getSelectionModel().getSelectedItem();
-        StorageSharer.itemStorage.add(m.getIdUsuario()+"");
-        StorageSharer.itemStorage.add(m.getNombre());
-        StorageSharer.itemStorage.add(m.getPermisos());
-        StorageSharer.itemStorage.add(m.getTap()+"");
-        StorageSharer.itemStorage.add(m.getEmisionesReducidas()+"");
-        StorageSharer.itemToMod = m;
-        
-        StorageSharer.itemPre = m;
+        if(m != null) {
+            // MODIFICADO: Limpiar ANTES de agregar
+            StorageSharer.itemStorage.clear();
+            
+            StorageSharer.itemStorage.add(m.getIdUsuario()+"");
+            StorageSharer.itemStorage.add(m.getNombre());
+            StorageSharer.itemStorage.add(m.getPermisos());
+            StorageSharer.itemStorage.add(m.getTap()+"");
+            StorageSharer.itemStorage.add(m.getEmisionesReducidas()+"");
+            StorageSharer.itemToMod = m;
+            StorageSharer.itemPre = m;
 
-        StartWin.lanzarModUser();
+            StartWin.lanzarModUser();
+        } else {
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setHeaderText("Error de selección");
+            alerta.setContentText("Selecciona un usuario");
+            alerta.showAndWait();
+        }
     }
 
     @FXML
@@ -307,30 +340,38 @@ public class MainController implements Initializable {
         if(SQLstatementStorage.preparedStatements.size()>0){
             Alert a = new Alert(AlertType.CONFIRMATION);
             a.setHeaderText("Cambios sin guardar");
-            a.setContentText("¿Esta seguro de que quiere salir de la applicación sin guardar?");
+            a.setContentText("¿Está seguro de que quiere salir sin guardar los cambios?");
 
-            Optional<ButtonType> botonPulado = a.showAndWait();
+            Optional<ButtonType> botonPulsado = a.showAndWait();
 
-            if(botonPulado.isPresent()){
-                if(botonPulado.get().equals(ButtonType.OK)){
-                    ((Stage)this.btn_exit.getScene().getWindow()).close();
-                }
+            if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.OK)) {
+                Platform.exit();
+                System.exit(0);
             }
+        } else {
+            Platform.exit();
+            System.exit(0);
         }
     }
 
     @FXML
     void launch_settings(ActionEvent event) {
+        // NUEVO: Deseleccionar al cambiar de vista
+        deseleccionarTodos();
         StartWin.lanzarAjustes();
     }
 
     @FXML
     void tab_personal(ActionEvent event) {
+        // NUEVO: Deseleccionar al cambiar de pestaña
+        deseleccionarTodos();
         tabMain.getSelectionModel().select(0);
     }
 
     @FXML
     void tab_products(ActionEvent event) {
+        // NUEVO: Deseleccionar al cambiar de pestaña
+        deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
         tab_product.setVisible(true);
         tab_transaccion.setVisible(false);
@@ -339,6 +380,8 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_transactions(ActionEvent event) {
+        // NUEVO: Deseleccionar al cambiar de pestaña
+        deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
         tab_product.setVisible(false);
         tab_transaccion.setVisible(true);
@@ -347,6 +390,8 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_users(ActionEvent event) {
+        // NUEVO: Deseleccionar al cambiar de pestaña
+        deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
         tab_product.setVisible(false);
         tab_transaccion.setVisible(false);
@@ -355,21 +400,29 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_newProducto(ActionEvent event) {
+        // NUEVO: Deseleccionar antes de crear nuevo
+        deseleccionarTodos();
         StartWin.lanzarNuevoProducto();
     }
 
     @FXML
     void launch_newTransaccion(ActionEvent event) {
+        // NUEVO: Deseleccionar antes de crear nuevo
+        deseleccionarTodos();
         StartWin.lanzarNuevaTransaccion();
     }
 
     @FXML
     void launch_newUser(ActionEvent event) {
+        // NUEVO: Deseleccionar antes de crear nuevo
+        deseleccionarTodos();
         StartWin.lanzarNuevoUsuario();
     }
 
     @FXML
     void launch_scan(ActionEvent event) {
+        // NUEVO: Deseleccionar antes de escanear
+        deseleccionarTodos();
         StartWin.lanzarEscanear();
     }
 
@@ -379,6 +432,8 @@ public class MainController implements Initializable {
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
             tablaProductosObservable.remove(e);
+            // NUEVO: Deseleccionar después de borrar
+            deseleccionarTodos();
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -391,9 +446,29 @@ public class MainController implements Initializable {
     void borrarTransaccion(ActionEvent event) {
         Transaccion e = tablaTransacciones.getSelectionModel().getSelectedItem();
         if(e!=null){
+            // Obtener emisiones del producto para restarlas
+            float emisionesProducto = obtenerEmisionesProducto(e.getTipo(), e.getNumeroBarras());
+            
+            // Sentencia 1: Borrar transacción
             SQLstatementStorage.storeStatement("DELETE FROM Recicla WHERE Fecha = '"+e.getFecha()+"' AND Hora = '"+ e.getHora()+"'");
+            
+            // Sentencia 2: Restar emisiones al usuario
+            SQLstatementStorage.storeStatement(
+                "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - " 
+                + emisionesProducto + " WHERE Id_Usuario = " + e.getIdUsuario()
+            );
+            
+            // Actualizar el observable de usuarios para reflejar el cambio en la tabla
+            actualizarEmisionesUsuarioObservable(e.getIdUsuario(), -emisionesProducto);
+            
+            // Actualizar datos del usuario actual si es el afectado
+            if (e.getIdUsuario() == id_user) {
+                cargarDatosUsuarioActual();
+            }
+            
             tablaTransaccionesObservable.remove(e);
-            System.out.println(e.getFecha()+" y "+e.getHora());
+            // NUEVO: Deseleccionar después de borrar
+            deseleccionarTodos();
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -402,12 +477,42 @@ public class MainController implements Initializable {
         }
     }
 
+    // Método para actualizar las emisiones de un usuario en el observable
+    public static void actualizarEmisionesUsuarioObservable(int idUsuario, float cambio) {
+        for (Usuario usuario : tablaUsuarioObservable) {
+            if (usuario.getIdUsuario() == idUsuario) {
+                float nuevasEmisiones = usuario.getEmisionesReducidas() + cambio;
+                usuario.setEmisionesReducidas(nuevasEmisiones);
+                break;
+            }
+        }
+    }
+
+    private float obtenerEmisionesProducto(String tipo, long codigoBarras) {
+        try {
+            String query = "SELECT Emisiones_Reducibles FROM Productos WHERE Tipo = ? AND Numero_barras = ?";
+            PreparedStatement pst = conn.prepareStatement(query);
+            pst.setString(1, tipo);
+            pst.setLong(2, codigoBarras);
+            ResultSet rs = pst.executeQuery();
+            
+            if(rs.next()) {
+                return rs.getFloat("Emisiones_Reducibles");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0.0f;
+    }
+
     @FXML
     void borrarUsuario(ActionEvent event) {
         Usuario e = tablaUsuario.getSelectionModel().getSelectedItem();
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
             tablaUsuarioObservable.remove(e);
+            // NUEVO: Deseleccionar después de borrar
+            deseleccionarTodos();
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -431,7 +536,7 @@ public class MainController implements Initializable {
                 }
             }
             tipos.addAll(tipoSet);
-            FXCollections.sort(tipos); // Orden alfabético
+            FXCollections.sort(tipos);
         }
         return tipos;
     }
@@ -445,7 +550,7 @@ public class MainController implements Initializable {
                 codigoSet.add(p.getNumeroBarras());
             }
             codigos.addAll(codigoSet);
-            codigos.sort((a, b) -> Long.compare(a, b)); // Orden numérico
+            codigos.sort((a, b) -> Long.compare(a, b));
         }
         return codigos;
     }
@@ -503,8 +608,6 @@ public class MainController implements Initializable {
                     tablaTransaccionesObservable.set(i,(Transaccion) o);
                 }
             }
-        }else{
-            System.out.println("???");
         }
     }
 
@@ -512,6 +615,9 @@ public class MainController implements Initializable {
     void launch_modProducto(ActionEvent event) {
         Producto m = tablaProductos.getSelectionModel().getSelectedItem();
         if(m != null) {
+            // MODIFICADO: Limpiar ANTES de agregar
+            StorageSharer.itemStorage.clear();
+            
             StorageSharer.itemStorage.add(m.getTipo());
             StorageSharer.itemStorage.add(m.getNumeroBarras() + "");
             StorageSharer.itemStorage.add(m.getNombre());
@@ -533,6 +639,9 @@ public class MainController implements Initializable {
     void launch_modTransaccion(ActionEvent event) {
         Transaccion m = tablaTransacciones.getSelectionModel().getSelectedItem();
         if(m != null) {
+            // MODIFICADO: Limpiar ANTES de agregar
+            StorageSharer.itemStorage.clear();
+            
             StorageSharer.itemStorage.add(m.getIdUsuario() + "");
             StorageSharer.itemStorage.add(m.getTipo());
             StorageSharer.itemStorage.add(m.getNumeroBarras() + "");

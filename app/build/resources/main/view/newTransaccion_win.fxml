@@ -29,7 +29,13 @@
             <ComboBox fx:id="codigoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="300.0" spacing="5.0">
+      <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
+         <children>
+            <Label text="Emisiones reducibles (kg CO₂)" />
+            <TextField fx:id="emisionesTransaccion" prefHeight="26.0" prefWidth="300.0" editable="false" text="0.0" />
+         </children>
+      </VBox>
+      <VBox layoutX="10.0" layoutY="139.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="300.0" spacing="5.0">
          <children>
             <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
                <children>
