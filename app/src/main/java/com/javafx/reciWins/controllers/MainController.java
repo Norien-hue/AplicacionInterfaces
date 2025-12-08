@@ -24,7 +24,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 import java.net.URL;
 import java.sql.*;
@@ -32,10 +31,12 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Random;
 
 public class MainController implements Initializable {
 
     public static int id_user; 
+    private boolean esAdministrador = false;
 
     @FXML private Button btn_addProducto;
     @FXML private Button btn_addTransaccion;
@@ -49,6 +50,17 @@ public class MainController implements Initializable {
     @FXML private Button btn_settings;
     @FXML private Button btn_transactions;
     @FXML private Button btn_users;
+    
+    // Botones de borrar
+    @FXML private Button btn_borrarProducto;
+    @FXML private Button btn_borrarTransaccion;
+    @FXML private Button btn_borrarUsuario;
+    
+    // Botones de modificar
+    @FXML private Button btn_modProducto;
+    @FXML private Button btn_modTransaccion;
+    @FXML private Button btn_modUsuario;
+    
     @FXML private TabPane tabMain;
     @FXML private AnchorPane tab_product;
     @FXML private AnchorPane tab_transaccion;
@@ -57,8 +69,10 @@ public class MainController implements Initializable {
     // Labels para la pestaña personal
     @FXML private Label nombreBD;
     @FXML private Label saldoBD;
-    @FXML private Label tapBD;
     @FXML private Label rolBD;
+    
+    // Botón de generar TAP
+    @FXML private Button btn_generarTap;
 
     // TableView y columnas para Productos
     @FXML 
@@ -122,6 +136,11 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         conn = StartWin.conn;
+        
+        // Cargar datos del usuario actual primero
+        cargarDatosUsuarioActual();
+        
+        // Configurar columnas y cargar datos de tablas
         configurarColumnasProductos();
         configurarColumnasTransacciones();
         configurarColumnasUsuarios();
@@ -130,10 +149,44 @@ public class MainController implements Initializable {
         cargarDatosTransacciones();
         cargarDatosUsuarios();
         
-        // Cargar datos del usuario actual en la pestaña personal
-        cargarDatosUsuarioActual();
+        // Configurar permisos según el rol
+        configurarPermisosSegunRol();
         
         configurarTooltips();
+    }
+
+    private void configurarPermisosSegunRol() {
+        // Para clientes, desactivar botones de administración pero mantenerlos visibles
+        if (!esAdministrador) {
+            // Deshabilitar la pestaña de tablas completamente
+            tabMain.getTabs().get(1).setDisable(true);
+            
+            // Desactivar botones de la barra superior
+            btn_users.setDisable(true);
+            btn_products.setDisable(true);
+            btn_transactions.setDisable(true);
+            
+            // El botón de guardar está habilitado para todos los usuarios
+            btn_save.setDisable(false); // Habilitado para todos
+        } else {
+            // Si es administrador, asegurarse de que todo esté habilitado
+            tabMain.getTabs().get(1).setDisable(false);
+            btn_users.setDisable(false);
+            btn_products.setDisable(false);
+            btn_transactions.setDisable(false);
+            btn_save.setDisable(false);
+            
+            // Habilitar botones de administración dentro de las tablas
+            btn_addProducto.setDisable(false);
+            btn_borrarProducto.setDisable(false);
+            btn_modProducto.setDisable(false);
+            btn_addTransaccion.setDisable(false);
+            btn_borrarTransaccion.setDisable(false);
+            btn_modTransaccion.setDisable(false);
+            btn_addUsuario.setDisable(false);
+            btn_borrarUsuario.setDisable(false);
+            btn_modUsuario.setDisable(false);
+        }
     }
 
     private void configurarTooltips() {
@@ -142,12 +195,14 @@ public class MainController implements Initializable {
         btn_products.setTooltip(new Tooltip("Productos"));
         btn_transactions.setTooltip(new Tooltip("Transacciones"));
         btn_settings.setTooltip(new Tooltip("Ajustes"));
+        btn_generarTap.setTooltip(new Tooltip("Generar un nuevo número TAP"));
+        btn_exit.setTooltip(new Tooltip("Cerrar sesión"));
     }
 
     private void deseleccionarTodos() {
-        tablaProductos.getSelectionModel().clearSelection();
-        tablaTransacciones.getSelectionModel().clearSelection();
-        tablaUsuario.getSelectionModel().clearSelection();
+        if (tablaProductos != null) tablaProductos.getSelectionModel().clearSelection();
+        if (tablaTransacciones != null) tablaTransacciones.getSelectionModel().clearSelection();
+        if (tablaUsuario != null) tablaUsuario.getSelectionModel().clearSelection();
     }
 
     private void configurarColumnasProductos() {
@@ -184,48 +239,46 @@ public class MainController implements Initializable {
             if (rs.next()) {
                 nombreBD.setText(rs.getString("Nombre"));
                 saldoBD.setText(String.format("%.1f", rs.getFloat("Emisiones_Reducidas")) + " kg CO₂");
-                tapBD.setText(String.valueOf(rs.getInt("TAP")));
-                rolBD.setText(rs.getString("Permisos"));
+                
+                // Determinar si es administrador
+                String permisos = rs.getString("Permisos");
+                esAdministrador = permisos != null && permisos.equalsIgnoreCase("administrador");
+                rolBD.setText(permisos);
             } else {
                 nombreBD.setText("Usuario no encontrado");
                 saldoBD.setText("0.0 kg CO₂");
-                tapBD.setText("0");
                 rolBD.setText("N/A");
             }
         } catch (SQLException e) {
             e.printStackTrace();
             nombreBD.setText("Error");
             saldoBD.setText("0.0 kg CO₂");
-            tapBD.setText("0");
             rolBD.setText("N/A");
         }
     }
 
     @FXML
     void saveClicked(ActionEvent event) {
+        // Ahora todos los usuarios pueden guardar cambios
         if(SQLstatementStorage.preparedStatements.size()>0){
            SQLstatementStorage.executeStatements();
 
             Alert a = new Alert(AlertType.INFORMATION);
-
             a.setHeaderText("Cambios guardados");
             a.setContentText("Se ha guardado correctamente los cambios");
-
             a.showAndWait();
 
-            tablaProductos.refresh();
-            tablaUsuario.refresh();
-            tablaTransacciones.refresh();
+            if (tablaProductos != null) tablaProductos.refresh();
+            if (tablaUsuario != null) tablaUsuario.refresh();
+            if (tablaTransacciones != null) tablaTransacciones.refresh();
             
             cargarDatosUsuarioActual();
             
             deseleccionarTodos();
         }else{
             Alert a = new Alert(AlertType.WARNING);
-
             a.setHeaderText("No hay cambios");
             a.setContentText("No se pudieron guardar cambios, no hay cambios");
-
             a.showAndWait();
         }
     }
@@ -249,7 +302,9 @@ public class MainController implements Initializable {
                 tablaProductosObservable.add(producto);
             }
 
-            tablaProductos.setItems(tablaProductosObservable);
+            if (tablaProductos != null) {
+                tablaProductos.setItems(tablaProductosObservable);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -274,7 +329,9 @@ public class MainController implements Initializable {
                 tablaTransaccionesObservable.add(transaccion);
             }
 
-            tablaTransacciones.setItems(tablaTransaccionesObservable);
+            if (tablaTransacciones != null) {
+                tablaTransacciones.setItems(tablaTransaccionesObservable);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -299,7 +356,9 @@ public class MainController implements Initializable {
                 tablaUsuarioObservable.add(usuario);
             }
 
-            tablaUsuario.setItems(tablaUsuarioObservable);
+            if (tablaUsuario != null) {
+                tablaUsuario.setItems(tablaUsuarioObservable);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -307,6 +366,12 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modUsuario(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         Usuario m = tablaUsuario.getSelectionModel().getSelectedItem();
         if(m != null) {
             StorageSharer.itemStorage.clear();
@@ -329,22 +394,38 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void kill_unsafe(ActionEvent event) {
-        if(SQLstatementStorage.preparedStatements.size()>0){
+    void logout(ActionEvent event) {
+        // Verificar si hay cambios sin guardar
+        if(SQLstatementStorage.preparedStatements.size() > 0){
             Alert a = new Alert(AlertType.CONFIRMATION);
             a.setHeaderText("Cambios sin guardar");
-            a.setContentText("¿Está seguro de que quiere salir sin guardar los cambios?");
-
+            a.setContentText("Tienes cambios sin guardar. ¿Deseas guardarlos antes de cerrar sesión?");
+            
             Optional<ButtonType> botonPulsado = a.showAndWait();
-
+            
             if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.OK)) {
-                Platform.exit();
-                System.exit(0);
+                // Guardar cambios antes de cerrar sesión
+                SQLstatementStorage.executeStatements();
+                Alert info = new Alert(AlertType.INFORMATION);
+                info.setHeaderText("Cambios guardados");
+                info.setContentText("Los cambios han sido guardados. Cerrando sesión...");
+                info.showAndWait();
+            } else if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.CANCEL)) {
+                // El usuario canceló el logout
+                return;
             }
-        } else {
-            Platform.exit();
-            System.exit(0);
         }
+        
+        // Limpiar credenciales y datos temporales
+        id_user = 0;
+        esAdministrador = false;
+        StorageSharer.itemStorage.clear();
+        StorageSharer.itemToMod = null;
+        StorageSharer.itemPre = null;
+        SQLstatementStorage.preparedStatements.clear();
+        
+        // Volver a la ventana de login
+        StartWin.mostrarLogin();
     }
 
     @FXML
@@ -361,6 +442,12 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_products(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
         tab_product.setVisible(true);
@@ -370,6 +457,12 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_transactions(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
         tab_product.setVisible(false);
@@ -379,6 +472,12 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_users(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
         tab_product.setVisible(false);
@@ -388,18 +487,36 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_newProducto(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         deseleccionarTodos();
         StartWin.lanzarNuevoProducto();
     }
 
     @FXML
     void launch_newTransaccion(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         deseleccionarTodos();
         StartWin.lanzarNuevaTransaccion();
     }
 
     @FXML
     void launch_newUser(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         deseleccionarTodos();
         StartWin.lanzarNuevoUsuario();
     }
@@ -412,6 +529,12 @@ public class MainController implements Initializable {
 
     @FXML
     void borrarProducto(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         Producto e = tablaProductos.getSelectionModel().getSelectedItem();
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
@@ -427,6 +550,12 @@ public class MainController implements Initializable {
 
     @FXML
     void borrarTransaccion(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         Transaccion e = tablaTransacciones.getSelectionModel().getSelectedItem();
         if(e!=null){
             float emisionesProducto = obtenerEmisionesProducto(e.getTipo(), e.getNumeroBarras());
@@ -483,6 +612,12 @@ public class MainController implements Initializable {
 
     @FXML
     void borrarUsuario(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         Usuario e = tablaUsuario.getSelectionModel().getSelectedItem();
         if(e!=null){
             SQLstatementStorage.storeStatement("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
@@ -584,6 +719,12 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modProducto(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         Producto m = tablaProductos.getSelectionModel().getSelectedItem();
         if(m != null) {
             StorageSharer.itemStorage.clear();
@@ -607,6 +748,12 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modTransaccion(ActionEvent event) {
+        // Verificar permisos cada vez que se intenta acceder
+        if (!esAdministrador) {
+            mostrarErrorAcceso();
+            return;
+        }
+        
         Transaccion m = tablaTransacciones.getSelectionModel().getSelectedItem();
         if(m != null) {
             StorageSharer.itemStorage.clear();
@@ -626,5 +773,38 @@ public class MainController implements Initializable {
             alerta.setContentText("Selecciona una transacción");
             alerta.showAndWait();
         }
+    }
+    
+    @FXML
+    void generarTap(ActionEvent event) {
+        // Generar un número TAP aleatorio de 6 dígitos
+        Random random = new Random();
+        int nuevoTap = 100000 + random.nextInt(900000);
+        
+        // Mostrar alerta con el nuevo TAP
+        Alert alerta = new Alert(AlertType.INFORMATION);
+        alerta.setHeaderText("Nuevo TAP generado");
+        alerta.setContentText("Tu nuevo número TAP es: " + nuevoTap + "\n\nRecuerda guardar los cambios.");
+        alerta.showAndWait();
+        
+        // Actualizar en el sistema de sentencias SQL
+        SQLstatementStorage.storeStatement(
+            "UPDATE Usuarios SET TAP = " + nuevoTap + " WHERE Id_Usuario = " + id_user
+        );
+        
+        // Actualizar en la ObservableList si existe
+        for (Usuario usuario : tablaUsuarioObservable) {
+            if (usuario.getIdUsuario() == id_user) {
+                usuario.setTap(nuevoTap);
+                break;
+            }
+        }
+    }
+    
+    private void mostrarErrorAcceso() {
+        Alert alerta = new Alert(AlertType.WARNING);
+        alerta.setHeaderText("Acceso denegado");
+        alerta.setContentText("Esta función solo está disponible para administradores.");
+        alerta.showAndWait();
     }
 }

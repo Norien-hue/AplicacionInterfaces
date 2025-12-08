@@ -3,34 +3,34 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="324.0" prefWidth="242.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.ChangePasswd">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="320.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.ChangePasswd">
    <children>
-      <VBox prefHeight="0.0" prefWidth="258.0">
+      <VBox prefHeight="50.0" prefWidth="300.0">
          <children>
             <Label text="Contraseña actual" />
-            <TextField />
+            <PasswordField fx:id="passwdActual" prefWidth="300.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="10.0" prefHeight="2.0" prefWidth="258.0">
+      <VBox layoutX="10.0" layoutY="10.0" prefHeight="50.0" prefWidth="300.0">
          <children>
             <Label text="Contraseña nueva" />
-            <TextField />
+            <PasswordField fx:id="passwdNueva" prefWidth="300.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="310.0" prefHeight="0.0" prefWidth="258.0">
+      <VBox layoutX="10.0" layoutY="70.0" prefHeight="50.0" prefWidth="300.0">
          <children>
             <Label text="Repetir contraseña nueva" />
-            <TextField />
+            <PasswordField fx:id="passwdRepetida" prefWidth="300.0" />
          </children>
       </VBox>
-      <HBox alignment="BOTTOM_RIGHT" prefHeight="158.0" prefWidth="222.0" spacing="10.0">
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" text="Aceptar cambio" />
-            <Button fx:id="btn_cancelar" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#cambiarContraseña" text="Cambiar contraseña" />
+            <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>
    </children>

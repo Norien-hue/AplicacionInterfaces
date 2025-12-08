@@ -18,7 +18,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.controlsfx/controlsfx
     implementation("org.controlsfx:controlsfx:11.2.2")
     // https://mvnrepository.com/artifact/de.gsi/chartfx
-    implementation("de.gsi:chartfx:11.2.7")
+    // implementation("de.gsi:chartfx:11.2.7")
+    // https://mvnrepository.com/artifact/io.fair-acc/chartfx
+    implementation("io.fair-acc:chartfx:11.3.1")
 }
 
 java { //Se indica la versión de JDK que ha de utilizar

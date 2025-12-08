@@ -8,41 +8,46 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="324.0" prefWidth="242.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.SettingsController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="320.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.SettingsController">
    <children>
-      <VBox prefHeight="54.0" prefWidth="222.0">
+      <VBox prefHeight="54.0" prefWidth="300.0">
          <children>
             <Label text="Nombre">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <TextField fx:id="txtFld_nombre" />
+            <TextField fx:id="txtFld_nombre" prefWidth="300.0" />
          </children>
       </VBox>
-      <VBox layoutX="20.0" layoutY="20.0" prefHeight="54.0" prefWidth="222.0">
+      <VBox layoutX="20.0" layoutY="20.0" prefHeight="54.0" prefWidth="300.0">
          <children>
             <Label text="Contraseña">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Button fx:id="btn_passwd" mnemonicParsing="false" onAction="#launch_cambiarPwd" text="Cambiar contraseña" />
+            <Button fx:id="btn_passwd" mnemonicParsing="false" onAction="#launch_cambiarPwd" prefWidth="300.0" text="Cambiar contraseña" />
          </children>
       </VBox>
-      <VBox layoutX="20.0" layoutY="90.0" prefHeight="54.0" prefWidth="222.0">
+      <VBox layoutX="20.0" layoutY="90.0" prefHeight="70.0" prefWidth="300.0">
          <children>
-            <Label text="Cambio de rol">
+            <Label text="TAP (Tarjeta de Aprovechamiento Personal)">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Button fx:id="btn_cambio" mnemonicParsing="false" text="Solicitar cambio" />
+            <HBox spacing="10.0">
+               <children>
+                  <TextField fx:id="txtFld_tap" prefWidth="220.0" editable="false" />
+                  <Button fx:id="btn_mostrarTap" mnemonicParsing="false" onAction="#alternarMostrarTap" prefWidth="70.0" text="Mostrar" />
+               </children>
+            </HBox>
          </children>
       </VBox>
-      <HBox alignment="BOTTOM_RIGHT" prefHeight="168.0" prefWidth="222.0" spacing="10.0">
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_accept" mnemonicParsing="false" text="Confirmar cambios" />
+            <Button fx:id="btn_accept" mnemonicParsing="false" onAction="#guardarCambios" text="Guardar cambios" />
             <Button fx:id="btn_cancel" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
          </children>
       </HBox>
