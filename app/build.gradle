@@ -17,6 +17,8 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.32'
     // https://mvnrepository.com/artifact/org.controlsfx/controlsfx
     implementation("org.controlsfx:controlsfx:11.2.2")
+    // https://mvnrepository.com/artifact/de.gsi/chartfx
+    implementation("de.gsi:chartfx:11.2.7")
 }
 
 java { //Se indica la versión de JDK que ha de utilizar

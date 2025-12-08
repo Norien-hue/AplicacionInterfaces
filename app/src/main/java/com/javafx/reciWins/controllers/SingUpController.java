@@ -124,7 +124,16 @@ public class SingUpController {
         }
         else if(!passwdSingUp.getText().equals(repPasswdSingUp.getText())) {
             hayError = true;
-            mensaje = "Las contraseñas no coinciden";
+            mensaje = "Las contraseñas no coinciden. Por favor, verifica que ambas contraseñas sean iguales.";
+        }
+        else if(passwdSingUp.getText().contains("@") || passwdSingUp.getText().contains("?") || 
+                passwdSingUp.getText().contains("=") || passwdSingUp.getText().contains("'") || 
+                passwdSingUp.getText().contains("\"") || passwdSingUp.getText().contains("|") || 
+                passwdSingUp.getText().contains("&") || passwdSingUp.getText().contains("*") || 
+                passwdSingUp.getText().contains("+") || passwdSingUp.getText().contains("\\")) {
+            hayError = true;
+            mensaje = "La contraseña contiene caracteres especiales no permitidos: @, ?, =, ', \", |, *, &, +, \\\n\n" +
+                      "Por seguridad, evita estos caracteres en tu contraseña.";
         }
         else if(passwdSingUp.getText().length() < 6) {
             hayError = true;

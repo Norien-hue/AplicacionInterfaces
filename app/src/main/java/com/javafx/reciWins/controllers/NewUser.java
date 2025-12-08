@@ -94,39 +94,55 @@ public class NewUser implements Initializable {
     private void checkForAlertNewUser() {
         alertMessage = "";
         
+        if(nombreUsuario.getText().trim().isEmpty()) {
+            checkAlert = true;
+            alertMessage = "El nombre de usuario no puede estar vacío.";
+            return;
+        }
+        
         if(nombreUsuario.getText().contains("@") || nombreUsuario.getText().contains("?") || 
            nombreUsuario.getText().contains("=") || nombreUsuario.getText().contains("'") || 
            nombreUsuario.getText().contains("\"") || nombreUsuario.getText().contains("|") || 
            nombreUsuario.getText().contains("&") || nombreUsuario.getText().contains("*") || 
-           nombreUsuario.getText().contains("+") || nombreUsuario.getText().contains("\\") || 
-           nombreUsuario.getText().strip().equals("")) {
+           nombreUsuario.getText().contains("+") || nombreUsuario.getText().contains("\\")) {
             checkAlert = true;
-            alertMessage = "El nombre contiene caracteres inválidos o está vacío";
+            alertMessage = "El nombre contiene caracteres inválidos (@, ?, =, ', \", |, &, *, +, \\)";
             return;
         }
         
-        if(contraseniaUsuario.getText().strip().equals("") || 
-           repetirContraseniaUsuario.getText().strip().equals("")) {
-            checkAlert = true;
-            alertMessage = "Las contraseñas no pueden estar vacías";
-            return;
-        }
-        
+
         if(!contraseniaUsuario.getText().equals(repetirContraseniaUsuario.getText())) {
             checkAlert = true;
-            alertMessage = "Las contraseñas no coinciden";
+            alertMessage = "Las contraseñas no coinciden.";
+            return;
+        }
+        
+        if(contraseniaUsuario.getText().contains("@") || contraseniaUsuario.getText().contains("?") || 
+           contraseniaUsuario.getText().contains("=") || contraseniaUsuario.getText().contains("'") || 
+           contraseniaUsuario.getText().contains("\"") || contraseniaUsuario.getText().contains("|") || 
+           contraseniaUsuario.getText().contains("&") || contraseniaUsuario.getText().contains("*") || 
+           contraseniaUsuario.getText().contains("+") || contraseniaUsuario.getText().contains("\\")) {
+            checkAlert = true;
+            alertMessage = "La contraseña contiene caracteres inválidos (@, ?, =, ', \", |, &, *, +, \\)";
+            return;
+        }
+        
+        if(contraseniaUsuario.getText().isEmpty() || 
+           repetirContraseniaUsuario.getText().isEmpty()) {
+            checkAlert = true;
+            alertMessage = "Las contraseñas no pueden estar vacías.";
             return;
         }
         
         if(contraseniaUsuario.getText().length() < 6) {
             checkAlert = true;
-            alertMessage = "La contraseña debe tener al menos 6 caracteres";
+            alertMessage = "La contraseña debe tener al menos 6 caracteres.";
             return;
         }
         
         if(!adminRoleUsuario.isSelected() && !userRoleUsuario.isSelected()) {
             checkAlert = true;
-            alertMessage = "Debes seleccionar un rol (Admin o User)";
+            alertMessage = "Debes seleccionar un rol (Admin o User).";
             return;
         }
     }
@@ -138,7 +154,13 @@ public class NewUser implements Initializable {
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
             a.setHeaderText("Error en los campos");
-            a.setContentText(alertMessage + "\n\nNo uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\");
+            a.setContentText(alertMessage);
+            
+            // Hacer la ventana redimensionable para que se ajuste al contenido
+            a.setResizable(true);
+            // Ajustar el tamaño del diálogo para que muestre bien el mensaje
+            a.getDialogPane().setPrefSize(400, 150);
+            
             a.showAndWait();
             ret = true;
         }
