@@ -56,10 +56,8 @@ public class MainController implements Initializable {
     @FXML private Button btn_addTransaccion;
     @FXML private Button btn_addUsuario;
     @FXML private Button btn_exit;
-    @FXML private Button btn_info;
     @FXML private Button btn_personal;
     @FXML private Button btn_products;
-    @FXML private Button btn_save;
     @FXML private Button btn_scan;
     @FXML private Button btn_settings;
     @FXML private Button btn_transactions;
@@ -171,8 +169,6 @@ public class MainController implements Initializable {
             }
         });
         
-        btn_save.setVisible(false);
-        btn_save.setDisable(true);
     }
 
     private void inicializarGrafico() {
@@ -318,7 +314,6 @@ public class MainController implements Initializable {
             btn_users.setDisable(false);
             btn_products.setDisable(false);
             btn_transactions.setDisable(false);
-            btn_save.setDisable(false);
             
             btn_addProducto.setDisable(false);
             btn_borrarProducto.setDisable(false);
@@ -398,10 +393,6 @@ public class MainController implements Initializable {
             saldoBD.setText("0.0 kg CO₂");
             rolBD.setText("N/A");
         }
-    }
-
-    @FXML
-    void saveClicked(ActionEvent event) {
     }
 
     private void cargarDatosProductos() {

@@ -98,26 +98,6 @@
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
-               <children>
-                  <Button fx:id="btn_save" mnemonicParsing="true" onAction="#saveClicked" prefHeight="31.0" prefWidth="82.0" style="-fx-font-size: 11px;" text="Guar_dar">
-                     <graphic>
-                        <ImageView fitHeight="23.0" fitWidth="67.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../img/floppy-5607525_640.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="btn_info" mnemonicParsing="true" style="-fx-font-size: 11px;" text="_Info">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="82.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../img/information-1294813_640.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-               </children>
                <padding>
                   <Insets top="5.0" />
                </padding>
@@ -195,18 +175,18 @@
                <content>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
-                        <AnchorPane fx:id="tab_product" prefHeight="200.0" prefWidth="200.0">
+                        <AnchorPane fx:id="tab_product" prefHeight="200.0" prefWidth="200.0" visible="false">
                            <children>
-                              <TableView fx:id="tablaProductos" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="640.0">
+                              <TableView fx:id="tablaProductos" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="879.0">
                                  <columns>
-                                    <TableColumn fx:id="colTipoProducto" prefWidth="75.0" text="Tipo" />
-                                    <TableColumn fx:id="colBarrasProducto" prefWidth="120.0" text="Código Barras" />
-                                    <TableColumn fx:id="colNombreProducto" prefWidth="150.0" text="Nombre" />
-                                    <TableColumn fx:id="colEmisionesProducto" prefWidth="100.0" text="Emisiones" />
-                                    <TableColumn fx:id="colMaterialProducto" prefWidth="100.0" text="Material" />
+                                    <TableColumn fx:id="colTipoProducto" prefWidth="103.20000648498535" text="Tipo" />
+                                    <TableColumn fx:id="colBarrasProducto" prefWidth="156.80001068115234" text="Código Barras" />
+                                    <TableColumn fx:id="colNombreProducto" prefWidth="307.9999694824219" text="Nombre" />
+                                    <TableColumn fx:id="colEmisionesProducto" prefWidth="92.79998779296875" text="Emisiones" />
+                                    <TableColumn fx:id="colMaterialProducto" prefWidth="150.4000244140625" text="Material" />
                                  </columns>
                               </TableView>
-                              <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="640.0" spacing="5.0">
+                              <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="879.0" spacing="5.0">
                                  <children>
                                     <Button fx:id="btn_addProducto" mnemonicParsing="true" onAction="#launch_newProducto" text="_Crear producto" />
                                     <Button fx:id="btn_borrarProducto" mnemonicParsing="true" onAction="#borrarProducto" text="_Borrar producto" />
@@ -217,16 +197,16 @@
                         </AnchorPane>
                         <AnchorPane fx:id="tab_transaccion" prefHeight="200.0" prefWidth="200.0" visible="false">
                            <children>
-                              <TableView fx:id="tablaTransacciones" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="640.0">
+                              <TableView fx:id="tablaTransacciones" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="882.0">
                                  <columns>
                                     <TableColumn fx:id="colUsuarioTransaccion" prefWidth="80.0" text="ID Usuario" />
-                                    <TableColumn fx:id="colTipoTransaccion" prefWidth="80.0" text="Tipo" />
-                                    <TableColumn fx:id="colBarrasTransaccion" prefWidth="120.0" text="Código Barras" />
-                                    <TableColumn fx:id="colFechaTransaccion" prefWidth="100.0" text="Fecha" />
-                                    <TableColumn fx:id="colHoraTransaccion" prefWidth="100.0" text="Hora" />
+                                    <TableColumn fx:id="colTipoTransaccion" prefWidth="161.5999984741211" text="Tipo" />
+                                    <TableColumn fx:id="colBarrasTransaccion" prefWidth="232.0" text="Código Barras" />
+                                    <TableColumn fx:id="colFechaTransaccion" prefWidth="155.19998168945312" text="Fecha" />
+                                    <TableColumn fx:id="colHoraTransaccion" prefWidth="94.39996337890625" text="Hora" />
                                  </columns>
                               </TableView>
-                              <HBox alignment="BOTTOM_RIGHT" layoutX="21.0" layoutY="14.0" prefHeight="74.0" prefWidth="640.0" spacing="5.0">
+                              <HBox alignment="BOTTOM_RIGHT" layoutX="21.0" layoutY="14.0" prefHeight="74.0" prefWidth="880.0" spacing="5.0">
                                  <children>
                                     <Button fx:id="btn_addTransaccion" mnemonicParsing="true" onAction="#launch_newTransaccion" text="_Crear transacción" />
                                     <Button fx:id="btn_borrarTransaccion" mnemonicParsing="true" onAction="#borrarTransaccion" text="_Borrar transacción" />
@@ -235,18 +215,18 @@
                               </HBox>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="tab_usuario" prefHeight="200.0" prefWidth="200.0" visible="false">
+                        <AnchorPane fx:id="tab_usuario" prefHeight="200.0" prefWidth="200.0">
                            <children>
-                              <TableView fx:id="tablaUsuario" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="640.0">
+                              <TableView fx:id="tablaUsuario" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="890.0">
                                  <columns>
                                     <TableColumn fx:id="colIdUsuario" prefWidth="60.0" text="ID" />
-                                    <TableColumn fx:id="colNombreUsuario" prefWidth="120.0" text="Nombre" />
-                                    <TableColumn fx:id="colEmisionesUsuario" prefWidth="100.0" text="Emisiones" />
-                                    <TableColumn fx:id="colTAPUsuario" prefWidth="80.0" text="TAP" />
-                                    <TableColumn fx:id="colPermisosUsuario" prefWidth="100.0" text="Rol" />
+                                    <TableColumn fx:id="colNombreUsuario" prefWidth="272.0000228881836" text="Nombre" />
+                                    <TableColumn fx:id="colEmisionesUsuario" prefWidth="176.80001831054688" text="Emisiones" />
+                                    <TableColumn fx:id="colTAPUsuario" prefWidth="143.199951171875" text="TAP" />
+                                    <TableColumn fx:id="colPermisosUsuario" prefWidth="133.60003662109375" text="Rol" />
                                  </columns>
                               </TableView>
-                              <HBox alignment="BOTTOM_RIGHT" layoutX="14.0" layoutY="13.0" prefHeight="69.0" prefWidth="640.0" spacing="10.0">
+                              <HBox alignment="BOTTOM_RIGHT" layoutX="14.0" layoutY="13.0" prefHeight="70.0" prefWidth="896.0" spacing="10.0">
                                  <children>
                                     <Button fx:id="btn_addUsuario" mnemonicParsing="true" onAction="#launch_newUser" text="_Crear usuario" />
                                     <Button fx:id="btn_borrarUsuario" mnemonicParsing="true" onAction="#borrarUsuario" text="_Borrar usuario" />
