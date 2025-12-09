@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javafx.application.Application;
@@ -29,8 +31,30 @@ public class StartWin extends Application {
         launch(args);
     }
 
-        @Override
-        public void start(Stage primeraEscena) throws Exception {
+    public static List<String> getMateriales() {
+        return MATERIALES;
+    }
+
+    public static final List<String> MATERIALES = Arrays.asList(
+        "PET", 
+        "PP", 
+        "Vidrio", 
+        "Aluminio",
+        "Papel",
+        "Cartón",
+        "Acero",
+        "Cobre",
+        "Bronce",
+        "Latón",
+        "Plástico mixto",
+        "Orgánico",
+        "Electrónico",
+        "Textil",
+        "Madera"
+    );
+
+    @Override
+    public void start(Stage primeraEscena) throws Exception {
         primaryStage = primeraEscena;
         Parent root = FXMLLoader.load(this.getClass().getResource("/view/loginStart_win.fxml"));
 

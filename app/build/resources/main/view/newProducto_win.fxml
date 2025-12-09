@@ -37,7 +37,7 @@
       <VBox layoutX="20.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
             <Label text="Material" />
-            <TextField fx:id="materialesProducto" prefHeight="26.0" prefWidth="260.0" />
+            <ComboBox fx:id="materialesProducto" prefHeight="26.0" prefWidth="260.0" editable="false" />
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="260.0" spacing="10.0">

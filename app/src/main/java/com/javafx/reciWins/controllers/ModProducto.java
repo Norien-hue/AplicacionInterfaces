@@ -1,10 +1,10 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class ModProducto implements Initializable {
     private TextField emisionesProducto;
     
     @FXML
-    private TextField materialesProducto;
+    private ComboBox<String> materialesProducto; // Cambiado de TextField a ComboBox<String>
     
     @FXML
     private Button btn_aceptar;
@@ -64,7 +64,15 @@ public class ModProducto implements Initializable {
             String tipo = tipoProducto.getEditor().getText().trim();
             long codigoBarras = Long.parseLong(codigoBarrasProducto.getText().trim());
             float emisiones = Float.parseFloat(emisionesProducto.getText().trim());
-            String material = materialesProducto.getText().trim();
+            String material = materialesProducto.getValue(); // Cambiado de getText() a getValue()
+            
+            if (material == null || material.trim().isEmpty()) {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setHeaderText("Material requerido");
+                a.setContentText("Debes seleccionar un material de la lista.");
+                a.showAndWait();
+                return;
+            }
             
             String tipoOriginal = StorageSharer.itemStorage.get(0);
             String codigoOriginal = StorageSharer.itemStorage.get(1);
@@ -147,46 +155,29 @@ public class ModProducto implements Initializable {
         }
     }
 
-    // Método para obtener las transacciones por usuario para un producto específico
-    private Map<Integer, Integer> obtenerTransaccionesPorUsuario(String tipo, long codigoBarras) {
-        Map<Integer, Integer> transaccionesPorUsuario = new HashMap<>();
-        
-        try {
-            String query = "SELECT Id_Usuario, COUNT(*) as Cantidad " +
-                          "FROM Recicla " +
-                          "WHERE Tipo = ? AND Numero_barras = ? " +
-                          "GROUP BY Id_Usuario";
-            
-            PreparedStatement pst = StartWin.conn.prepareStatement(query);
-            pst.setString(1, tipo);
-            pst.setLong(2, codigoBarras);
-            ResultSet rs = pst.executeQuery();
-            
-            while (rs.next()) {
-                int idUsuario = rs.getInt("Id_Usuario");
-                int cantidad = rs.getInt("Cantidad");
-                transaccionesPorUsuario.put(idUsuario, cantidad);
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return transaccionesPorUsuario;
-    }
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Configurar tipos de productos
         ObservableList<String> tipos = MainController.getTiposProductos();
         
         FilteredList<String> filteredItems = new FilteredList<>(tipos, p -> true);
         tipoProducto.setItems(filteredItems);
         
+        // Cargar datos del producto a modificar
         tipoProducto.getEditor().setText(StorageSharer.itemStorage.get(0));
         codigoBarrasProducto.setText(StorageSharer.itemStorage.get(1));
         nombreProducto.setText(StorageSharer.itemStorage.get(2));
         emisionesProducto.setText(StorageSharer.itemStorage.get(3));
-        materialesProducto.setText(StorageSharer.itemStorage.get(4));
+        
+        // Configurar materiales (lista fija) y seleccionar el actual
+        ObservableList<String> materiales = FXCollections.observableArrayList(StartWin.getMateriales());
+        FXCollections.sort(materiales);
+        materialesProducto.setItems(materiales);
+        
+        String materialActual = StorageSharer.itemStorage.get(4);
+        if (materialActual != null && !materialActual.trim().isEmpty()) {
+            materialesProducto.setValue(materialActual);
+        }
         
         tipoProducto.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
             final String selected = tipoProducto.getSelectionModel().getSelectedItem();
@@ -217,6 +208,34 @@ public class ModProducto implements Initializable {
         });
     }
 
+    // Método para obtener las transacciones por usuario para un producto específico
+    private Map<Integer, Integer> obtenerTransaccionesPorUsuario(String tipo, long codigoBarras) {
+        Map<Integer, Integer> transaccionesPorUsuario = new HashMap<>();
+        
+        try {
+            String query = "SELECT Id_Usuario, COUNT(*) as Cantidad " +
+                          "FROM Recicla " +
+                          "WHERE Tipo = ? AND Numero_barras = ? " +
+                          "GROUP BY Id_Usuario";
+            
+            PreparedStatement pst = StartWin.conn.prepareStatement(query);
+            pst.setString(1, tipo);
+            pst.setLong(2, codigoBarras);
+            ResultSet rs = pst.executeQuery();
+            
+            while (rs.next()) {
+                int idUsuario = rs.getInt("Id_Usuario");
+                int cantidad = rs.getInt("Cantidad");
+                transaccionesPorUsuario.put(idUsuario, cantidad);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return transaccionesPorUsuario;
+    }
+
     private static boolean checkAlert = false;
     private static String alertMessage = "";
 
@@ -225,7 +244,6 @@ public class ModProducto implements Initializable {
         
         ArrayList<TextField> camposTexto = new ArrayList<>();
         camposTexto.add(nombreProducto);
-        camposTexto.add(materialesProducto);
 
         for(TextField campo : camposTexto) {
             if(campo.getText().contains("@") || campo.getText().contains("?") || 
@@ -255,6 +273,13 @@ public class ModProducto implements Initializable {
             alertMessage = "El tipo contiene caracteres inválidos o está vacío";
             return;
         }
+        
+        // Validar que se haya seleccionado un material
+        if(materialesProducto.getValue() == null || materialesProducto.getValue().trim().isEmpty()) {
+            checkAlert = true;
+            alertMessage = "Debes seleccionar un material de la lista";
+            return;
+        }
 
         try {
             Long.parseLong(codigoBarrasProducto.getText().trim());
@@ -280,7 +305,7 @@ public class ModProducto implements Initializable {
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
             a.setHeaderText("Error en los campos");
-            a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- El código de barras es numérico\n- Las emisiones son numéricas\n- No uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\");
+            a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- El código de barras es numérico\n- Las emisiones son numéricas\n- No uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\\n- Selecciona un material de la lista");
             a.showAndWait();
             ret = true;
         }
