@@ -4,10 +4,10 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ResourceBundle;
 
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -71,7 +71,6 @@ public class SettingsController implements Initializable {
             return;
         }
         
-        // Verificar si el nombre ya existe (excepto para el usuario actual)
         try {
             String query = "SELECT COUNT(*) FROM Usuarios WHERE Nombre = ? AND Id_Usuario != ?";
             PreparedStatement pst = StartWin.conn.prepareStatement(query);
@@ -89,27 +88,30 @@ public class SettingsController implements Initializable {
             return;
         }
         
-        // Guardar cambios en el lote de SQL
-        SQLstatementStorage.storeStatement(
-            "UPDATE Usuarios SET Nombre = '" + nuevoNombre + "' WHERE Id_Usuario = " + idUsuario
-        );
-        
-        Alert exito = new Alert(AlertType.INFORMATION);
-        exito.setHeaderText("Cambios guardados");
-        exito.setContentText("Los cambios se guardarán cuando pulses 'Save' en la ventana principal.");
-        exito.showAndWait();
-        
-        kill(event);
+        try {
+            Statement stmt = StartWin.conn.createStatement();
+            stmt.executeUpdate(
+                "UPDATE Usuarios SET Nombre = '" + nuevoNombre + "' WHERE Id_Usuario = " + idUsuario
+            );
+            
+            Alert exito = new Alert(AlertType.INFORMATION);
+            exito.setHeaderText("Cambios guardados");
+            exito.setContentText("Los cambios se han guardado correctamente.");
+            exito.showAndWait();
+            
+            kill(event);
+        } catch (Exception e) {
+            mostrarError("Error al guardar", "No se pudieron guardar los cambios: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
     void alternarMostrarTap(ActionEvent event) {
         if (tapVisible) {
-            // Ocultar TAP
             txtFld_tap.setText(ocultarTap(tapOriginal));
             btn_mostrarTap.setText("Mostrar");
         } else {
-            // Mostrar TAP
             txtFld_tap.setText(tapOriginal);
             btn_mostrarTap.setText("Ocultar");
         }
@@ -158,7 +160,6 @@ public class SettingsController implements Initializable {
         if (tap == null || tap.isEmpty() || tap.equals("No asignado")) {
             return tap;
         }
-        // Reemplazar todos los caracteres por asteriscos
         return tap.replaceAll(".", "*");
     }
 

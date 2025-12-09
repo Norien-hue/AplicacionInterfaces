@@ -1,12 +1,12 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
 import javafx.application.Platform;
@@ -83,24 +83,33 @@ public class ModUser implements Initializable {
             int tap = Integer.parseInt(tapModUsuario.getText().trim());
             float emisiones = Float.parseFloat(emisionesModUsuario.getText().trim());
             
-            SQLstatementStorage.storeStatement(
-                "UPDATE Usuarios SET " +
-                "Nombre = '" + nombre + "', " +
-                "Permisos = '" + role + "', " +
-                "TAP = '" + tap + "', " +
-                "Emisiones_Reducidas = '" + emisiones + "' " +
-                "WHERE Id_Usuario = '" + id + "'"
-            );
-            
-            StorageSharer.itemToMod = new Usuario(id, emisiones, role, nombre, tap);
-            
-            MainController.modItem();
-            
-            StorageSharer.itemToMod = null;
-            StorageSharer.itemPre = null;
-            StorageSharer.itemStorage.clear();
-            
-            ((Stage)btn_cancelar.getScene().getWindow()).close();
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                stmt.executeUpdate(
+                    "UPDATE Usuarios SET " +
+                    "Nombre = '" + nombre + "', " +
+                    "Permisos = '" + role + "', " +
+                    "TAP = '" + tap + "', " +
+                    "Emisiones_Reducidas = '" + emisiones + "' " +
+                    "WHERE Id_Usuario = '" + id + "'"
+                );
+                
+                StorageSharer.itemToMod = new Usuario(id, emisiones, role, nombre, tap);
+                
+                MainController.modItem();
+                
+                StorageSharer.itemToMod = null;
+                StorageSharer.itemPre = null;
+                StorageSharer.itemStorage.clear();
+                
+                ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (Exception e) {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setHeaderText("Error al modificar");
+                a.setContentText("No se pudo modificar el usuario: " + e.getMessage());
+                a.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
 

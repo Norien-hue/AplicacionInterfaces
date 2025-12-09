@@ -4,7 +4,6 @@ import com.javafx.model.Producto;
 import com.javafx.model.Transaccion;
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
 import io.fair_acc.chartfx.XYChart;
@@ -66,12 +65,10 @@ public class MainController implements Initializable {
     @FXML private Button btn_transactions;
     @FXML private Button btn_users;
     
-    // Botones de borrar
     @FXML private Button btn_borrarProducto;
     @FXML private Button btn_borrarTransaccion;
     @FXML private Button btn_borrarUsuario;
     
-    // Botones de modificar
     @FXML private Button btn_modProducto;
     @FXML private Button btn_modTransaccion;
     @FXML private Button btn_modUsuario;
@@ -81,14 +78,12 @@ public class MainController implements Initializable {
     @FXML private AnchorPane tab_transaccion;
     @FXML private AnchorPane tab_usuario;
     
-    // Labels para la pestaña personal
     @FXML private Label nombreBD;
     @FXML private Label saldoBD;
     @FXML private Label rolBD;
     
     @FXML private Button btn_generarTap;
 
-    // TableView y columnas para Productos
     @FXML 
     private TableView<Producto> tablaProductos;
 
@@ -107,7 +102,6 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<Producto, String> colMaterialProducto;
 
-    // TableView y columnas para Transacciones
     @FXML 
     private TableView<Transaccion> tablaTransacciones;
 
@@ -126,7 +120,6 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<Transaccion, Time> colHoraTransaccion;
 
-    // TableView y columnas para Usuarios
     @FXML 
     private TableView<Usuario> tablaUsuario;
 
@@ -147,10 +140,15 @@ public class MainController implements Initializable {
 
     private Connection conn;
 
+    private static MainController instance;
     
+    public static MainController getInstance() {
+        return instance;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        instance = this;
         conn = StartWin.conn;
         
         cargarDatosUsuarioActual();
@@ -167,12 +165,14 @@ public class MainController implements Initializable {
         
         configurarTooltips();
         
-        
         tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab != null && newTab.getText().equals("Gráfico de Emisiones")) {
                 Platform.runLater(() -> {inicializarGrafico();});
             }
         });
+        
+        btn_save.setVisible(false);
+        btn_save.setDisable(true);
     }
 
     private void inicializarGrafico() {
@@ -198,7 +198,6 @@ public class MainController implements Initializable {
         DefaultErrorDataSet dataSet = new DefaultErrorDataSet("Emisiones por Usuario");
         
         if (tablaUsuarioObservable != null && !tablaUsuarioObservable.isEmpty()) {
-            // Crear un mapa de índices a nombres de usuario
             final Map<Integer, String> nombresPorIndice = new java.util.HashMap<>();
             
             yAxis.setAutoRanging(true);
@@ -221,8 +220,6 @@ public class MainController implements Initializable {
                 index++;
             }
             
-            //podria haber hecho una clase que implementara esto? si,
-            //pero me es mas rapido hacer esto ademas de que asi me queda claro lo que hace
             SimpleFormatter formatter = new SimpleFormatter(xAxis) {
                 @Override
                 public String toString(Number object) {
@@ -302,7 +299,6 @@ public class MainController implements Initializable {
             btn_transactions.setDisable(false);
             btn_save.setDisable(false);
             
-
             btn_addProducto.setDisable(false);
             btn_borrarProducto.setDisable(false);
             btn_modProducto.setDisable(false);
@@ -385,31 +381,6 @@ public class MainController implements Initializable {
 
     @FXML
     void saveClicked(ActionEvent event) {
-        if(SQLstatementStorage.preparedStatements.size()>0){
-        SQLstatementStorage.executeStatements();
-
-            Alert a = new Alert(AlertType.INFORMATION);
-            a.setHeaderText("Cambios guardados");
-            a.setContentText("Se ha guardado correctamente los cambios");
-            a.showAndWait();
-
-            if (tablaProductos != null) tablaProductos.refresh();
-            if (tablaUsuario != null) tablaUsuario.refresh();
-            if (tablaTransacciones != null) tablaTransacciones.refresh();
-            
-            actualizarDatosUsuarioActualEnVista();
-
-            cargarDatosProductos();
-            cargarDatosTransacciones();
-            cargarDatosUsuarios();
-            
-            deseleccionarTodos();
-        }else{
-            Alert a = new Alert(AlertType.WARNING);
-            a.setHeaderText("No hay cambios");
-            a.setContentText("No se pudieron guardar cambios, no hay cambios");
-            a.showAndWait();
-        }
     }
 
     private void cargarDatosProductos() {
@@ -523,30 +494,11 @@ public class MainController implements Initializable {
 
     @FXML
     void logout(ActionEvent event) {
-        if(SQLstatementStorage.preparedStatements.size() > 0){
-            Alert a = new Alert(AlertType.CONFIRMATION);
-            a.setHeaderText("Cambios sin guardar");
-            a.setContentText("Tienes cambios sin guardar. ¿Deseas guardarlos antes de cerrar sesión?");
-            
-            Optional<ButtonType> botonPulsado = a.showAndWait();
-            
-            if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.OK)) {
-                SQLstatementStorage.executeStatements();
-                Alert info = new Alert(AlertType.INFORMATION);
-                info.setHeaderText("Cambios guardados");
-                info.setContentText("Los cambios han sido guardados. Cerrando sesión...");
-                info.showAndWait();
-            } else if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.CANCEL)) {
-                return;
-            }
-        }
-        
         id_user = 0;
         esAdministrador = false;
         StorageSharer.itemStorage.clear();
         StorageSharer.itemToMod = null;
         StorageSharer.itemPre = null;
-        SQLstatementStorage.preparedStatements.clear();
         
         StartWin.mostrarLogin();
     }
@@ -653,9 +605,19 @@ public class MainController implements Initializable {
         
         Producto e = tablaProductos.getSelectionModel().getSelectedItem();
         if(e!=null){
-            SQLstatementStorage.storeStatement("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
-            tablaProductosObservable.remove(e);
-            deseleccionarTodos();
+            try {
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
+                tablaProductosObservable.remove(e);
+                cargarDatosProductos();
+                deseleccionarTodos();
+            } catch (Exception ex) {
+                Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setHeaderText("Error al eliminar");
+                alerta.setContentText("No se pudo eliminar el producto: " + ex.getMessage());
+                alerta.showAndWait();
+                ex.printStackTrace();
+            }
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -673,23 +635,34 @@ public class MainController implements Initializable {
         
         Transaccion e = tablaTransacciones.getSelectionModel().getSelectedItem();
         if(e!=null){
-            float emisionesProducto = obtenerEmisionesProducto(e.getTipo(), e.getNumeroBarras());
-            
-            SQLstatementStorage.storeStatement("DELETE FROM Recicla WHERE Fecha = '"+e.getFecha()+"' AND Hora = '"+ e.getHora()+"'");
-            
-            SQLstatementStorage.storeStatement(
-                "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - " 
-                + emisionesProducto + " WHERE Id_Usuario = " + e.getIdUsuario()
-            );
-            
-            actualizarEmisionesUsuarioObservable(e.getIdUsuario(), -emisionesProducto);
-            
-            if (e.getIdUsuario() == id_user) {
-                cargarDatosUsuarioActual();
+            try {
+                Statement stmt = conn.createStatement();
+                float emisionesProducto = obtenerEmisionesProducto(e.getTipo(), e.getNumeroBarras());
+                
+                stmt.executeUpdate("DELETE FROM Recicla WHERE Fecha = '"+e.getFecha()+"' AND Hora = '"+ e.getHora()+"'");
+                
+                stmt.executeUpdate(
+                    "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - " 
+                    + emisionesProducto + " WHERE Id_Usuario = " + e.getIdUsuario()
+                );
+                
+                actualizarEmisionesUsuarioObservable(e.getIdUsuario(), -emisionesProducto);
+                
+                if (e.getIdUsuario() == id_user) {
+                    cargarDatosUsuarioActual();
+                }
+                
+                tablaTransaccionesObservable.remove(e);
+                cargarDatosTransacciones();
+                cargarDatosUsuarios();
+                deseleccionarTodos();
+            } catch (Exception ex) {
+                Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setHeaderText("Error al eliminar");
+                alerta.setContentText("No se pudo eliminar la transacción: " + ex.getMessage());
+                alerta.showAndWait();
+                ex.printStackTrace();
             }
-            
-            tablaTransaccionesObservable.remove(e);
-            deseleccionarTodos();
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -734,9 +707,19 @@ public class MainController implements Initializable {
         
         Usuario e = tablaUsuario.getSelectionModel().getSelectedItem();
         if(e!=null){
-            SQLstatementStorage.storeStatement("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
-            tablaUsuarioObservable.remove(e);
-            deseleccionarTodos();
+            try {
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
+                tablaUsuarioObservable.remove(e);
+                cargarDatosUsuarios();
+                deseleccionarTodos();
+            } catch (Exception ex) {
+                Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setHeaderText("Error al eliminar");
+                alerta.setContentText("No se pudo eliminar el usuario: " + ex.getMessage());
+                alerta.showAndWait();
+                ex.printStackTrace();
+            }
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
             alerta.setHeaderText("Error de seleccion");
@@ -792,7 +775,6 @@ public class MainController implements Initializable {
     public static int obtenerIdUsuarioDesdeBusqueda(String busqueda) {
         if (busqueda == null || busqueda.trim().isEmpty()) return -1;
         
-        // Formato: "ID - Nombre"
         String[] partes = busqueda.split(" - ");
         if (partes.length > 0) {
             try {
@@ -828,6 +810,39 @@ public class MainController implements Initializable {
                     tablaTransaccionesObservable.set(i,(Transaccion) o);
                 }
             }
+        }
+        // Actualizar las vistas
+        MainController controller = getInstance();
+        if (controller != null) {
+            if (o instanceof Usuario) {
+                Usuario usuarioModificado = (Usuario) o;
+                controller.tablaUsuario.refresh();
+                controller.cargarDatosUsuarios();
+                // Si es el usuario actual, actualizar también la vista personal
+                if (usuarioModificado.getIdUsuario() == id_user) {
+                    controller.actualizarDatosUsuarioActualEnVista();
+                }
+            } else if (o instanceof Producto) {
+                controller.tablaProductos.refresh();
+                controller.cargarDatosProductos();
+            } else if (o instanceof Transaccion) {
+                Transaccion transaccionModificada = (Transaccion) o;
+                controller.tablaTransacciones.refresh();
+                controller.cargarDatosTransacciones();
+                controller.cargarDatosUsuarios();
+                // Si la transacción es del usuario actual, actualizar la vista personal
+                if (transaccionModificada.getIdUsuario() == id_user) {
+                    controller.actualizarDatosUsuarioActualEnVista();
+                }
+            }
+        }
+    }
+
+    // Método público para actualizar la vista personal desde otros controladores
+    public static void actualizarVistaPersonal() {
+        MainController controller = getInstance();
+        if (controller != null) {
+            controller.actualizarDatosUsuarioActualEnVista();
         }
     }
 
@@ -892,20 +907,33 @@ public class MainController implements Initializable {
         Random random = new Random();
         int nuevoTap = 100000 + random.nextInt(900000);
         
-        Alert alerta = new Alert(AlertType.INFORMATION);
-        alerta.setHeaderText("Nuevo TAP generado");
-        alerta.setContentText("Tu nuevo número TAP es: " + nuevoTap + "\n\nRecuerda guardar los cambios.");
-        alerta.showAndWait();
-        
-        SQLstatementStorage.storeStatement(
-            "UPDATE Usuarios SET TAP = " + nuevoTap + " WHERE Id_Usuario = " + id_user
-        );
-        
-        for (Usuario usuario : tablaUsuarioObservable) {
-            if (usuario.getIdUsuario() == id_user) {
-                usuario.setTap(nuevoTap);
-                break;
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(
+                "UPDATE Usuarios SET TAP = " + nuevoTap + " WHERE Id_Usuario = " + id_user
+            );
+            
+            for (Usuario usuario : tablaUsuarioObservable) {
+                if (usuario.getIdUsuario() == id_user) {
+                    usuario.setTap(nuevoTap);
+                    break;
+                }
             }
+            
+            cargarDatosUsuarios();
+            actualizarDatosUsuarioActualEnVista();
+            
+            Alert alerta = new Alert(AlertType.INFORMATION);
+            alerta.setHeaderText("Nuevo TAP generado");
+            alerta.setContentText("Tu nuevo número TAP es: " + nuevoTap);
+            alerta.showAndWait();
+            
+        } catch (Exception e) {
+            Alert alerta = new Alert(AlertType.ERROR);
+            alerta.setHeaderText("Error al generar TAP");
+            alerta.setContentText("No se pudo generar el nuevo TAP: " + e.getMessage());
+            alerta.showAndWait();
+            e.printStackTrace();
         }
     }
     

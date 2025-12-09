@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +13,6 @@ import java.util.ResourceBundle;
 
 import com.javafx.model.Transaccion;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -46,7 +46,7 @@ public class Escanear implements Initializable {
     private TextField emisionesField;
     
     @FXML
-    private TextField tapField;  // Nuevo campo para el TAP
+    private TextField tapField;
     
     @FXML
     void kill(ActionEvent event) {
@@ -56,7 +56,6 @@ public class Escanear implements Initializable {
     @FXML
     void crearTransaccionEscaner(ActionEvent event) {
         if(!launchAlertsEscanear()) {
-            // Primero validar el TAP
             int tapIngresado;
             try {
                 tapIngresado = Integer.parseInt(tapField.getText().trim());
@@ -68,7 +67,6 @@ public class Escanear implements Initializable {
                 return;
             }
             
-            // Verificar que el TAP coincida con el del usuario actual
             int tapUsuario = obtenerTapUsuarioActual();
             if (tapUsuario == -1) {
                 Alert alert = new Alert(AlertType.ERROR);
@@ -111,48 +109,51 @@ public class Escanear implements Initializable {
             
             int idUsuario = MainController.id_user;
             
-            // Guardar en el storage de SQL
-            SQLstatementStorage.storeStatement(
-                "INSERT INTO Recicla (Id_Usuario, Tipo, Numero_barras, Fecha, Hora) VALUES ('" 
-                + idUsuario + "', '" 
-                + tipo + "', '" 
-                + codigo + "', '" 
-                + fecha + "', '" 
-                + hora + "')"
-            );
-            
-            SQLstatementStorage.storeStatement(
-                "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
-                + emisionesProducto + " WHERE Id_Usuario = " + idUsuario
-            );
-            
-            // Actualizar en las listas observables
-            MainController.actualizarEmisionesUsuarioObservable(idUsuario, emisionesProducto);
-            
-            Transaccion nuevaTransaccion = new Transaccion(idUsuario, tipo, codigo, fecha, hora);
-            if (MainController.tablaTransaccionesObservable != null) {
-                MainController.tablaTransaccionesObservable.add(nuevaTransaccion);
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                stmt.executeUpdate(
+                    "INSERT INTO Recicla (Id_Usuario, Tipo, Numero_barras, Fecha, Hora) VALUES ('" 
+                    + idUsuario + "', '" 
+                    + tipo + "', '" 
+                    + codigo + "', '" 
+                    + fecha + "', '" 
+                    + hora + "')"
+                );
+                
+                stmt.executeUpdate(
+                    "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
+                    + emisionesProducto + " WHERE Id_Usuario = " + idUsuario
+                );
+                
+                MainController.actualizarEmisionesUsuarioObservable(idUsuario, emisionesProducto);
+                
+                Transaccion nuevaTransaccion = new Transaccion(idUsuario, tipo, codigo, fecha, hora);
+                if (MainController.tablaTransaccionesObservable != null) {
+                    MainController.tablaTransaccionesObservable.add(nuevaTransaccion);
+                }
+                
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setHeaderText("Escaneo completado");
+                alert.setContentText("Producto escaneado correctamente.\n" +
+                                   "Se han añadido " + emisionesProducto + " kg CO₂ a tu cuenta.");
+                alert.showAndWait();
+                
+                ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (Exception e) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setHeaderText("Error al escanear");
+                alert.setContentText("No se pudo registrar el escaneo: " + e.getMessage());
+                alert.showAndWait();
+                e.printStackTrace();
             }
-            
-            // Mostrar confirmación
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText("Escaneo completado");
-            alert.setContentText("Producto escaneado correctamente.\n" +
-                               "Se han añadido " + emisionesProducto + " kg CO₂ a tu cuenta.\n\n" +
-                               "Recuerda guardar los cambios.");
-            alert.showAndWait();
-            
-            ((Stage)btn_cancelar.getScene().getWindow()).close();
         }
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Cargar tipos de productos
         ObservableList<String> tipos = MainController.getTiposProductos();
         tipoProducto.setItems(tipos);
         
-        // Cargar códigos de barras
         ObservableList<Long> codigosBarrasLong = MainController.getCodigosBarras();
         ObservableList<String> codigosBarrasStr = FXCollections.observableArrayList();
         for (Long codigo : codigosBarrasLong) {
@@ -163,15 +164,12 @@ public class Escanear implements Initializable {
         codigoBarras.setItems(filteredCodigos);
         configurarAutocompletado(codigoBarras, filteredCodigos);
         
-        // Campo de emisiones no editable
         emisionesField.setEditable(false);
         emisionesField.setText("0.0");
         
-        // Escuchar cambios para actualizar emisiones
         tipoProducto.valueProperty().addListener((obs, oldVal, newVal) -> actualizarEmisiones());
         codigoBarras.valueProperty().addListener((obs, oldVal, newVal) -> actualizarEmisiones());
         
-        // Configurar icono
         Platform.runLater(() -> {
             ((Stage)btn_cancelar.getScene().getWindow()).getIcons().add(StartWin.icon);
         });

@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,7 +14,6 @@ import java.util.ResourceBundle;
 
 import com.javafx.model.Transaccion;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
 import javafx.application.Platform;
@@ -103,51 +103,59 @@ public class ModTransaccion implements Initializable {
             LocalTime localTime = LocalTime.of(hora, minuto, segundo);
             Time horaTime = Time.valueOf(localTime);
             
-            // Valores originales para el WHERE
             String fechaOriginal = StorageSharer.itemStorage.get(3);
             String horaOriginal = StorageSharer.itemStorage.get(4);
             
-            
-            if(idUsuario == idUsuarioOriginal) {
-                float diferencia = nuevasEmisiones - emisionesOriginales;
-                if(diferencia != 0) {
-                    SQLstatementStorage.storeStatement(
-                        "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
-                        + diferencia + " WHERE Id_Usuario = " + idUsuario
-                    );
-                    MainController.actualizarEmisionesUsuarioObservable(idUsuario, diferencia);
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                
+                if(idUsuario == idUsuarioOriginal) {
+                    float diferencia = nuevasEmisiones - emisionesOriginales;
+                    if(diferencia != 0) {
+                        stmt.executeUpdate(
+                            "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
+                            + diferencia + " WHERE Id_Usuario = " + idUsuario
+                        );
+                        MainController.actualizarEmisionesUsuarioObservable(idUsuario, diferencia);
+                    }
                 }
-            }
-            else {
-                SQLstatementStorage.storeStatement(
-                    "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - " 
-                    + emisionesOriginales + " WHERE Id_Usuario = " + idUsuarioOriginal
+                else {
+                    stmt.executeUpdate(
+                        "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - " 
+                        + emisionesOriginales + " WHERE Id_Usuario = " + idUsuarioOriginal
+                    );
+                    
+                    stmt.executeUpdate(
+                        "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
+                        + nuevasEmisiones + " WHERE Id_Usuario = " + idUsuario
+                    );
+                    
+                    MainController.actualizarEmisionesUsuarioObservable(idUsuarioOriginal, -emisionesOriginales);
+                    MainController.actualizarEmisionesUsuarioObservable(idUsuario, nuevasEmisiones);
+                }
+                
+                stmt.executeUpdate(
+                    "UPDATE Recicla SET Id_Usuario = '" + idUsuario + "', " +
+                    "Tipo = '" + tipo + "', " +
+                    "Numero_barras = '" + codigoBarras + "', " +
+                    "Fecha = '" + fecha + "', " +
+                    "Hora = '" + horaTime + "' " +
+                    "WHERE Fecha = '" + fechaOriginal + "' AND Hora = '" + horaOriginal + "'"
                 );
                 
-                SQLstatementStorage.storeStatement(
-                    "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
-                    + nuevasEmisiones + " WHERE Id_Usuario = " + idUsuario
-                );
+                StorageSharer.itemToMod = new Transaccion(idUsuario, tipo, codigoBarras, fecha, horaTime);
+                MainController.modItem();
                 
-                MainController.actualizarEmisionesUsuarioObservable(idUsuarioOriginal, -emisionesOriginales);
-                MainController.actualizarEmisionesUsuarioObservable(idUsuario, nuevasEmisiones);
+                StorageSharer.itemToMod = null;
+                StorageSharer.itemStorage.clear();
+                ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (Exception e) {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setHeaderText("Error al modificar");
+                a.setContentText("No se pudo modificar la transacción: " + e.getMessage());
+                a.showAndWait();
+                e.printStackTrace();
             }
-            
-            SQLstatementStorage.storeStatement(
-                "UPDATE Recicla SET Id_Usuario = '" + idUsuario + "', " +
-                "Tipo = '" + tipo + "', " +
-                "Numero_barras = '" + codigoBarras + "', " +
-                "Fecha = '" + fecha + "', " +
-                "Hora = '" + horaTime + "' " +
-                "WHERE Fecha = '" + fechaOriginal + "' AND Hora = '" + horaOriginal + "'"
-            );
-            
-            StorageSharer.itemToMod = new Transaccion(idUsuario, tipo, codigoBarras, fecha, horaTime);
-            MainController.modItem();
-            
-            StorageSharer.itemToMod = null;
-            StorageSharer.itemStorage.clear();
-            ((Stage)btn_cancelar.getScene().getWindow()).close();
         }
     }
 

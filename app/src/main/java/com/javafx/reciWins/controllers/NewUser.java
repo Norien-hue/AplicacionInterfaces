@@ -1,12 +1,12 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -57,25 +57,34 @@ public class NewUser implements Initializable {
             
             String hashContrasenia = "$2y$10$" + contrasenia.hashCode(); 
             
-            SQLstatementStorage.storeStatement(
-                "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('" 
-                + nombre + "', '" 
-                + hashContrasenia + "', '" 
-                + role + "', " 
-                + "0, " 
-                + "NULL)"
-            );
-            
-            Usuario nuevoUsuario = new Usuario(
-                0,
-                0.0f,
-                role,
-                nombre,
-                0
-            );
-            MainController.tablaUsuarioObservable.add(nuevoUsuario);
-            
-            ((Stage)btn_cancelar.getScene().getWindow()).close();
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                stmt.executeUpdate(
+                    "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('" 
+                    + nombre + "', '" 
+                    + hashContrasenia + "', '" 
+                    + role + "', " 
+                    + "0, " 
+                    + "NULL)"
+                );
+                
+                Usuario nuevoUsuario = new Usuario(
+                    0,
+                    0.0f,
+                    role,
+                    nombre,
+                    0
+                );
+                MainController.tablaUsuarioObservable.add(nuevoUsuario);
+                
+                ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (Exception e) {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setHeaderText("Error al crear");
+                a.setContentText("No se pudo crear el usuario: " + e.getMessage());
+                a.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
 
@@ -110,7 +119,6 @@ public class NewUser implements Initializable {
             return;
         }
         
-
         if(!contraseniaUsuario.getText().equals(repetirContraseniaUsuario.getText())) {
             checkAlert = true;
             alertMessage = "Las contraseñas no coinciden.";
@@ -156,9 +164,7 @@ public class NewUser implements Initializable {
             a.setHeaderText("Error en los campos");
             a.setContentText(alertMessage);
             
-            // Hacer la ventana redimensionable para que se ajuste al contenido
             a.setResizable(true);
-            // Ajustar el tamaño del diálogo para que muestre bien el mensaje
             a.getDialogPane().setPrefSize(400, 150);
             
             a.showAndWait();

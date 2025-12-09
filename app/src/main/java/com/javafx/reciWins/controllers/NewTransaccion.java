@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,7 +14,6 @@ import java.util.ResourceBundle;
 
 import com.javafx.model.Transaccion;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -94,27 +94,35 @@ public class NewTransaccion implements Initializable {
             LocalTime localTime = LocalTime.of(hora, minuto, segundo);
             Time horaTime = Time.valueOf(localTime);
             
-
-            SQLstatementStorage.storeStatement(
-                "INSERT INTO Recicla (Id_Usuario, Tipo, Numero_barras, Fecha, Hora) VALUES ('" 
-                + idUsuario + "', '" 
-                + tipo + "', '" 
-                + codigoBarras + "', '" 
-                + fecha + "', '" 
-                + horaTime + "')"
-            );
-            
-            SQLstatementStorage.storeStatement(
-                "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
-                + emisionesProducto + " WHERE Id_Usuario = " + idUsuario
-            );
-            
-            MainController.actualizarEmisionesUsuarioObservable(idUsuario, emisionesProducto);
-            
-            Transaccion nuevaTransaccion = new Transaccion(idUsuario, tipo, codigoBarras, fecha, horaTime);
-            MainController.tablaTransaccionesObservable.add(nuevaTransaccion);
-            
-            ((Stage)btn_cancelar.getScene().getWindow()).close();
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                stmt.executeUpdate(
+                    "INSERT INTO Recicla (Id_Usuario, Tipo, Numero_barras, Fecha, Hora) VALUES ('" 
+                    + idUsuario + "', '" 
+                    + tipo + "', '" 
+                    + codigoBarras + "', '" 
+                    + fecha + "', '" 
+                    + horaTime + "')"
+                );
+                
+                stmt.executeUpdate(
+                    "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
+                    + emisionesProducto + " WHERE Id_Usuario = " + idUsuario
+                );
+                
+                MainController.actualizarEmisionesUsuarioObservable(idUsuario, emisionesProducto);
+                
+                Transaccion nuevaTransaccion = new Transaccion(idUsuario, tipo, codigoBarras, fecha, horaTime);
+                MainController.tablaTransaccionesObservable.add(nuevaTransaccion);
+                
+                ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (Exception e) {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setHeaderText("Error al crear");
+                a.setContentText("No se pudo crear la transacción: " + e.getMessage());
+                a.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
 

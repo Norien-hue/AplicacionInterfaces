@@ -4,10 +4,10 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ResourceBundle;
 
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -47,17 +47,26 @@ public class ChangePasswd implements Initializable {
             String nuevaContrasenia = passwdNueva.getText();
             String hashNuevaContrasenia = "$2y$10$" + nuevaContrasenia.hashCode();
             
-            SQLstatementStorage.storeStatement(
-                "UPDATE Usuarios SET Hash_Contraseña = '" + hashNuevaContrasenia + 
-                "' WHERE Id_Usuario = " + MainController.id_user
-            );
-            
-            Alert exito = new Alert(AlertType.INFORMATION);
-            exito.setHeaderText("Contraseña cambiada");
-            exito.setContentText("La contraseña se cambiará cuando pulses 'Save' en la ventana principal.");
-            exito.showAndWait();
-            
-            kill(event);
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                stmt.executeUpdate(
+                    "UPDATE Usuarios SET Hash_Contraseña = '" + hashNuevaContrasenia + 
+                    "' WHERE Id_Usuario = " + MainController.id_user
+                );
+                
+                Alert exito = new Alert(AlertType.INFORMATION);
+                exito.setHeaderText("Contraseña cambiada");
+                exito.setContentText("La contraseña se ha cambiado correctamente.");
+                exito.showAndWait();
+                
+                kill(event);
+            } catch (Exception e) {
+                Alert error = new Alert(AlertType.ERROR);
+                error.setHeaderText("Error al cambiar contraseña");
+                error.setContentText("No se pudo cambiar la contraseña: " + e.getMessage());
+                error.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
 
@@ -69,7 +78,6 @@ public class ChangePasswd implements Initializable {
     }
 
     private boolean validarCambioContraseña() {
-        // Verificar que la contraseña actual sea correcta
         try {
             String query = "SELECT Hash_Contraseña FROM Usuarios WHERE Id_Usuario = ?";
             PreparedStatement pst = StartWin.conn.prepareStatement(query);
@@ -91,7 +99,6 @@ public class ChangePasswd implements Initializable {
             return false;
         }
         
-        // Validar nueva contraseña
         if(passwdNueva.getText().isEmpty() || passwdRepetida.getText().isEmpty()) {
             mostrarError("Campos vacíos", "Debes completar todos los campos.");
             return false;

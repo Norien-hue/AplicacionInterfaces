@@ -1,12 +1,12 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Producto;
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
 import javafx.application.Platform;
@@ -61,45 +61,49 @@ public class ModProducto implements Initializable {
             float emisiones = Float.parseFloat(emisionesProducto.getText().trim());
             String material = materialesProducto.getText().trim();
             
-            // Obtener valores originales para el WHERE
             String tipoOriginal = StorageSharer.itemStorage.get(0);
             String codigoOriginal = StorageSharer.itemStorage.get(1);
             
-            SQLstatementStorage.storeStatement(
-                "UPDATE Productos SET Tipo = '" + tipo + "', " +
-                "Numero_barras = '" + codigoBarras + "', " +
-                "Nombre = '" + nombre + "', " +
-                "Emisiones_Reducibles = '" + emisiones + "', " +
-                "Material = '" + material + "' " +
-                "WHERE Tipo = '" + tipoOriginal + "' AND Numero_barras = '" + codigoOriginal + "'"
-            );
-            
-            StorageSharer.itemToMod = new Producto(tipo, codigoBarras, nombre, emisiones, material);
-            MainController.modItem();
-            
-            StorageSharer.itemToMod = null;
-            StorageSharer.itemStorage.clear();
-            ((Stage)btn_cancelar.getScene().getWindow()).close();
+            try {
+                Statement stmt = StartWin.conn.createStatement();
+                stmt.executeUpdate(
+                    "UPDATE Productos SET Tipo = '" + tipo + "', " +
+                    "Numero_barras = '" + codigoBarras + "', " +
+                    "Nombre = '" + nombre + "', " +
+                    "Emisiones_Reducibles = '" + emisiones + "', " +
+                    "Material = '" + material + "' " +
+                    "WHERE Tipo = '" + tipoOriginal + "' AND Numero_barras = '" + codigoOriginal + "'"
+                );
+                
+                StorageSharer.itemToMod = new Producto(tipo, codigoBarras, nombre, emisiones, material);
+                MainController.modItem();
+                
+                StorageSharer.itemToMod = null;
+                StorageSharer.itemStorage.clear();
+                ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (Exception e) {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setHeaderText("Error al modificar");
+                a.setContentText("No se pudo modificar el producto: " + e.getMessage());
+                a.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Cargar tipos de productos existentes
         ObservableList<String> tipos = MainController.getTiposProductos();
         
-        // Usar FilteredList para autocompletado
         FilteredList<String> filteredItems = new FilteredList<>(tipos, p -> true);
         tipoProducto.setItems(filteredItems);
         
-        // Cargar datos del producto seleccionado
         tipoProducto.getEditor().setText(StorageSharer.itemStorage.get(0));
         codigoBarrasProducto.setText(StorageSharer.itemStorage.get(1));
         nombreProducto.setText(StorageSharer.itemStorage.get(2));
         emisionesProducto.setText(StorageSharer.itemStorage.get(3));
         materialesProducto.setText(StorageSharer.itemStorage.get(4));
         
-        // Configurar autocompletado
         tipoProducto.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
             final String selected = tipoProducto.getSelectionModel().getSelectedItem();
             
@@ -118,7 +122,6 @@ public class ModProducto implements Initializable {
             }
         });
         
-        // Posicionar cursor al final al seleccionar
         tipoProducto.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 tipoProducto.getEditor().positionCaret(tipoProducto.getEditor().getText().length());
@@ -140,7 +143,6 @@ public class ModProducto implements Initializable {
         camposTexto.add(nombreProducto);
         camposTexto.add(materialesProducto);
 
-        // Validar campos de texto
         for(TextField campo : camposTexto) {
             if(campo.getText().contains("@") || campo.getText().contains("?") || 
                campo.getText().contains("=") || campo.getText().contains("'") || 
@@ -154,7 +156,6 @@ public class ModProducto implements Initializable {
             }
         }
         
-        // Validar que el tipo no esté vacío
         if(tipoProducto.getEditor().getText().contains("@") || 
            tipoProducto.getEditor().getText().contains("?") || 
            tipoProducto.getEditor().getText().contains("=") || 
