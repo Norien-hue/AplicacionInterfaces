@@ -55,13 +55,23 @@ public class ChangePasswd implements Initializable {
                 );
                 
                 Alert exito = new Alert(AlertType.INFORMATION);
+                exito.setOnShown(e -> {
+                    Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 exito.setHeaderText("Contraseña cambiada");
                 exito.setContentText("La contraseña se ha cambiado correctamente.");
                 exito.showAndWait();
+
+                
                 
                 kill(event);
             } catch (Exception e) {
                 Alert error = new Alert(AlertType.ERROR);
+                error.setOnShown(ex -> {
+                    Stage stage = (Stage) error.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 error.setHeaderText("Error al cambiar contraseña");
                 error.setContentText("No se pudo cambiar la contraseña: " + e.getMessage());
                 error.showAndWait();
@@ -127,9 +137,13 @@ public class ChangePasswd implements Initializable {
     }
 
     private void mostrarError(String titulo, String mensaje) {
-        Alert alerta = new Alert(AlertType.ERROR);
-        alerta.setHeaderText(titulo);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        Alert a = new Alert(AlertType.ERROR);
+        a.setOnShown(e -> {
+            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(StartWin.icon);
+        });
+        a.setHeaderText(titulo);
+        a.setContentText(mensaje);
+        a.showAndWait();
     }
 }

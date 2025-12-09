@@ -60,28 +60,40 @@ public class Escanear implements Initializable {
             try {
                 tapIngresado = Integer.parseInt(tapField.getText().trim());
             } catch (NumberFormatException e) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setHeaderText("TAP inválido");
-                alert.setContentText("El TAP debe ser un número de 6 dígitos.");
-                alert.showAndWait();
+                Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                a.setHeaderText("TAP inválido");
+                a.setContentText("El TAP debe ser un número de 6 dígitos.");
+                a.showAndWait();
                 return;
             }
             
             int tapUsuario = obtenerTapUsuarioActual();
             if (tapUsuario == -1) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setHeaderText("Error de usuario");
-                alert.setContentText("No se pudo verificar el usuario. Vuelve a iniciar sesión.");
-                alert.showAndWait();
+                Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(e -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                a.setHeaderText("Error de usuario");
+                a.setContentText("No se pudo verificar el usuario. Vuelve a iniciar sesión.");
+                a.showAndWait();
                 return;
             }
             
             if (tapIngresado != tapUsuario) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setHeaderText("TAP incorrecto");
-                alert.setContentText("El TAP ingresado no coincide con tu código personal.\n" +
+                Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(e -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                a.setHeaderText("TAP incorrecto");
+                a.setContentText("El TAP ingresado no coincide con tu código personal.\n" +
                                    "Verifica tu TAP en la pestaña Personal.");
-                alert.showAndWait();
+                a.showAndWait();
                 tapField.clear();
                 tapField.requestFocus();
                 return;
@@ -91,11 +103,15 @@ public class Escanear implements Initializable {
             long codigo = Long.parseLong(codigoBarras.getValue());
             
             if(!productoExisteEnBD(tipo, codigo)) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setHeaderText("Producto no encontrado");
-                alert.setContentText("El producto con tipo '" + tipo + "' y código '" + codigo + "' no existe.\n" +
+                Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(e -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                a.setHeaderText("Producto no encontrado");
+                a.setContentText("El producto con tipo '" + tipo + "' y código '" + codigo + "' no existe.\n" +
                                    "Debes crear el producto primero en la sección de Productos.");
-                alert.showAndWait();
+                a.showAndWait();
                 return;
             }
             
@@ -136,6 +152,10 @@ public class Escanear implements Initializable {
                 MainController.actualizarVistasDesdeExterno();
                 
                 Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setOnShown(e -> {
+                    Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 alert.setHeaderText("Escaneo completado");
                 alert.setContentText("Producto escaneado correctamente.\n" +
                                    "Se han añadido " + emisionesProducto + " kg CO₂ a tu cuenta.");
@@ -144,6 +164,10 @@ public class Escanear implements Initializable {
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert alert = new Alert(AlertType.ERROR);
+                alert.setOnShown(ex -> {
+                    Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 alert.setHeaderText("Error al escanear");
                 alert.setContentText("No se pudo registrar el escaneo: " + e.getMessage());
                 alert.showAndWait();
@@ -273,6 +297,10 @@ public class Escanear implements Initializable {
 
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(e -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Error en los campos");
             a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Has seleccionado un tipo de producto\n- Has seleccionado o escrito un código de barras válido\n- Has introducido tu TAP de 6 dígitos");
             a.showAndWait();

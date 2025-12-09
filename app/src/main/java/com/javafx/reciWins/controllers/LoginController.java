@@ -95,6 +95,10 @@ public class LoginController {
     
     private void mostrarError(String titulo, String mensaje) {
         Alert alerta = new Alert(AlertType.ERROR);
+        alerta.setOnShown(e -> {
+                    Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
         alerta.setHeaderText(titulo);
         alerta.setContentText(mensaje);
         alerta.showAndWait();

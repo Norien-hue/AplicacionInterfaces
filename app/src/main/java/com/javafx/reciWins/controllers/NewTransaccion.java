@@ -76,6 +76,10 @@ public class NewTransaccion implements Initializable {
             
             if(!productoExisteEnBD(tipo, codigoBarras)) {
                 Alert alert = new Alert(AlertType.ERROR);
+                alert.setOnShown(ex -> {
+                    Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 alert.setHeaderText("Producto no encontrado");
                 alert.setContentText("El producto con tipo '" + tipo + "' y código '" + codigoBarras + "' no existe.\n" +
                                    "Debes crear el producto primero en la sección de Productos.");
@@ -121,6 +125,10 @@ public class NewTransaccion implements Initializable {
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Error al crear");
                 a.setContentText("No se pudo crear la transacción: " + e.getMessage());
                 a.showAndWait();
@@ -294,6 +302,10 @@ public class NewTransaccion implements Initializable {
 
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Error en los campos");
             a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- Los valores de hora son válidos (HH:0-23, MM:0-59, SS:0-59)\n- Has seleccionado un usuario, tipo y código de barras válidos");
             a.showAndWait();

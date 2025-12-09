@@ -108,6 +108,10 @@ public class ModUser implements Initializable {
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Error al modificar");
                 a.setContentText("No se pudo modificar el usuario: " + e.getMessage());
                 a.showAndWait();
@@ -167,6 +171,10 @@ public class ModUser implements Initializable {
 
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Campo inválido");
             a.setContentText(alertMessage + "\n\nNo uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\");
             a.showAndWait();

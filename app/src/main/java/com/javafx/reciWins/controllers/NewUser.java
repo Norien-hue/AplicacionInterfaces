@@ -83,6 +83,10 @@ public class NewUser implements Initializable {
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Error al crear");
                 a.setContentText("No se pudo crear el usuario: " + e.getMessage());
                 a.showAndWait();
@@ -164,6 +168,10 @@ public class NewUser implements Initializable {
 
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Error en los campos");
             a.setContentText(alertMessage);
             

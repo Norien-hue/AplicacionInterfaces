@@ -51,6 +51,10 @@ public class SingUpController {
             
             if(usuarioExiste(nombre)) {
                 Alert error = new Alert(AlertType.ERROR);
+                error.setOnShown(ex -> {
+                    Stage stage = (Stage) error.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 error.setHeaderText("Usuario ya existe");
                 error.setContentText("El nombre de usuario '" + nombre + "' ya está registrado. Por favor, elige otro.");
                 error.showAndWait();
@@ -77,6 +81,10 @@ public class SingUpController {
                     int nuevoId = rs.getInt(1);
                     
                     Alert success = new Alert(AlertType.INFORMATION);
+                    success.setOnShown(ex -> {
+                    Stage stage = (Stage) success.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                     success.setHeaderText("Registro exitoso");
                     success.setContentText("¡Bienvenido " + nombre + "! Tu cuenta ha sido creada exitosamente.\nID de usuario: " + nuevoId);
                     success.showAndWait();
@@ -88,6 +96,10 @@ public class SingUpController {
                 
             } catch (SQLException e) {
                 Alert error = new Alert(AlertType.ERROR);
+                error.setOnShown(ex -> {
+                    Stage stage = (Stage) error.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 error.setHeaderText("Error al registrar usuario");
                 error.setContentText("Ocurrió un error al crear la cuenta: " + e.getMessage());
                 error.showAndWait();
@@ -142,6 +154,10 @@ public class SingUpController {
         
         if(hayError) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Error en el registro");
             a.setContentText(mensaje);
             a.showAndWait();

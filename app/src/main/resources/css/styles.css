@@ -1,0 +1,221 @@
+/* ===== ESTILOS GENERALES PARA TODOS LOS FXML ===== */
+
+/* Estilo base para la aplicación */
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-background-color: #f5f7fa;
+}
+
+/* ===== CONTENEDORES PRINCIPALES ===== */
+VBox, HBox, AnchorPane, StackPane, ScrollPane, TabPane {
+    -fx-background-color: transparent;
+}
+
+VBox {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d1d9e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+/* ===== ETIQUETAS (LABELS) ===== */
+Label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: normal;
+}
+
+/* Títulos principales */
+Label[text="ReciInventario"] {
+    -fx-text-fill: #2980b9;
+    -fx-font-weight: bold;
+}
+
+/* Labels de formularios */
+VBox > Label {
+    -fx-text-fill: #34495e;
+    -fx-font-weight: 600;
+}
+
+/* ===== CAMPOS DE TEXTO Y CONTRASEÑA ===== */
+TextField, PasswordField {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-text-fill: #2c3e50;
+}
+
+TextField:focused, PasswordField:focused {
+    -fx-border-color: #3498db;
+    -fx-background-color: #ecf0f1;
+}
+
+/* ===== BOTONES ===== */
+Button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-border-color: #2980b9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-font-weight: 600;
+}
+
+Button:hover {
+    -fx-background-color: #2980b9;
+    -fx-border-color: #1c5a7a;
+}
+
+Button:pressed {
+    -fx-background-color: #1c5a7a;
+}
+
+/* Botones de cancelar/salir */
+Button[text*="Salir"], Button[text*="Cancelar"] {
+    -fx-background-color: #e74c3c;
+    -fx-border-color: #c0392b;
+}
+
+Button[text*="Salir"]:hover, Button[text*="Cancelar"]:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Botón de escanear especial */
+Button[text="_ESCANEAR"] {
+    -fx-background-color: #27ae60;
+    -fx-border-color: #219653;
+}
+
+/* ===== TABLAS ===== */
+TableView {
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-color: #ffffff;
+}
+
+.table-column {
+    -fx-border-color: #ecf0f1;
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell {
+    -fx-border-color: #ecf0f1;
+}
+
+/* ===== PESTAÑAS (TABS) ===== */
+TabPane {
+    -fx-background-color: transparent;
+    -fx-border-color: #d1d9e6;
+}
+
+Tab {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+}
+
+Tab:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-border-color: #2980b9;
+}
+
+/* ===== COMBO BOX ===== */
+ComboBox {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-text-fill: #2c3e50;
+}
+
+ComboBox:hover {
+    -fx-border-color: #95a5a6;
+}
+
+/* ===== DATE PICKER ===== */
+DatePicker {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+/* ===== RADIO BUTTONS ===== */
+RadioButton {
+    -fx-text-fill: #2c3e50;
+}
+
+/* ===== SEPARADORES ===== */
+Separator {
+    -fx-background-color: #bdc3c7;
+}
+
+/* ===== SCROLL PANE ===== */
+ScrollPane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* ===== TEXTO CON ENLACE (Labels clickeables) ===== */
+Label[textFill="#51a4cf"] {
+    -fx-text-fill: #3498db;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+Label[textFill="#51a4cf"]:hover {
+    -fx-text-fill: #2980b9;
+    -fx-underline: true;
+}
+
+/* ===== CAMPOS DESHABILITADOS ===== */
+TextField:disabled, PasswordField:disabled, ComboBox:disabled {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: #7f8c8d;
+    -fx-border-color: #bdc3c7;
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA VENTANAS ===== */
+
+/* Ventana de login/signup */
+VBox[prefHeight="322.0"] {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
+}
+
+/* Ventana principal */
+VBox[prefHeight="450.0"] {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d1d9e6;
+}
+
+/* Ventanas de diálogo (más pequeñas) */
+VBox[prefHeight="400.0"], VBox[prefHeight="350.0"], VBox[prefHeight="450.0"] {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+}
+
+/* ===== ESTILOS PARA BOTONES CON ÍCONOS ===== */
+Button > .graphic {
+    -fx-effect: none;
+}
+
+/* ===== TABLA DE USUARIOS/PRODUCTOS/TRANSACCIONES ===== */
+.table-view .column-header {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+/* ===== ÁREA PERSONAL ===== */
+#nombreBD, #saldoBD, #rolBD {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: 600;
+}

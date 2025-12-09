@@ -68,6 +68,10 @@ public class ModProducto implements Initializable {
             
             if (material == null || material.trim().isEmpty()) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(e -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Material requerido");
                 a.setContentText("Debes seleccionar un material de la lista.");
                 a.showAndWait();
@@ -140,6 +144,10 @@ public class ModProducto implements Initializable {
                 
                 // Mostrar mensaje de éxito
                 Alert exito = new Alert(AlertType.INFORMATION);
+                exito.setOnShown(e -> {
+                    Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 exito.setHeaderText("Producto modificado");
                 exito.setContentText("El producto se modificó correctamente.\n" +
                                    "Las emisiones de los usuarios afectados se han actualizado.");
@@ -147,6 +155,10 @@ public class ModProducto implements Initializable {
                 
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Error al modificar");
                 a.setContentText("No se pudo modificar el producto: " + e.getMessage());
                 a.showAndWait();
@@ -304,6 +316,10 @@ public class ModProducto implements Initializable {
 
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(e -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Error en los campos");
             a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- El código de barras es numérico\n- Las emisiones son numéricas\n- No uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\\n- Selecciona un material de la lista");
             a.showAndWait();

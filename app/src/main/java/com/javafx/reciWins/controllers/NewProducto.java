@@ -62,6 +62,10 @@ public class NewProducto implements Initializable {
             
             if (material == null || material.trim().isEmpty()) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Material requerido");
                 a.setContentText("Debes seleccionar un material de la lista.");
                 a.showAndWait();
@@ -88,6 +92,10 @@ public class NewProducto implements Initializable {
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
                 a.setHeaderText("Error al guardar");
                 a.setContentText("No se pudo guardar el producto: " + e.getMessage());
                 a.showAndWait();
@@ -206,6 +214,10 @@ public class NewProducto implements Initializable {
 
         if(checkAlert) {
             Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             a.setHeaderText("Error en los campos");
             a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- El código de barras es numérico\n- Las emisiones son numéricas\n- No uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\\n- Selecciona un material de la lista");
             a.showAndWait();

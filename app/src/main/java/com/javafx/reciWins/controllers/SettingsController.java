@@ -98,6 +98,10 @@ public class SettingsController implements Initializable {
             MainController.actualizarVistasDesdeExterno();
             
             Alert exito = new Alert(AlertType.INFORMATION);
+            exito.setOnShown(ex -> {
+                    Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
             exito.setHeaderText("Cambios guardados");
             exito.setContentText("Los cambios se han guardado correctamente.");
             exito.showAndWait();
@@ -167,9 +171,13 @@ public class SettingsController implements Initializable {
     }
 
     private void mostrarError(String titulo, String mensaje) {
-        Alert alerta = new Alert(AlertType.ERROR);
-        alerta.setHeaderText(titulo);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        Alert a = new Alert(AlertType.ERROR);
+        a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+        a.setHeaderText(titulo);
+        a.setContentText(mensaje);
+        a.showAndWait();
     }
 }

@@ -12,6 +12,7 @@ import io.fair_acc.chartfx.axes.spi.format.SimpleFormatter;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 
@@ -498,6 +499,10 @@ public class MainController implements Initializable {
             StartWin.lanzarModUser();
         } else {
             Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error de selección");
             alerta.setContentText("Selecciona un usuario");
             alerta.showAndWait();
@@ -666,12 +671,20 @@ public class MainController implements Initializable {
                 deseleccionarTodos();
                 
                 Alert alerta = new Alert(AlertType.INFORMATION);
+                alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
                 alerta.setHeaderText("Producto eliminado");
                 alerta.setContentText("El producto y todas sus transacciones asociadas han sido eliminados.\nLas emisiones de los usuarios afectados se han actualizado.");
                 alerta.showAndWait();
                 
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
                 alerta.setHeaderText("Error al eliminar");
                 alerta.setContentText("No se pudo eliminar el producto: " + ex.getMessage());
                 alerta.showAndWait();
@@ -679,6 +692,10 @@ public class MainController implements Initializable {
             }
         } else {
             Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error de selección");
             alerta.setContentText("Selecciona un producto para eliminar");
             alerta.showAndWait();
@@ -718,6 +735,10 @@ public class MainController implements Initializable {
                 deseleccionarTodos();
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setOnShown(ea -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
                 alerta.setHeaderText("Error al eliminar");
                 alerta.setContentText("No se pudo eliminar la transacción: " + ex.getMessage());
                 alerta.showAndWait();
@@ -725,6 +746,10 @@ public class MainController implements Initializable {
             }
         }else{
             Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setOnShown(ex -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error de seleccion");
             alerta.setContentText("Selecciona un elemento");
             alerta.showAndWait();
@@ -806,12 +831,20 @@ public class MainController implements Initializable {
                 deseleccionarTodos();
                 
                 Alert alerta = new Alert(AlertType.INFORMATION);
+                alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
                 alerta.setHeaderText("Usuario eliminado");
                 alerta.setContentText("El usuario y todas sus transacciones han sido eliminados.");
                 alerta.showAndWait();
                 
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
                 alerta.setHeaderText("Error al eliminar");
                 alerta.setContentText("No se pudo eliminar el usuario: " + ex.getMessage());
                 alerta.showAndWait();
@@ -819,6 +852,10 @@ public class MainController implements Initializable {
             }
         } else {
             Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error de selección");
             alerta.setContentText("Selecciona un usuario para eliminar");
             alerta.showAndWait();
@@ -971,6 +1008,10 @@ public class MainController implements Initializable {
             StartWin.lanzarModProducto();
         } else {
             Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error de selección");
             alerta.setContentText("Selecciona un producto");
             alerta.showAndWait();
@@ -999,6 +1040,10 @@ public class MainController implements Initializable {
             StartWin.lanzarModTransaccion();
         } else {
             Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error de selección");
             alerta.setContentText("Selecciona una transacción");
             alerta.showAndWait();
@@ -1027,12 +1072,20 @@ public class MainController implements Initializable {
             actualizarDatosUsuarioActualEnVista();
             
             Alert alerta = new Alert(AlertType.INFORMATION);
+            alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Nuevo TAP generado");
             alerta.setContentText("Tu nuevo número TAP es: " + nuevoTap);
             alerta.showAndWait();
             
         } catch (Exception e) {
             Alert alerta = new Alert(AlertType.ERROR);
+            alerta.setOnShown(xe -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
             alerta.setHeaderText("Error al generar TAP");
             alerta.setContentText("No se pudo generar el nuevo TAP: " + e.getMessage());
             alerta.showAndWait();
@@ -1042,6 +1095,10 @@ public class MainController implements Initializable {
     
     private void mostrarErrorAcceso() {
         Alert alerta = new Alert(AlertType.WARNING);
+        alerta.setOnShown(e -> {
+                Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
         alerta.setHeaderText("Acceso denegado");
         alerta.setContentText("Esta función solo está disponible para administradores.");
         alerta.showAndWait();
