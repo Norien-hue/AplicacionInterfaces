@@ -99,7 +99,7 @@
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_save" mnemonicParsing="true" onAction="#saveClicked" prefHeight="31.0" prefWidth="82.0" style="-fx-font-size: 11px;" text="_Guardar">
+                  <Button fx:id="btn_save" mnemonicParsing="true" onAction="#saveClicked" prefHeight="31.0" prefWidth="82.0" style="-fx-font-size: 11px;" text="Guar_dar">
                      <graphic>
                         <ImageView fitHeight="23.0" fitWidth="67.0" pickOnBounds="true" preserveRatio="true">
                            <image>
