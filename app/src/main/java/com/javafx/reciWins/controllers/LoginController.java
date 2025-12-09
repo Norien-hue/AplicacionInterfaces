@@ -35,7 +35,7 @@ public class LoginController {
     private PasswordField contraseniaUsuario;
 
     @FXML
-    void changeToMain(MouseEvent event) {
+    void changeToMain(ActionEvent event) {
         if(validarLogin()) {
             StartWin.mostrarMain();
         }
