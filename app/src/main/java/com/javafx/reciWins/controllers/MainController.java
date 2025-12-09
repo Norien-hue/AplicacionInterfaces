@@ -9,6 +9,7 @@ import com.javafx.reciWins.utiles.StorageSharer;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.axes.spi.format.SimpleFormatter;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import javafx.scene.layout.AnchorPane;
@@ -36,9 +37,11 @@ import javafx.scene.layout.AnchorPane;
 import java.net.URL;
 import java.sql.*;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.Random;
 
 public class MainController implements Initializable {
@@ -173,79 +176,89 @@ public class MainController implements Initializable {
     }
 
     private void inicializarGrafico() {
-        try {
-            tab_graph_content.getChildren().clear();
+    try {
+        tab_graph_content.getChildren().clear();
+        
+        XYChart chart = new XYChart();
+        chart.setPrefSize(800, 400);
+        
+        DefaultNumericAxis xAxis = new DefaultNumericAxis("Usuarios", 0, 1, 1);
+        DefaultNumericAxis yAxis = new DefaultNumericAxis("Emisiones Reducidas (kg CO₂)", 0, 1, 1);
+        
+        xAxis.setAnimated(false);
+        yAxis.setAnimated(false);
+        
+        chart.getAxes().clear();
+        chart.getAxes().addAll(xAxis, yAxis);
+        
+        ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+        chart.getRenderers().clear();
+        chart.getRenderers().add(renderer);
+        
+        DefaultErrorDataSet dataSet = new DefaultErrorDataSet("Emisiones por Usuario");
+        
+        if (tablaUsuarioObservable != null && !tablaUsuarioObservable.isEmpty()) {
+            // Crear un mapa de índices a nombres de usuario
+            final Map<Integer, String> nombresPorIndice = new java.util.HashMap<>();
             
-            XYChart chart = new XYChart();
-            chart.setPrefSize(800, 400);
+            yAxis.setAutoRanging(true);
+            yAxis.setAutoRangePadding(0.1); 
             
-
-            DefaultNumericAxis xAxis = new DefaultNumericAxis("Usuarios", 0, 1, 1);
-            DefaultNumericAxis yAxis = new DefaultNumericAxis("Emisiones Reducidas (kg CO₂)", 0, 1, 1);
-            
-            xAxis.setAnimated(false);
-            yAxis.setAnimated(false);
-            
-            chart.getAxes().clear();
-            chart.getAxes().addAll(xAxis, yAxis);
-            
-            ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
-            chart.getRenderers().clear();
-            chart.getRenderers().add(renderer);
-            
-            DefaultErrorDataSet dataSet = new DefaultErrorDataSet("Emisiones por Usuario");
-            
-            if (tablaUsuarioObservable != null && !tablaUsuarioObservable.isEmpty()) {
-                int index = 0;
+            int index = 0;
+            for (Usuario usuario : tablaUsuarioObservable) {
+                float emisiones = usuario.getEmisionesReducidas();
+                String nombre = usuario.getNombre();
                 
-                float maxEmisiones = 0;
-                for (Usuario usuario : tablaUsuarioObservable) {
-                    if (usuario.getEmisionesReducidas() > maxEmisiones) {
-                        maxEmisiones = usuario.getEmisionesReducidas();
-                    }
+                String label = nombre.length() > 8 ? 
+                    nombre.substring(0, Math.min(12, nombre.length())) : 
+                    nombre;
+                if (nombre.length() > 12) {
+                    label += "...";
                 }
                 
-                yAxis.setAutoRanging(true);
-                yAxis.setAutoRangePadding(0.5); 
-                
-                for (Usuario usuario : tablaUsuarioObservable) {
-                    float emisiones = usuario.getEmisionesReducidas();
-                    String nombre = usuario.getNombre();
-                    
-                    String label = nombre.length() > 5 ? nombre.substring(0, Math.min(5, nombre.length())) : nombre;
-                    if (nombre.length() > 5) label += "...";
-                    //TODO no funcionaaaaaaa
-                    
-                    dataSet.add(index, emisiones, 0, 0, label);
-                    index++;
-                }
-                
-                xAxis.setAutoRanging(true);
-                xAxis.setAutoRangePadding(0.1);
-                
-                renderer.setDrawBars(true);
-                renderer.setBarWidth(1); 
-                
-                chart.getDatasets().add(dataSet);
-            } else {
-                DefaultErrorDataSet emptyDataSet = new DefaultErrorDataSet("No hay datos disponibles");
-                chart.getDatasets().add(emptyDataSet);
+                nombresPorIndice.put(index, label);
+                dataSet.add(index, emisiones, 0, 0);
+                index++;
             }
             
-            chart.setLegendVisible(false);
+            //podria haber hecho una clase que implementara esto? si,
+            //pero me es mas rapido hacer esto ademas de que asi me queda claro lo que hace
+            SimpleFormatter formatter = new SimpleFormatter(xAxis) {
+                @Override
+                public String toString(Number object) {
+                    int idx = object.intValue();
+                    return nombresPorIndice.getOrDefault(idx, "");
+                }
+            };
             
-            AnchorPane.setTopAnchor(chart, 10.0);
-            AnchorPane.setBottomAnchor(chart, 10.0);
-            AnchorPane.setLeftAnchor(chart, 10.0);
-            AnchorPane.setRightAnchor(chart, 10.0);
+            xAxis.setAxisLabelFormatter(formatter);
             
-            tab_graph_content.getChildren().add(chart);
+            xAxis.setAutoRanging(true);
+            xAxis.setAutoRangePadding(0.2);
             
-        } catch (Exception e) {
-            e.printStackTrace();
+            renderer.setDrawBars(true);
+            renderer.setBarWidth(1); 
+            
+            chart.getDatasets().add(dataSet);
+        } else {
+            DefaultErrorDataSet emptyDataSet = new DefaultErrorDataSet("No hay datos disponibles");
+            chart.getDatasets().add(emptyDataSet);
         }
+        
+        chart.setLegendVisible(false);
+        
+        AnchorPane.setTopAnchor(chart, 10.0);
+        AnchorPane.setBottomAnchor(chart, 10.0);
+        AnchorPane.setLeftAnchor(chart, 10.0);
+        AnchorPane.setRightAnchor(chart, 10.0);
+        
+        tab_graph_content.getChildren().add(chart);
+        
+    } catch (Exception e) {
+        e.printStackTrace();
     }
-
+}
+    
     private void actualizarDatosUsuarioActualEnVista() {
         try {
             String query = "SELECT * FROM Usuarios WHERE Id_Usuario = ?";
