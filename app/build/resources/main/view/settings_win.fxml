@@ -27,7 +27,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <Button fx:id="btn_passwd" mnemonicParsing="false" onAction="#launch_cambiarPwd" prefWidth="300.0" text="Cambiar contraseña" />
+            <Button fx:id="btn_passwd" mnemonicParsing="true" onAction="#launch_cambiarPwd" prefWidth="300.0" text="Cambiar contrase_ña" />
          </children>
       </VBox>
       <VBox layoutX="20.0" layoutY="90.0" prefHeight="70.0" prefWidth="300.0">
@@ -40,15 +40,15 @@
             <HBox spacing="10.0">
                <children>
                   <TextField fx:id="txtFld_tap" prefWidth="220.0" editable="false" />
-                  <Button fx:id="btn_mostrarTap" mnemonicParsing="false" onAction="#alternarMostrarTap" prefWidth="70.0" text="Mostrar" />
+                  <Button fx:id="btn_mostrarTap" mnemonicParsing="true" onAction="#alternarMostrarTap" prefWidth="70.0" text="_Mostrar" />
                </children>
             </HBox>
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_accept" mnemonicParsing="false" onAction="#guardarCambios" text="Guardar cambios" />
-            <Button fx:id="btn_cancel" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+            <Button fx:id="btn_accept" mnemonicParsing="true" onAction="#guardarCambios" text="_Guardar cambios" />
+            <Button fx:id="btn_cancel" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
          </children>
       </HBox>
    </children>

@@ -29,8 +29,8 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#cambiarContraseña" text="Cambiar contraseña" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#cambiarContraseña" text="Cambiar contrase_ña" />
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
          </children>
       </HBox>
    </children>

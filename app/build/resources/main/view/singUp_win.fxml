@@ -41,8 +41,8 @@
                   <Label fx:id="txt_loginAccount" onMouseClicked="#changeToLogin" prefHeight="18.0" prefWidth="110.0" text="¿Ya tienes cuenta?" textFill="#51a4cf" />
                   <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="173.0" spacing="10.0">
                      <children>
-                        <Button fx:id="btn_singUp" mnemonicParsing="false" onAction="#changeToMain" text="Aceptar" />
-                        <Button fx:id="btn_cancelSingUp" mnemonicParsing="false" onAction="#killApp" text="Salir" />
+                        <Button fx:id="btn_singUp" mnemonicParsing="true" onAction="#changeToMain" text="_Aceptar" />
+                        <Button fx:id="btn_cancelSingUp" mnemonicParsing="true" onAction="#killApp" text="_Salir" />
                      </children>
                   </HBox>
                </children>

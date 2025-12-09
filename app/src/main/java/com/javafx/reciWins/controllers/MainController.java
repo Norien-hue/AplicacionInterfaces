@@ -7,6 +7,14 @@ import com.javafx.reciWins.start.StartWin;
 import com.javafx.reciWins.utiles.SQLstatementStorage;
 import com.javafx.reciWins.utiles.StorageSharer;
 
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.spi.DefaultErrorDataSet;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TabPane;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,6 +45,10 @@ public class MainController implements Initializable {
 
     public static int id_user; 
     private boolean esAdministrador = false;
+
+    @FXML private AnchorPane tab_graph_content;
+    @FXML private ScrollPane scrollPaneGraph;
+    @FXML private Button btn_graph;
 
     @FXML private Button btn_addProducto;
     @FXML private Button btn_addTransaccion;
@@ -71,7 +83,6 @@ public class MainController implements Initializable {
     @FXML private Label saldoBD;
     @FXML private Label rolBD;
     
-    // Botón de generar TAP
     @FXML private Button btn_generarTap;
 
     // TableView y columnas para Productos
@@ -133,14 +144,14 @@ public class MainController implements Initializable {
 
     private Connection conn;
 
+    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         conn = StartWin.conn;
         
-        // Cargar datos del usuario actual primero
         cargarDatosUsuarioActual();
         
-        // Configurar columnas y cargar datos de tablas
         configurarColumnasProductos();
         configurarColumnasTransacciones();
         configurarColumnasUsuarios();
@@ -149,34 +160,137 @@ public class MainController implements Initializable {
         cargarDatosTransacciones();
         cargarDatosUsuarios();
         
-        // Configurar permisos según el rol
         configurarPermisosSegunRol();
         
         configurarTooltips();
+        
+        
+        tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            if (newTab != null && newTab.getText().equals("Gráfico de Emisiones")) {
+                Platform.runLater(() -> {inicializarGrafico();});
+            }
+        });
+    }
+
+    private void inicializarGrafico() {
+        try {
+            tab_graph_content.getChildren().clear();
+            
+            XYChart chart = new XYChart();
+            chart.setPrefSize(800, 400);
+            
+
+            DefaultNumericAxis xAxis = new DefaultNumericAxis("Usuarios", 0, 1, 1);
+            DefaultNumericAxis yAxis = new DefaultNumericAxis("Emisiones Reducidas (kg CO₂)", 0, 1, 1);
+            
+            xAxis.setAnimated(false);
+            yAxis.setAnimated(false);
+            
+            chart.getAxes().clear();
+            chart.getAxes().addAll(xAxis, yAxis);
+            
+            ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+            chart.getRenderers().clear();
+            chart.getRenderers().add(renderer);
+            
+            DefaultErrorDataSet dataSet = new DefaultErrorDataSet("Emisiones por Usuario");
+            
+            if (tablaUsuarioObservable != null && !tablaUsuarioObservable.isEmpty()) {
+                int index = 0;
+                
+                float maxEmisiones = 0;
+                for (Usuario usuario : tablaUsuarioObservable) {
+                    if (usuario.getEmisionesReducidas() > maxEmisiones) {
+                        maxEmisiones = usuario.getEmisionesReducidas();
+                    }
+                }
+                
+                yAxis.setAutoRanging(true);
+                yAxis.setAutoRangePadding(0.1); 
+                
+                for (Usuario usuario : tablaUsuarioObservable) {
+                    float emisiones = usuario.getEmisionesReducidas();
+                    String nombre = usuario.getNombre();
+                    
+                    String label = nombre.length() > 5 ? nombre.substring(0, Math.min(5, nombre.length())) : nombre;
+                    if (nombre.length() > 5) label += "...";
+                    //TODO no funcionaaaaaaa
+                    
+                    dataSet.add(index, emisiones, 0, 0, label);
+                    index++;
+                }
+                
+                xAxis.setAutoRanging(true);
+                xAxis.setAutoRangePadding(0.1);
+                
+                renderer.setDrawBars(true);
+                renderer.setBarWidth(1); 
+                
+                chart.getDatasets().add(dataSet);
+            } else {
+                DefaultErrorDataSet emptyDataSet = new DefaultErrorDataSet("No hay datos disponibles");
+                chart.getDatasets().add(emptyDataSet);
+            }
+            
+            chart.setLegendVisible(false);
+            
+            AnchorPane.setTopAnchor(chart, 10.0);
+            AnchorPane.setBottomAnchor(chart, 10.0);
+            AnchorPane.setLeftAnchor(chart, 10.0);
+            AnchorPane.setRightAnchor(chart, 10.0);
+            
+            tab_graph_content.getChildren().add(chart);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void actualizarDatosUsuarioActualEnVista() {
+        try {
+            String query = "SELECT * FROM Usuarios WHERE Id_Usuario = ?";
+            PreparedStatement pst = conn.prepareStatement(query);
+            pst.setInt(1, id_user);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                nombreBD.setText(rs.getString("Nombre"));
+                saldoBD.setText(String.format("%.1f", rs.getFloat("Emisiones_Reducidas")) + " kg CO₂");
+                
+                String permisos = rs.getString("Permisos");
+                esAdministrador = permisos != null && permisos.equalsIgnoreCase("administrador");
+                rolBD.setText(permisos);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @FXML
+    void tab_graph(ActionEvent event) {
+        deseleccionarTodos();
+        tabMain.getSelectionModel().select(2); 
+        inicializarGrafico(); 
     }
 
     private void configurarPermisosSegunRol() {
-        // Para clientes, desactivar botones de administración pero mantenerlos visibles
         if (!esAdministrador) {
-            // Deshabilitar la pestaña de tablas completamente
             tabMain.getTabs().get(1).setDisable(true);
             
-            // Desactivar botones de la barra superior
             btn_users.setDisable(true);
             btn_products.setDisable(true);
             btn_transactions.setDisable(true);
             
-            // El botón de guardar está habilitado para todos los usuarios
-            btn_save.setDisable(false); // Habilitado para todos
+            // btn_save.setDisable(false); 
         } else {
-            // Si es administrador, asegurarse de que todo esté habilitado
             tabMain.getTabs().get(1).setDisable(false);
             btn_users.setDisable(false);
             btn_products.setDisable(false);
             btn_transactions.setDisable(false);
             btn_save.setDisable(false);
             
-            // Habilitar botones de administración dentro de las tablas
+
             btn_addProducto.setDisable(false);
             btn_borrarProducto.setDisable(false);
             btn_modProducto.setDisable(false);
@@ -190,13 +304,14 @@ public class MainController implements Initializable {
     }
 
     private void configurarTooltips() {
-        btn_personal.setTooltip(new Tooltip("Personal"));
-        btn_users.setTooltip(new Tooltip("Usuarios"));
-        btn_products.setTooltip(new Tooltip("Productos"));
-        btn_transactions.setTooltip(new Tooltip("Transacciones"));
-        btn_settings.setTooltip(new Tooltip("Ajustes"));
-        btn_generarTap.setTooltip(new Tooltip("Generar un nuevo número TAP"));
-        btn_exit.setTooltip(new Tooltip("Cerrar sesión"));
+    btn_personal.setTooltip(new Tooltip("Personal"));
+    btn_users.setTooltip(new Tooltip("Usuarios"));
+    btn_products.setTooltip(new Tooltip("Productos"));
+    btn_transactions.setTooltip(new Tooltip("Transacciones"));
+    btn_graph.setTooltip(new Tooltip("Gráfico de Emisiones")); 
+    btn_settings.setTooltip(new Tooltip("Ajustes"));
+    btn_generarTap.setTooltip(new Tooltip("Generar un nuevo número TAP"));
+    btn_exit.setTooltip(new Tooltip("Cerrar sesión"));
     }
 
     private void deseleccionarTodos() {
@@ -240,7 +355,6 @@ public class MainController implements Initializable {
                 nombreBD.setText(rs.getString("Nombre"));
                 saldoBD.setText(String.format("%.1f", rs.getFloat("Emisiones_Reducidas")) + " kg CO₂");
                 
-                // Determinar si es administrador
                 String permisos = rs.getString("Permisos");
                 esAdministrador = permisos != null && permisos.equalsIgnoreCase("administrador");
                 rolBD.setText(permisos);
@@ -259,9 +373,8 @@ public class MainController implements Initializable {
 
     @FXML
     void saveClicked(ActionEvent event) {
-        // Ahora todos los usuarios pueden guardar cambios
         if(SQLstatementStorage.preparedStatements.size()>0){
-           SQLstatementStorage.executeStatements();
+        SQLstatementStorage.executeStatements();
 
             Alert a = new Alert(AlertType.INFORMATION);
             a.setHeaderText("Cambios guardados");
@@ -272,7 +385,7 @@ public class MainController implements Initializable {
             if (tablaUsuario != null) tablaUsuario.refresh();
             if (tablaTransacciones != null) tablaTransacciones.refresh();
             
-            cargarDatosUsuarioActual();
+            actualizarDatosUsuarioActualEnVista();
             
             deseleccionarTodos();
         }else{
@@ -366,7 +479,6 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modUsuario(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -395,7 +507,6 @@ public class MainController implements Initializable {
 
     @FXML
     void logout(ActionEvent event) {
-        // Verificar si hay cambios sin guardar
         if(SQLstatementStorage.preparedStatements.size() > 0){
             Alert a = new Alert(AlertType.CONFIRMATION);
             a.setHeaderText("Cambios sin guardar");
@@ -404,19 +515,16 @@ public class MainController implements Initializable {
             Optional<ButtonType> botonPulsado = a.showAndWait();
             
             if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.OK)) {
-                // Guardar cambios antes de cerrar sesión
                 SQLstatementStorage.executeStatements();
                 Alert info = new Alert(AlertType.INFORMATION);
                 info.setHeaderText("Cambios guardados");
                 info.setContentText("Los cambios han sido guardados. Cerrando sesión...");
                 info.showAndWait();
             } else if(botonPulsado.isPresent() && botonPulsado.get().equals(ButtonType.CANCEL)) {
-                // El usuario canceló el logout
                 return;
             }
         }
         
-        // Limpiar credenciales y datos temporales
         id_user = 0;
         esAdministrador = false;
         StorageSharer.itemStorage.clear();
@@ -424,7 +532,6 @@ public class MainController implements Initializable {
         StorageSharer.itemPre = null;
         SQLstatementStorage.preparedStatements.clear();
         
-        // Volver a la ventana de login
         StartWin.mostrarLogin();
     }
 
@@ -442,7 +549,6 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_products(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -457,7 +563,6 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_transactions(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -472,7 +577,6 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_users(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -487,7 +591,6 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_newProducto(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -499,7 +602,6 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_newTransaccion(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -511,7 +613,6 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_newUser(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -529,7 +630,6 @@ public class MainController implements Initializable {
 
     @FXML
     void borrarProducto(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -550,7 +650,6 @@ public class MainController implements Initializable {
 
     @FXML
     void borrarTransaccion(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -612,7 +711,6 @@ public class MainController implements Initializable {
 
     @FXML
     void borrarUsuario(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -719,7 +817,6 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modProducto(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -748,7 +845,6 @@ public class MainController implements Initializable {
 
     @FXML
     void launch_modTransaccion(ActionEvent event) {
-        // Verificar permisos cada vez que se intenta acceder
         if (!esAdministrador) {
             mostrarErrorAcceso();
             return;
@@ -777,22 +873,18 @@ public class MainController implements Initializable {
     
     @FXML
     void generarTap(ActionEvent event) {
-        // Generar un número TAP aleatorio de 6 dígitos
         Random random = new Random();
         int nuevoTap = 100000 + random.nextInt(900000);
         
-        // Mostrar alerta con el nuevo TAP
         Alert alerta = new Alert(AlertType.INFORMATION);
         alerta.setHeaderText("Nuevo TAP generado");
         alerta.setContentText("Tu nuevo número TAP es: " + nuevoTap + "\n\nRecuerda guardar los cambios.");
         alerta.showAndWait();
         
-        // Actualizar en el sistema de sentencias SQL
         SQLstatementStorage.storeStatement(
             "UPDATE Usuarios SET TAP = " + nuevoTap + " WHERE Id_Usuario = " + id_user
         );
         
-        // Actualizar en la ObservableList si existe
         for (Usuario usuario : tablaUsuarioObservable) {
             if (usuario.getIdUsuario() == id_user) {
                 usuario.setTap(nuevoTap);

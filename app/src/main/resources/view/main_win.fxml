@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -14,100 +15,122 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="424.0" prefWidth="651.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.MainController">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="955.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.MainController">
    <children>
-      <HBox prefHeight="91.0" prefWidth="600.0" spacing="10.0">
+      <HBox prefHeight="53.0" prefWidth="908.0" spacing="10.0">
          <opaqueInsets>
             <Insets />
          </opaqueInsets>
          <children>
-            <HBox alignment="CENTER" prefHeight="50.0" prefWidth="397.0" spacing="10.0">
+            <HBox alignment="CENTER" prefHeight="53.0" prefWidth="682.0" spacing="10.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_personal" mnemonicParsing="false" onAction="#tab_personal" prefHeight="34.0" prefWidth="40.0">
+                  <Button fx:id="btn_personal" minWidth="80" mnemonicParsing="true" onAction="#tab_personal" style="-fx-font-size: 11px;" text="_Personal">
                      <graphic>
                         <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/contact-1293388_640.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
+                     </graphic>
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                  </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Button fx:id="btn_users" mnemonicParsing="false" onAction="#tab_users" prefHeight="33.0" prefWidth="40.0">
+                  <Button fx:id="btn_users" minWidth="80" mnemonicParsing="true" onAction="#tab_users" prefHeight="30.0" prefWidth="108.0" style="-fx-font-size: 11px;" text="_Usuarios">
                      <graphic>
                         <ImageView fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/usuarios.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
-                  <Button fx:id="btn_products" mnemonicParsing="false" onAction="#tab_products" prefHeight="18.0" prefWidth="38.0">
+                     </graphic>
+                  </Button>
+                  <Button fx:id="btn_products" minWidth="90" mnemonicParsing="true" onAction="#tab_products" style="-fx-font-size: 11px;" text="P_roductos">
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="39.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/icon-157357_640.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
-                  <Button fx:id="btn_transactions" layoutX="176.0" layoutY="43.0" mnemonicParsing="false" onAction="#tab_transactions">
+                     </graphic>
+                  </Button>
+                  <Button fx:id="btn_transactions" minWidth="100" mnemonicParsing="true" onAction="#tab_transactions" style="-fx-font-size: 11px;" text="Tra_nsacciones">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/black-and-white-1297353_640.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
-                  <Button fx:id="btn_settings" mnemonicParsing="false" onAction="#launch_settings">
+                     </graphic>
+                  </Button>
+                  <Separator orientation="VERTICAL" prefHeight="200.0" />
+                  <Button fx:id="btn_graph" minWidth="80" mnemonicParsing="true" onAction="#tab_graph" style="-fx-font-size: 11px;" text="_Gráfico">
+                     <graphic>
+                        <ImageView fitHeight="25.0" fitWidth="29.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../img/graph-27130_640.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Separator orientation="VERTICAL" prefHeight="200.0" />
+                  <Button fx:id="btn_settings" minWidth="80" mnemonicParsing="true" onAction="#launch_settings" style="-fx-font-size: 11px;" text="A_justes">
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="29.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/administration-6491208_640.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
+                     </graphic>
+                  </Button>
                </children>
                <padding>
                   <Insets top="5.0" />
                </padding>
             </HBox>
-            <HBox alignment="CENTER_RIGHT" layoutX="10.0" layoutY="10.0" prefHeight="50.0" prefWidth="157.0" spacing="10.0">
+            <HBox alignment="CENTER_RIGHT" layoutX="10.0" layoutY="10.0" prefHeight="53.0" prefWidth="160.0" spacing="10.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_save" mnemonicParsing="false" onAction="#saveClicked" prefHeight="31.0" prefWidth="70.0" text="Save">
+                  <Button fx:id="btn_save" mnemonicParsing="true" onAction="#saveClicked" prefHeight="31.0" prefWidth="82.0" style="-fx-font-size: 11px;" text="_Guardar">
                      <graphic>
                         <ImageView fitHeight="23.0" fitWidth="67.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/floppy-5607525_640.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
-                  <Button fx:id="btn_info" mnemonicParsing="false" text="Info">
+                     </graphic>
+                  </Button>
+                  <Button fx:id="btn_info" mnemonicParsing="true" style="-fx-font-size: 11px;" text="_Info">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="82.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/information-1294813_640.png" />
                            </image>
                         </ImageView>
-                     </graphic></Button>
+                     </graphic>
+                  </Button>
                </children>
                <padding>
                   <Insets top="5.0" />
                </padding>
             </HBox>
             <Separator orientation="VERTICAL" prefHeight="200.0" />
-            <HBox alignment="TOP_RIGHT" layoutX="300.0" layoutY="10.0" prefHeight="88.0" prefWidth="51.0">
+            <HBox alignment="TOP_RIGHT" layoutX="300.0" layoutY="10.0" prefHeight="38.0" prefWidth="65.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_exit" mnemonicParsing="false" onAction="#logout" prefHeight="0.0" prefWidth="46.0">
+                  <Button fx:id="btn_exit" mnemonicParsing="true" onAction="#logout" prefHeight="32.0" prefWidth="65.0" style="-fx-font-size: 11px;" text="_Salir">
                      <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="74.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                               <image>
                                  <Image url="@../img/log-35496_640.png" />
                               </image>
@@ -121,11 +144,11 @@
             <Insets top="10.0" />
          </VBox.margin>
       </HBox>
-      <TabPane fx:id="tabMain" prefHeight="382.0" prefWidth="579.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabMain" prefHeight="400.0" prefWidth="680.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Personal">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="231.0" prefWidth="600.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="231.0" prefWidth="680.0">
                      <children>
                         <VBox layoutX="14.0" layoutY="14.0" prefHeight="283.0" prefWidth="248.0">
                            <children>
@@ -162,19 +185,19 @@
                               </HBox>
                            </children>
                         </VBox>
-                        <Button fx:id="btn_scan" layoutX="520.0" layoutY="232.0" mnemonicParsing="false" onAction="#launch_scan" prefHeight="66.0" prefWidth="97.0" text="ESCANEAR" />
-                        <Button fx:id="btn_generarTap" layoutX="411.0" layoutY="232.0" mnemonicParsing="false" onAction="#generarTap" prefHeight="66.0" prefWidth="97.0" text="GENERAR TAP" />
+                        <Button fx:id="btn_scan" layoutX="822.0" layoutY="265.0" mnemonicParsing="true" onAction="#launch_scan" prefHeight="66.0" prefWidth="97.0" text="_ESCANEAR" />
+                        <Button fx:id="btn_generarTap" layoutX="712.0" layoutY="265.0" mnemonicParsing="true" onAction="#generarTap" prefHeight="66.0" prefWidth="97.0" text="GENERAR _TAP" />
                      </children>
                   </AnchorPane>
             </content>
           </Tab>
-            <Tab text="Tablas" disable="false">
+            <Tab disable="false" text="Tablas">
                <content>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
                         <AnchorPane fx:id="tab_product" prefHeight="200.0" prefWidth="200.0">
                            <children>
-                              <TableView fx:id="tablaProductos" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="590.0">
+                              <TableView fx:id="tablaProductos" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="640.0">
                                  <columns>
                                     <TableColumn fx:id="colTipoProducto" prefWidth="75.0" text="Tipo" />
                                     <TableColumn fx:id="colBarrasProducto" prefWidth="120.0" text="Código Barras" />
@@ -183,18 +206,18 @@
                                     <TableColumn fx:id="colMaterialProducto" prefWidth="100.0" text="Material" />
                                  </columns>
                               </TableView>
-                              <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="589.0" spacing="5.0">
+                              <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="640.0" spacing="5.0">
                                  <children>
-                                    <Button fx:id="btn_addProducto" mnemonicParsing="false" onAction="#launch_newProducto" text="Crear producto" />
-                                    <Button fx:id="btn_borrarProducto" mnemonicParsing="false" onAction="#borrarProducto" text="Borrar producto" />
-                                    <Button fx:id="btn_modProducto" layoutX="397.0" layoutY="59.0" mnemonicParsing="false" onAction="#launch_modProducto" text="Modificar producto" />
+                                    <Button fx:id="btn_addProducto" mnemonicParsing="true" onAction="#launch_newProducto" text="_Crear producto" />
+                                    <Button fx:id="btn_borrarProducto" mnemonicParsing="true" onAction="#borrarProducto" text="_Borrar producto" />
+                                    <Button fx:id="btn_modProducto" layoutX="397.0" layoutY="59.0" mnemonicParsing="true" onAction="#launch_modProducto" text="_Modificar producto" />
                                  </children>
                               </HBox>
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="tab_transaccion" prefHeight="200.0" prefWidth="200.0" visible="false">
                            <children>
-                              <TableView fx:id="tablaTransacciones" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="590.0">
+                              <TableView fx:id="tablaTransacciones" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="640.0">
                                  <columns>
                                     <TableColumn fx:id="colUsuarioTransaccion" prefWidth="80.0" text="ID Usuario" />
                                     <TableColumn fx:id="colTipoTransaccion" prefWidth="80.0" text="Tipo" />
@@ -203,18 +226,18 @@
                                     <TableColumn fx:id="colHoraTransaccion" prefWidth="100.0" text="Hora" />
                                  </columns>
                               </TableView>
-                              <HBox alignment="BOTTOM_RIGHT" layoutX="21.0" layoutY="14.0" prefHeight="74.0" prefWidth="589.0" spacing="5.0">
+                              <HBox alignment="BOTTOM_RIGHT" layoutX="21.0" layoutY="14.0" prefHeight="74.0" prefWidth="640.0" spacing="5.0">
                                  <children>
-                                    <Button fx:id="btn_addTransaccion" mnemonicParsing="false" onAction="#launch_newTransaccion" text="Crear transacción" />
-                                    <Button fx:id="btn_borrarTransaccion" mnemonicParsing="false" onAction="#borrarTransaccion" text="Borrar transacción" />
-                                    <Button fx:id="btn_modTransaccion" layoutX="375.0" layoutY="59.0" mnemonicParsing="false" onAction="#launch_modTransaccion" text="Modificar transacción" />
+                                    <Button fx:id="btn_addTransaccion" mnemonicParsing="true" onAction="#launch_newTransaccion" text="_Crear transacción" />
+                                    <Button fx:id="btn_borrarTransaccion" mnemonicParsing="true" onAction="#borrarTransaccion" text="_Borrar transacción" />
+                                    <Button fx:id="btn_modTransaccion" layoutX="375.0" layoutY="59.0" mnemonicParsing="true" onAction="#launch_modTransaccion" text="_Modificar transacción" />
                                  </children>
                               </HBox>
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="tab_usuario" prefHeight="200.0" prefWidth="200.0" visible="false">
                            <children>
-                              <TableView fx:id="tablaUsuario" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="590.0">
+                              <TableView fx:id="tablaUsuario" layoutX="20.0" layoutY="97.0" prefHeight="200.0" prefWidth="640.0">
                                  <columns>
                                     <TableColumn fx:id="colIdUsuario" prefWidth="60.0" text="ID" />
                                     <TableColumn fx:id="colNombreUsuario" prefWidth="120.0" text="Nombre" />
@@ -223,17 +246,27 @@
                                     <TableColumn fx:id="colPermisosUsuario" prefWidth="100.0" text="Rol" />
                                  </columns>
                               </TableView>
-                              <HBox alignment="BOTTOM_RIGHT" layoutX="14.0" layoutY="13.0" prefHeight="69.0" prefWidth="598.0" spacing="10.0">
+                              <HBox alignment="BOTTOM_RIGHT" layoutX="14.0" layoutY="13.0" prefHeight="69.0" prefWidth="640.0" spacing="10.0">
                                  <children>
-                                    <Button fx:id="btn_addUsuario" mnemonicParsing="false" onAction="#launch_newUser" text="Crear usuario" />
-                                    <Button fx:id="btn_borrarUsuario" mnemonicParsing="false" onAction="#borrarUsuario" text="Borrar usuario" />
-                                    <Button fx:id="btn_modUsuario" mnemonicParsing="false" onAction="#launch_modUsuario" text="Modificar usuario" />
+                                    <Button fx:id="btn_addUsuario" mnemonicParsing="true" onAction="#launch_newUser" text="_Crear usuario" />
+                                    <Button fx:id="btn_borrarUsuario" mnemonicParsing="true" onAction="#borrarUsuario" text="_Borrar usuario" />
+                                    <Button fx:id="btn_modUsuario" mnemonicParsing="true" onAction="#launch_modUsuario" text="_Modificar usuario" />
                                  </children>
                               </HBox>
                            </children>
                         </AnchorPane>
                      </children>
                   </StackPane>
+               </content>
+            </Tab>
+            <Tab text="Gráfico de Emisiones">
+               <content>
+                  <ScrollPane fx:id="scrollPaneGraph" fitToHeight="true" fitToWidth="true" prefHeight="400.0" prefWidth="680.0">
+                     <content>
+                        <AnchorPane fx:id="tab_graph_content" minHeight="400.0" minWidth="800.0" prefHeight="400.0" prefWidth="800.0">
+                        </AnchorPane>
+                     </content>
+                  </ScrollPane>
                </content>
             </Tab>
         </tabs>

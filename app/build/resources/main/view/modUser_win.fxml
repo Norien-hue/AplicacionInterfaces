@@ -52,8 +52,8 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
-            <Button fx:id="modUsuarioConfirmar" mnemonicParsing="false" onAction="#modUsuarioPulsado" text="Confirmar" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+            <Button fx:id="modUsuarioConfirmar" mnemonicParsing="true" onAction="#modUsuarioPulsado" text="_Confirmar" />
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
          </children>
       </HBox>
    </children>

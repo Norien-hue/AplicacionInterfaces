@@ -55,14 +55,12 @@ public class LoginController {
         String nombre = nombreUsuario.getText().trim();
         String contrasenia = contraseniaUsuario.getText();
         
-        // Validar que los campos no estén vacíos
         if(nombre.isEmpty() || contrasenia.isEmpty()) {
             mostrarError("Campos vacíos", "Por favor, ingresa tu nombre de usuario y contraseña.");
             return false;
         }
         
         try {
-            // Consultar el usuario en la base de datos
             String query = "SELECT Id_Usuario, Hash_Contraseña FROM Usuarios WHERE Nombre = ?";
             PreparedStatement pst = StartWin.conn.prepareStatement(query);
             pst.setString(1, nombre);
@@ -73,12 +71,9 @@ public class LoginController {
                 String hashAlmacenado = rs.getString("Hash_Contraseña");
                 int idUsuario = rs.getInt("Id_Usuario");
                 
-                // Generar el hash de la contraseña ingresada
                 String hashIngresado = "$2y$10$" + contrasenia.hashCode();
                 
-                // Comparar los hashes
                 if(hashAlmacenado.equals(hashIngresado)) {
-                    // Login exitoso - establecer el id_user estático en MainController
                     MainController.id_user = idUsuario;
                     System.out.println("Login exitoso. ID Usuario: " + idUsuario);
                     return true;

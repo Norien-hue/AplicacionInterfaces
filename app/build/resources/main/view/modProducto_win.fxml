@@ -42,8 +42,8 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="260.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_aceptar" mnemonicParsing="false" onAction="#modificarProducto" text="Aceptar" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="false" onAction="#kill" text="Cancelar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#modificarProducto" text="_Aceptar" />
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
          </children>
       </HBox>
    </children>
