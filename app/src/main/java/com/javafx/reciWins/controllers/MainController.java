@@ -206,7 +206,7 @@ public class MainController implements Initializable {
                 }
                 
                 yAxis.setAutoRanging(true);
-                yAxis.setAutoRangePadding(0.1); 
+                yAxis.setAutoRangePadding(0.5); 
                 
                 for (Usuario usuario : tablaUsuarioObservable) {
                     float emisiones = usuario.getEmisionesReducidas();
@@ -282,7 +282,6 @@ public class MainController implements Initializable {
             btn_products.setDisable(true);
             btn_transactions.setDisable(true);
             
-            // btn_save.setDisable(false); 
         } else {
             tabMain.getTabs().get(1).setDisable(false);
             btn_users.setDisable(false);
@@ -386,6 +385,10 @@ public class MainController implements Initializable {
             if (tablaTransacciones != null) tablaTransacciones.refresh();
             
             actualizarDatosUsuarioActualEnVista();
+
+            cargarDatosProductos();
+            cargarDatosTransacciones();
+            cargarDatosUsuarios();
             
             deseleccionarTodos();
         }else{
