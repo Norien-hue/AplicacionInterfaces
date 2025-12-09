@@ -74,6 +74,9 @@ public class NewProducto implements Initializable {
                 Producto nuevoProducto = new Producto(tipo, codigoBarras, nombre, emisiones, material);
                 MainController.tablaProductosObservable.add(nuevoProducto);
                 
+                // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE CREAR
+                MainController.actualizarVistasDesdeExterno();
+                
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);

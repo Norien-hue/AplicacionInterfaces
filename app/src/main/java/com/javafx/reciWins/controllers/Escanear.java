@@ -132,6 +132,9 @@ public class Escanear implements Initializable {
                     MainController.tablaTransaccionesObservable.add(nuevaTransaccion);
                 }
                 
+                // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DEL ESCANEO
+                MainController.actualizarVistasDesdeExterno();
+                
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setHeaderText("Escaneo completado");
                 alert.setContentText("Producto escaneado correctamente.\n" +

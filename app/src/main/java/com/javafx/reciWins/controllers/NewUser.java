@@ -77,6 +77,9 @@ public class NewUser implements Initializable {
                 );
                 MainController.tablaUsuarioObservable.add(nuevoUsuario);
                 
+                // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE CREAR
+                MainController.actualizarVistasDesdeExterno();
+                
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);

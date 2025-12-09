@@ -115,6 +115,9 @@ public class NewTransaccion implements Initializable {
                 Transaccion nuevaTransaccion = new Transaccion(idUsuario, tipo, codigoBarras, fecha, horaTime);
                 MainController.tablaTransaccionesObservable.add(nuevaTransaccion);
                 
+                // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE CREAR
+                MainController.actualizarVistasDesdeExterno();
+                
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);

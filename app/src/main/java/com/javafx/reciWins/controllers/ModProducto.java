@@ -1,8 +1,13 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Producto;
@@ -63,9 +68,37 @@ public class ModProducto implements Initializable {
             
             String tipoOriginal = StorageSharer.itemStorage.get(0);
             String codigoOriginal = StorageSharer.itemStorage.get(1);
+            float emisionesOriginales = Float.parseFloat(StorageSharer.itemStorage.get(3));
+            
+            // Calcular la diferencia de emisiones
+            float diferenciaEmisiones = emisiones - emisionesOriginales;
             
             try {
                 Statement stmt = StartWin.conn.createStatement();
+                
+                // 1. ACTUALIZAR EMISIONES DE USUARIOS SI HAY DIFERENCIA
+                if (diferenciaEmisiones != 0) {
+                    // Obtener todos los usuarios que han reciclado este producto
+                    Map<Integer, Integer> transaccionesPorUsuario = obtenerTransaccionesPorUsuario(tipoOriginal, Long.parseLong(codigoOriginal));
+                    
+                    // Para cada usuario, actualizar sus emisiones totales
+                    for (Map.Entry<Integer, Integer> entry : transaccionesPorUsuario.entrySet()) {
+                        int idUsuario = entry.getKey();
+                        int cantidadTransacciones = entry.getValue();
+                        float cambioTotal = diferenciaEmisiones * cantidadTransacciones;
+                        
+                        // Actualizar emisiones del usuario en la base de datos
+                        stmt.executeUpdate(
+                            "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
+                            + cambioTotal + " WHERE Id_Usuario = " + idUsuario
+                        );
+                        
+                        // Actualizar emisiones en la lista observable
+                        MainController.actualizarEmisionesUsuarioObservable(idUsuario, cambioTotal);
+                    }
+                }
+                
+                // 2. ACTUALIZAR EL PRODUCTO
                 stmt.executeUpdate(
                     "UPDATE Productos SET Tipo = '" + tipo + "', " +
                     "Numero_barras = '" + codigoBarras + "', " +
@@ -75,12 +108,35 @@ public class ModProducto implements Initializable {
                     "WHERE Tipo = '" + tipoOriginal + "' AND Numero_barras = '" + codigoOriginal + "'"
                 );
                 
+                // 3. ACTUALIZAR LAS TRANSACCIONES EXISTENTES
+                if (!tipo.equals(tipoOriginal) || codigoBarras != Long.parseLong(codigoOriginal)) {
+                    stmt.executeUpdate(
+                        "UPDATE Recicla SET Tipo = '" + tipo + "', " +
+                        "Numero_barras = '" + codigoBarras + "' " +
+                        "WHERE Tipo = '" + tipoOriginal + "' AND Numero_barras = '" + codigoOriginal + "'"
+                    );
+                }
+                
                 StorageSharer.itemToMod = new Producto(tipo, codigoBarras, nombre, emisiones, material);
                 MainController.modItem();
+                
+                // 4. ACTUALIZAR TODAS LAS VISTAS
+                MainController.actualizarVistasDesdeExterno();
+                
+                // 5. ACTUALIZAR LA VISTA PERSONAL DEL USUARIO ACTUAL SI ES NECESARIO
+                MainController.actualizarVistaPersonal();
                 
                 StorageSharer.itemToMod = null;
                 StorageSharer.itemStorage.clear();
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
+                
+                // Mostrar mensaje de éxito
+                Alert exito = new Alert(AlertType.INFORMATION);
+                exito.setHeaderText("Producto modificado");
+                exito.setContentText("El producto se modificó correctamente.\n" +
+                                   "Las emisiones de los usuarios afectados se han actualizado.");
+                exito.showAndWait();
+                
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
                 a.setHeaderText("Error al modificar");
@@ -89,6 +145,34 @@ public class ModProducto implements Initializable {
                 e.printStackTrace();
             }
         }
+    }
+
+    // Método para obtener las transacciones por usuario para un producto específico
+    private Map<Integer, Integer> obtenerTransaccionesPorUsuario(String tipo, long codigoBarras) {
+        Map<Integer, Integer> transaccionesPorUsuario = new HashMap<>();
+        
+        try {
+            String query = "SELECT Id_Usuario, COUNT(*) as Cantidad " +
+                          "FROM Recicla " +
+                          "WHERE Tipo = ? AND Numero_barras = ? " +
+                          "GROUP BY Id_Usuario";
+            
+            PreparedStatement pst = StartWin.conn.prepareStatement(query);
+            pst.setString(1, tipo);
+            pst.setLong(2, codigoBarras);
+            ResultSet rs = pst.executeQuery();
+            
+            while (rs.next()) {
+                int idUsuario = rs.getInt("Id_Usuario");
+                int cantidad = rs.getInt("Cantidad");
+                transaccionesPorUsuario.put(idUsuario, cantidad);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return transaccionesPorUsuario;
     }
 
     @Override

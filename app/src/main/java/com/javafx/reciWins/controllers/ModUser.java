@@ -98,6 +98,9 @@ public class ModUser implements Initializable {
                 
                 MainController.modItem();
                 
+                // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE MODIFICAR
+                MainController.actualizarVistasDesdeExterno();
+                
                 StorageSharer.itemToMod = null;
                 StorageSharer.itemPre = null;
                 StorageSharer.itemStorage.clear();

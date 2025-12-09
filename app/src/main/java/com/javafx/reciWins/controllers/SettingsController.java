@@ -94,6 +94,9 @@ public class SettingsController implements Initializable {
                 "UPDATE Usuarios SET Nombre = '" + nuevoNombre + "' WHERE Id_Usuario = " + idUsuario
             );
             
+            // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE MODIFICAR
+            MainController.actualizarVistasDesdeExterno();
+            
             Alert exito = new Alert(AlertType.INFORMATION);
             exito.setHeaderText("Cambios guardados");
             exito.setContentText("Los cambios se han guardado correctamente.");

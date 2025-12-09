@@ -146,6 +146,9 @@ public class ModTransaccion implements Initializable {
                 StorageSharer.itemToMod = new Transaccion(idUsuario, tipo, codigoBarras, fecha, horaTime);
                 MainController.modItem();
                 
+                // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE MODIFICAR
+                MainController.actualizarVistasDesdeExterno();
+                
                 StorageSharer.itemToMod = null;
                 StorageSharer.itemStorage.clear();
                 ((Stage)btn_cancelar.getScene().getWindow()).close();

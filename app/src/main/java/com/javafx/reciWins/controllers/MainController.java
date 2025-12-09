@@ -255,6 +255,27 @@ public class MainController implements Initializable {
         e.printStackTrace();
     }
 }
+
+    // MÉTODO PARA ACTUALIZAR TODAS LAS VISTAS
+    public void actualizarTodasLasVistas() {
+        cargarDatosUsuarioActual();
+        cargarDatosProductos();
+        cargarDatosTransacciones();
+        cargarDatosUsuarios();
+        
+        // Actualizar el gráfico si está visible
+        if (tabMain.getSelectionModel().getSelectedItem().getText().equals("Gráfico de Emisiones")) {
+            inicializarGrafico();
+        }
+    }
+    
+    public static void actualizarVistasDesdeExterno() {
+        if (instance != null) {
+            Platform.runLater(() -> {
+                instance.actualizarTodasLasVistas();
+            });
+        }
+    }
     
     private void actualizarDatosUsuarioActualEnVista() {
         try {
@@ -603,14 +624,61 @@ public class MainController implements Initializable {
             return;
         }
         
-        Producto e = tablaProductos.getSelectionModel().getSelectedItem();
-        if(e!=null){
+        Producto producto = tablaProductos.getSelectionModel().getSelectedItem();
+        if(producto != null){
+            // Primero: Restar emisiones de todos los usuarios que tengan transacciones con este producto
             try {
+                // 1. Obtener todas las transacciones de este producto
+                String queryTransacciones = "SELECT Id_Usuario, COUNT(*) as cantidad FROM Recicla WHERE Tipo = ? AND Numero_barras = ? GROUP BY Id_Usuario";
+                PreparedStatement pstTrans = conn.prepareStatement(queryTransacciones);
+                pstTrans.setString(1, producto.getTipo());
+                pstTrans.setLong(2, producto.getNumeroBarras());
+                ResultSet rsTrans = pstTrans.executeQuery();
+                
+                // 2. Para cada usuario, restar emisiones
+                while (rsTrans.next()) {
+                    int idUsuario = rsTrans.getInt("Id_Usuario");
+                    int cantidad = rsTrans.getInt("cantidad");
+                    float emisionesTotales = producto.getEmisionesReducibles() * cantidad;
+                    
+                    // Restar emisiones del usuario
+                    String updateUsuario = "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - ? WHERE Id_Usuario = ?";
+                    PreparedStatement pstUpdate = conn.prepareStatement(updateUsuario);
+                    pstUpdate.setFloat(1, emisionesTotales);
+                    pstUpdate.setInt(2, idUsuario);
+                    pstUpdate.executeUpdate();
+                    
+                    // Actualizar observable
+                    actualizarEmisionesUsuarioObservable(idUsuario, -emisionesTotales);
+                }
+                
+                // 3. Eliminar todas las transacciones asociadas al producto
                 Statement stmt = conn.createStatement();
-                stmt.executeUpdate("DELETE FROM Productos WHERE Numero_barras = '"+e.getNumeroBarras()+"' AND Tipo = '"+ e.getTipo()+"'");
-                tablaProductosObservable.remove(e);
-                cargarDatosProductos();
+                stmt.executeUpdate("DELETE FROM Recicla WHERE Tipo = '" + producto.getTipo() + "' AND Numero_barras = '" + producto.getNumeroBarras() + "'");
+                
+                // 4. Finalmente, eliminar el producto
+                stmt.executeUpdate("DELETE FROM Productos WHERE Tipo = '" + producto.getTipo() + "' AND Numero_barras = '" + producto.getNumeroBarras() + "'");
+                
+                // 5. Actualizar listas observables
+                tablaProductosObservable.remove(producto);
+                
+                // Actualizar transacciones observables
+                if (tablaTransaccionesObservable != null) {
+                    tablaTransaccionesObservable.removeIf(t -> 
+                        t.getTipo().equals(producto.getTipo()) && 
+                        t.getNumeroBarras() == producto.getNumeroBarras()
+                    );
+                }
+                
+                // 6. Actualizar todas las vistas
+                actualizarTodasLasVistas();
                 deseleccionarTodos();
+                
+                Alert alerta = new Alert(AlertType.INFORMATION);
+                alerta.setHeaderText("Producto eliminado");
+                alerta.setContentText("El producto y todas sus transacciones asociadas han sido eliminados.\nLas emisiones de los usuarios afectados se han actualizado.");
+                alerta.showAndWait();
+                
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
                 alerta.setHeaderText("Error al eliminar");
@@ -618,10 +686,10 @@ public class MainController implements Initializable {
                 alerta.showAndWait();
                 ex.printStackTrace();
             }
-        }else{
+        } else {
             Alert alerta = new Alert(AlertType.WARNING);
-            alerta.setHeaderText("Error de seleccion");
-            alerta.setContentText("Selecciona un elemento");
+            alerta.setHeaderText("Error de selección");
+            alerta.setContentText("Selecciona un producto para eliminar");
             alerta.showAndWait();
         }
     }
@@ -653,8 +721,9 @@ public class MainController implements Initializable {
                 }
                 
                 tablaTransaccionesObservable.remove(e);
-                cargarDatosTransacciones();
-                cargarDatosUsuarios();
+                
+                // Actualizar todas las vistas después de borrar
+                actualizarTodasLasVistas();
                 deseleccionarTodos();
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
@@ -705,14 +774,51 @@ public class MainController implements Initializable {
             return;
         }
         
-        Usuario e = tablaUsuario.getSelectionModel().getSelectedItem();
-        if(e!=null){
+        Usuario usuario = tablaUsuario.getSelectionModel().getSelectedItem();
+        if(usuario != null){
             try {
+                // Primero: Obtener todas las transacciones del usuario para restar emisiones
+                String queryTransacciones = "SELECT r.Tipo, r.Numero_barras, p.Emisiones_Reducibles " +
+                                        "FROM Recicla r " +
+                                        "JOIN Productos p ON r.Tipo = p.Tipo AND r.Numero_barras = p.Numero_barras " +
+                                        "WHERE r.Id_Usuario = ?";
+                PreparedStatement pstTrans = conn.prepareStatement(queryTransacciones);
+                pstTrans.setInt(1, usuario.getIdUsuario());
+                ResultSet rsTrans = pstTrans.executeQuery();
+                
+                // Calcular total de emisiones a restar
+                float totalEmisiones = 0;
+                while (rsTrans.next()) {
+                    totalEmisiones += rsTrans.getFloat("Emisiones_Reducibles");
+                }
+                
+                // Restar emisiones del usuario (aunque se vaya a eliminar, mantenemos consistencia)
+                // NOTA: En realidad, como el usuario se eliminará, esto no es necesario pero mantiene consistencia
+                
+                // Eliminar todas las transacciones del usuario
                 Statement stmt = conn.createStatement();
-                stmt.executeUpdate("DELETE FROM Usuarios WHERE Id_Usuario = '"+e.getIdUsuario()+"'");
-                tablaUsuarioObservable.remove(e);
-                cargarDatosUsuarios();
+                stmt.executeUpdate("DELETE FROM Recicla WHERE Id_Usuario = '" + usuario.getIdUsuario() + "'");
+                
+                // Finalmente, eliminar el usuario
+                stmt.executeUpdate("DELETE FROM Usuarios WHERE Id_Usuario = '" + usuario.getIdUsuario() + "'");
+                
+                // Actualizar listas observables
+                tablaUsuarioObservable.remove(usuario);
+                
+                // Actualizar transacciones observables
+                if (tablaTransaccionesObservable != null) {
+                    tablaTransaccionesObservable.removeIf(t -> t.getIdUsuario() == usuario.getIdUsuario());
+                }
+                
+                // Actualizar todas las vistas
+                actualizarTodasLasVistas();
                 deseleccionarTodos();
+                
+                Alert alerta = new Alert(AlertType.INFORMATION);
+                alerta.setHeaderText("Usuario eliminado");
+                alerta.setContentText("El usuario y todas sus transacciones han sido eliminados.");
+                alerta.showAndWait();
+                
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
                 alerta.setHeaderText("Error al eliminar");
@@ -720,10 +826,10 @@ public class MainController implements Initializable {
                 alerta.showAndWait();
                 ex.printStackTrace();
             }
-        }else{
+        } else {
             Alert alerta = new Alert(AlertType.WARNING);
-            alerta.setHeaderText("Error de seleccion");
-            alerta.setContentText("Selecciona un elemento");
+            alerta.setHeaderText("Error de selección");
+            alerta.setContentText("Selecciona un usuario para eliminar");
             alerta.showAndWait();
         }
     }
@@ -818,6 +924,8 @@ public class MainController implements Initializable {
                 Usuario usuarioModificado = (Usuario) o;
                 controller.tablaUsuario.refresh();
                 controller.cargarDatosUsuarios();
+                // Actualizar TODAS las vistas
+                controller.actualizarTodasLasVistas();
                 // Si es el usuario actual, actualizar también la vista personal
                 if (usuarioModificado.getIdUsuario() == id_user) {
                     controller.actualizarDatosUsuarioActualEnVista();
@@ -825,11 +933,15 @@ public class MainController implements Initializable {
             } else if (o instanceof Producto) {
                 controller.tablaProductos.refresh();
                 controller.cargarDatosProductos();
+                // Actualizar TODAS las vistas
+                controller.actualizarTodasLasVistas();
             } else if (o instanceof Transaccion) {
                 Transaccion transaccionModificada = (Transaccion) o;
                 controller.tablaTransacciones.refresh();
                 controller.cargarDatosTransacciones();
                 controller.cargarDatosUsuarios();
+                // Actualizar TODAS las vistas
+                controller.actualizarTodasLasVistas();
                 // Si la transacción es del usuario actual, actualizar la vista personal
                 if (transaccionModificada.getIdUsuario() == id_user) {
                     controller.actualizarDatosUsuarioActualEnVista();
