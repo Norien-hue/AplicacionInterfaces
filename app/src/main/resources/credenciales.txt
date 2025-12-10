@@ -1,0 +1,7 @@
+Usuario con rol de administrador:
+    Nombre: Admin
+    Contraseña: admin1234
+
+Usuario con rol de cliente:
+    Nombre: User
+    Contraseña: user1234

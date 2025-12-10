@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 01-12-2025 a las 11:20:50
+-- Tiempo de generación: 10-12-2025 a las 09:43:08
 -- Versión del servidor: 5.7.35-0ubuntu0.18.04.2
 -- Versión de PHP: 8.0.10
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `reciclaje_db`
+-- Base de datos: `reciInventario_db`
 --
 
 -- --------------------------------------------------------
@@ -41,8 +41,9 @@ CREATE TABLE `Productos` (
 --
 
 INSERT INTO `Productos` (`Tipo`, `Numero_barras`, `Nombre`, `Emisiones_Reducibles`, `Material`, `Imagen`) VALUES
+('EAN13', 123456789, 'Botellin 2.0', 0.1, 'PET', NULL),
 ('EAN13', 8410031961234, 'Botella agua 50cl Bezoya', 1.2, 'PET', NULL),
-('EAN13', 8410031961241, 'Botella agua 1L Bezoya', 2.1, 'PET', NULL),
+('EAN13', 8410031961241, 'Botella agua 1L Bezoya', 200, 'PET', NULL),
 ('EAN13', 8410100222224, 'Brick leche 1L Pascual', 1.7, 'Brick', NULL),
 ('EAN13', 8410123151234, 'Yogur natural Danone', 0.5, 'Plástico', NULL),
 ('EAN13', 8410314021012, 'Botella cerveza 33cl Mahou', 1.5, 'Vidrio', NULL),
@@ -71,14 +72,12 @@ CREATE TABLE `Recicla` (
 --
 
 INSERT INTO `Recicla` (`Id_Usuario`, `Tipo`, `Numero_barras`, `Fecha`, `Hora`) VALUES
-(1, 'EAN13', 8410031961234, '2024-01-15', '09:30:00'),
-(3, 'EAN13', 8410100222224, '2024-01-17', '16:45:00'),
-(2, 'EAN13', 8410123151234, '2024-01-20', '14:30:00'),
-(1, 'EAN13', 8410376101246, '2024-01-15', '09:32:00'),
-(1, 'EAN13', 8410596004108, '2024-01-19', '10:00:00'),
-(5, 'EAN13', 8410654012345, '2024-01-21', '18:15:00'),
-(3, 'EAN13', 8437001234567, '2024-01-22', '12:00:00'),
-(2, 'EAN13', 8480000178324, '2024-01-16', '11:15:00');
+(13, 'EAN13', 8410031961241, '2025-12-09', '19:19:59'),
+(12, 'EAN13', 8410123151234, '2025-12-09', '14:38:29'),
+(13, 'EAN13', 8410314021012, '2025-12-09', '12:28:46'),
+(15, 'EAN13', 8410314021012, '2025-12-09', '12:25:42'),
+(13, 'EAN13', 8410376101246, '2025-12-09', '19:19:38'),
+(12, 'EAN13', 8410596004108, '2025-12-09', '18:59:25');
 
 -- --------------------------------------------------------
 
@@ -100,10 +99,11 @@ CREATE TABLE `Usuarios` (
 --
 
 INSERT INTO `Usuarios` (`Id_Usuario`, `Emisiones_Reducidas`, `Hash_Contraseña`, `Permisos`, `Nombre`, `TAP`) VALUES
-(1, 15.5, '$2y$10$abc123def456ghi789jkl', 'cliente', 'maria_garcia', 12345),
-(2, 28.3, '$2y$10$xyz789uvw012abc345def', 'cliente', 'carlos_ruiz', 67890),
-(3, 0, '$2y$10$admin123hash456secure', 'administrador', 'admin_recicla', 54321),
-(5, 42.1, '$2y$10$anotherhash7890123456', 'cliente', 'javier_lopez', 13579);
+(12, 4.7, '$2y$10$20761617', 'administrador', 'Admin', 224969),
+(13, 4.4, '$2y$10$-267577715', 'cliente', 'User', 824330),
+(15, 1.5, '$2y$10$-995380578', 'cliente', 'Antonio Rueda', NULL),
+(16, 0, '$2y$10$983918467', 'cliente', 'PepitoPalotes', NULL),
+(18, 0, '$2y$10$-995380578', 'administrador', 'Profesor', NULL);
 
 --
 -- Índices para tablas volcadas
@@ -137,7 +137,7 @@ ALTER TABLE `Usuarios`
 -- AUTO_INCREMENT de la tabla `Usuarios`
 --
 ALTER TABLE `Usuarios`
-  MODIFY `Id_Usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `Id_Usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- Restricciones para tablas volcadas
