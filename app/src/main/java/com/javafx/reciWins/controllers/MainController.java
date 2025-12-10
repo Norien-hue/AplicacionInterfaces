@@ -34,6 +34,13 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.SequentialTransition;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+
 import java.net.URL;
 import java.sql.*;
 import java.util.HashSet;
@@ -52,7 +59,6 @@ public class MainController implements Initializable {
     @FXML private AnchorPane tab_graph_content;
     @FXML private ScrollPane scrollPaneGraph;
     @FXML private Button btn_graph;
-
     @FXML private Button btn_addProducto;
     @FXML private Button btn_addTransaccion;
     @FXML private Button btn_addUsuario;
@@ -63,25 +69,21 @@ public class MainController implements Initializable {
     @FXML private Button btn_settings;
     @FXML private Button btn_transactions;
     @FXML private Button btn_users;
-    
     @FXML private Button btn_borrarProducto;
     @FXML private Button btn_borrarTransaccion;
     @FXML private Button btn_borrarUsuario;
-    
     @FXML private Button btn_modProducto;
     @FXML private Button btn_modTransaccion;
     @FXML private Button btn_modUsuario;
-    
     @FXML private TabPane tabMain;
     @FXML private AnchorPane tab_product;
     @FXML private AnchorPane tab_transaccion;
     @FXML private AnchorPane tab_usuario;
-    
     @FXML private Label nombreBD;
     @FXML private Label saldoBD;
     @FXML private Label rolBD;
-    
     @FXML private Button btn_generarTap;
+    @FXML private VBox rootVBox; 
 
     @FXML 
     private TableView<Producto> tablaProductos;
@@ -150,6 +152,8 @@ public class MainController implements Initializable {
         instance = this;
         conn = StartWin.conn;
         
+        aplicarAnimacionEntrada();
+        
         cargarDatosUsuarioActual();
         
         configurarColumnasProductos();
@@ -164,103 +168,170 @@ public class MainController implements Initializable {
         
         configurarTooltips();
         
+        configurarAnimacionesTab();
+        
         tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab != null && newTab.getText().equals("Gráfico de Emisiones")) {
                 Platform.runLater(() -> {inicializarGrafico();});
             }
         });
+    }
+
+    private void aplicarAnimacionEntrada() {
+        if (rootVBox != null) {
+            rootVBox.setOpacity(0);
+            
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(800), rootVBox);
+            fadeIn.setFromValue(0);    
+            fadeIn.setToValue(1);      
+            fadeIn.setCycleCount(1);   
+            
+            fadeIn.setDelay(Duration.millis(200));
+            
+            fadeIn.play();
+        }
+    }
+
+    private void configurarAnimacionesTab() {
+        tabMain.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+            if (oldTab != null && newTab != null) {
+                Node oldContent = oldTab.getContent();
+                Node newContent = newTab.getContent();
+                
+                animarCambioDeTab(oldContent, newContent);
+            }
+        });
+    }
+
+    private void animarCambioDeTab(Node nodoSaliente, Node nodoEntrante) {
+        if (nodoSaliente == null || nodoEntrante == null) return;
         
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), nodoSaliente);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), nodoEntrante);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        
+        nodoEntrante.setOpacity(0);
+        
+        SequentialTransition sequentialTransition = new SequentialTransition(fadeOut, fadeIn);
+        sequentialTransition.play();
+    }
+
+
+    private void animarCambioDeVistaTablas(Node vistaActual, Node nuevaVista) {
+        if (vistaActual == null || nuevaVista == null) return;
+        
+        FadeTransition fadeOutActual = new FadeTransition(Duration.millis(250), vistaActual);
+        fadeOutActual.setFromValue(1.0);
+        fadeOutActual.setToValue(0.0);
+        
+        FadeTransition fadeInNueva = new FadeTransition(Duration.millis(250), nuevaVista);
+        fadeInNueva.setFromValue(0.0);
+        fadeInNueva.setToValue(1.0);
+        
+        nuevaVista.setOpacity(0);
+        nuevaVista.setVisible(true);
+        
+        SequentialTransition sequentialTransition = new SequentialTransition(fadeOutActual, fadeInNueva);
+        
+        sequentialTransition.setOnFinished(event -> {
+            vistaActual.setVisible(false);
+            vistaActual.setOpacity(1); 
+        });
+        
+        sequentialTransition.play();
     }
 
     private void inicializarGrafico() {
-    try {
-        tab_graph_content.getChildren().clear();
-        
-        XYChart chart = new XYChart();
-        chart.setPrefSize(800, 400);
-        
-        DefaultNumericAxis xAxis = new DefaultNumericAxis("Usuarios", 0, 1, 1);
-        DefaultNumericAxis yAxis = new DefaultNumericAxis("Emisiones Reducidas (kg CO₂)", 0, 1, 1);
-        
-        xAxis.setAnimated(false);
-        yAxis.setAnimated(false);
-        
-        chart.getAxes().clear();
-        chart.getAxes().addAll(xAxis, yAxis);
-        
-        ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
-        chart.getRenderers().clear();
-        chart.getRenderers().add(renderer);
-        
-        DefaultErrorDataSet dataSet = new DefaultErrorDataSet("Emisiones por Usuario");
-        
-        if (tablaUsuarioObservable != null && !tablaUsuarioObservable.isEmpty()) {
-            final Map<Integer, String> nombresPorIndice = new java.util.HashMap<>();
+        try {
+            tab_graph_content.getChildren().clear();
             
-            yAxis.setAutoRanging(true);
-            yAxis.setAutoRangePadding(0.1); 
+            XYChart chart = new XYChart();
+            chart.setPrefSize(800, 400);
             
-            int index = 0;
-            for (Usuario usuario : tablaUsuarioObservable) {
-                float emisiones = usuario.getEmisionesReducidas();
-                String nombre = usuario.getNombre();
+            DefaultNumericAxis xAxis = new DefaultNumericAxis("Usuarios", 0, 1, 1);
+            DefaultNumericAxis yAxis = new DefaultNumericAxis("Emisiones Reducidas (kg CO₂)", 0, 1, 1);
+            
+            xAxis.setAnimated(false);
+            yAxis.setAnimated(false);
+            
+            chart.getAxes().clear();
+            chart.getAxes().addAll(xAxis, yAxis);
+            
+            ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+            chart.getRenderers().clear();
+            chart.getRenderers().add(renderer);
+            
+            DefaultErrorDataSet dataSet = new DefaultErrorDataSet("Emisiones por Usuario");
+            
+            if (tablaUsuarioObservable != null && !tablaUsuarioObservable.isEmpty()) {
+                final Map<Integer, String> nombresPorIndice = new java.util.HashMap<>();
                 
-                String label = nombre.length() > 8 ? 
-                    nombre.substring(0, Math.min(12, nombre.length())) : 
-                    nombre;
-                if (nombre.length() > 12) {
-                    label += "...";
+                yAxis.setAutoRanging(true);
+                yAxis.setAutoRangePadding(0.1); 
+                
+                int index = 0;
+                for (Usuario usuario : tablaUsuarioObservable) {
+                    float emisiones = usuario.getEmisionesReducidas();
+                    String nombre = usuario.getNombre();
+                    
+                    String label = nombre.length() > 8 ? 
+                        nombre.substring(0, Math.min(12, nombre.length())) : 
+                        nombre;
+                    if (nombre.length() > 12) {
+                        label += "...";
+                    }
+                    
+                    nombresPorIndice.put(index, label);
+                    dataSet.add(index, emisiones, 0, 0);
+                    index++;
                 }
                 
-                nombresPorIndice.put(index, label);
-                dataSet.add(index, emisiones, 0, 0);
-                index++;
+                SimpleFormatter formatter = new SimpleFormatter(xAxis) {
+                    @Override
+                    public String toString(Number object) {
+                        int idx = object.intValue();
+                        return nombresPorIndice.getOrDefault(idx, "");
+                    }
+                };
+                
+                xAxis.setAxisLabelFormatter(formatter);
+                
+                xAxis.setAutoRanging(true);
+                xAxis.setAutoRangePadding(0.2);
+                
+                renderer.setDrawBars(true);
+                renderer.setBarWidth(1); 
+                
+                chart.getDatasets().add(dataSet);
+            } else {
+                DefaultErrorDataSet emptyDataSet = new DefaultErrorDataSet("No hay datos disponibles");
+                chart.getDatasets().add(emptyDataSet);
             }
             
-            SimpleFormatter formatter = new SimpleFormatter(xAxis) {
-                @Override
-                public String toString(Number object) {
-                    int idx = object.intValue();
-                    return nombresPorIndice.getOrDefault(idx, "");
-                }
-            };
+            chart.setLegendVisible(false);
             
-            xAxis.setAxisLabelFormatter(formatter);
+            AnchorPane.setTopAnchor(chart, 10.0);
+            AnchorPane.setBottomAnchor(chart, 10.0);
+            AnchorPane.setLeftAnchor(chart, 10.0);
+            AnchorPane.setRightAnchor(chart, 10.0);
             
-            xAxis.setAutoRanging(true);
-            xAxis.setAutoRangePadding(0.2);
+            tab_graph_content.getChildren().add(chart);
             
-            renderer.setDrawBars(true);
-            renderer.setBarWidth(1); 
-            
-            chart.getDatasets().add(dataSet);
-        } else {
-            DefaultErrorDataSet emptyDataSet = new DefaultErrorDataSet("No hay datos disponibles");
-            chart.getDatasets().add(emptyDataSet);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        chart.setLegendVisible(false);
-        
-        AnchorPane.setTopAnchor(chart, 10.0);
-        AnchorPane.setBottomAnchor(chart, 10.0);
-        AnchorPane.setLeftAnchor(chart, 10.0);
-        AnchorPane.setRightAnchor(chart, 10.0);
-        
-        tab_graph_content.getChildren().add(chart);
-        
-    } catch (Exception e) {
-        e.printStackTrace();
     }
-}
 
-    // MÉTODO PARA ACTUALIZAR TODAS LAS VISTAS
     public void actualizarTodasLasVistas() {
         cargarDatosUsuarioActual();
         cargarDatosProductos();
         cargarDatosTransacciones();
         cargarDatosUsuarios();
         
-        // Actualizar el gráfico si está visible
         if (tabMain.getSelectionModel().getSelectedItem().getText().equals("Gráfico de Emisiones")) {
             inicializarGrafico();
         }
@@ -293,7 +364,6 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
     }
-
 
     @FXML
     void tab_graph(ActionEvent event) {
@@ -329,14 +399,14 @@ public class MainController implements Initializable {
     }
 
     private void configurarTooltips() {
-    btn_personal.setTooltip(new Tooltip("Personal"));
-    btn_users.setTooltip(new Tooltip("Usuarios"));
-    btn_products.setTooltip(new Tooltip("Productos"));
-    btn_transactions.setTooltip(new Tooltip("Transacciones"));
-    btn_graph.setTooltip(new Tooltip("Gráfico de Emisiones")); 
-    btn_settings.setTooltip(new Tooltip("Ajustes"));
-    btn_generarTap.setTooltip(new Tooltip("Generar un nuevo número TAP"));
-    btn_exit.setTooltip(new Tooltip("Cerrar sesión"));
+        btn_personal.setTooltip(new Tooltip("Personal"));
+        btn_users.setTooltip(new Tooltip("Usuarios"));
+        btn_products.setTooltip(new Tooltip("Productos"));
+        btn_transactions.setTooltip(new Tooltip("Transacciones"));
+        btn_graph.setTooltip(new Tooltip("Gráfico de Emisiones")); 
+        btn_settings.setTooltip(new Tooltip("Ajustes"));
+        btn_generarTap.setTooltip(new Tooltip("Generar un nuevo número TAP"));
+        btn_exit.setTooltip(new Tooltip("Cerrar sesión"));
     }
 
     private void deseleccionarTodos() {
@@ -541,9 +611,21 @@ public class MainController implements Initializable {
         
         deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
-        tab_product.setVisible(true);
-        tab_transaccion.setVisible(false);
-        tab_usuario.setVisible(false);
+        
+        if (tab_transaccion.isVisible() || tab_usuario.isVisible()) {
+            Node vistaActual = null;
+            if (tab_transaccion.isVisible()) vistaActual = tab_transaccion;
+            if (tab_usuario.isVisible()) vistaActual = tab_usuario;
+            
+            animarCambioDeVistaTablas(vistaActual, tab_product);
+        } else {
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), tab_product);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            tab_product.setOpacity(0);
+            tab_product.setVisible(true);
+            fadeIn.play();
+        }
     }
 
     @FXML
@@ -555,9 +637,21 @@ public class MainController implements Initializable {
         
         deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
-        tab_product.setVisible(false);
-        tab_transaccion.setVisible(true);
-        tab_usuario.setVisible(false);
+        
+        if (tab_product.isVisible() || tab_usuario.isVisible()) {
+            Node vistaActual = null;
+            if (tab_product.isVisible()) vistaActual = tab_product;
+            if (tab_usuario.isVisible()) vistaActual = tab_usuario;
+            
+            animarCambioDeVistaTablas(vistaActual, tab_transaccion);
+        } else {
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), tab_transaccion);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            tab_transaccion.setOpacity(0);
+            tab_transaccion.setVisible(true);
+            fadeIn.play();
+        }
     }
 
     @FXML
@@ -569,9 +663,21 @@ public class MainController implements Initializable {
         
         deseleccionarTodos();
         tabMain.getSelectionModel().select(1);
-        tab_product.setVisible(false);
-        tab_transaccion.setVisible(false);
-        tab_usuario.setVisible(true);
+        
+        if (tab_product.isVisible() || tab_transaccion.isVisible()) {
+            Node vistaActual = null;
+            if (tab_product.isVisible()) vistaActual = tab_product;
+            if (tab_transaccion.isVisible()) vistaActual = tab_transaccion;
+            
+            animarCambioDeVistaTablas(vistaActual, tab_usuario);
+        } else {
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), tab_usuario);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            tab_usuario.setOpacity(0);
+            tab_usuario.setVisible(true);
+            fadeIn.play();
+        }
     }
 
     @FXML
@@ -622,43 +728,34 @@ public class MainController implements Initializable {
         
         Producto producto = tablaProductos.getSelectionModel().getSelectedItem();
         if(producto != null){
-            // Primero: Restar emisiones de todos los usuarios que tengan transacciones con este producto
             try {
-                // 1. Obtener todas las transacciones de este producto
                 String queryTransacciones = "SELECT Id_Usuario, COUNT(*) as cantidad FROM Recicla WHERE Tipo = ? AND Numero_barras = ? GROUP BY Id_Usuario";
                 PreparedStatement pstTrans = conn.prepareStatement(queryTransacciones);
                 pstTrans.setString(1, producto.getTipo());
                 pstTrans.setLong(2, producto.getNumeroBarras());
                 ResultSet rsTrans = pstTrans.executeQuery();
                 
-                // 2. Para cada usuario, restar emisiones
                 while (rsTrans.next()) {
                     int idUsuario = rsTrans.getInt("Id_Usuario");
                     int cantidad = rsTrans.getInt("cantidad");
                     float emisionesTotales = producto.getEmisionesReducibles() * cantidad;
                     
-                    // Restar emisiones del usuario
                     String updateUsuario = "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas - ? WHERE Id_Usuario = ?";
                     PreparedStatement pstUpdate = conn.prepareStatement(updateUsuario);
                     pstUpdate.setFloat(1, emisionesTotales);
                     pstUpdate.setInt(2, idUsuario);
                     pstUpdate.executeUpdate();
                     
-                    // Actualizar observable
                     actualizarEmisionesUsuarioObservable(idUsuario, -emisionesTotales);
                 }
                 
-                // 3. Eliminar todas las transacciones asociadas al producto
                 Statement stmt = conn.createStatement();
                 stmt.executeUpdate("DELETE FROM Recicla WHERE Tipo = '" + producto.getTipo() + "' AND Numero_barras = '" + producto.getNumeroBarras() + "'");
                 
-                // 4. Finalmente, eliminar el producto
                 stmt.executeUpdate("DELETE FROM Productos WHERE Tipo = '" + producto.getTipo() + "' AND Numero_barras = '" + producto.getNumeroBarras() + "'");
                 
-                // 5. Actualizar listas observables
                 tablaProductosObservable.remove(producto);
                 
-                // Actualizar transacciones observables
                 if (tablaTransaccionesObservable != null) {
                     tablaTransaccionesObservable.removeIf(t -> 
                         t.getTipo().equals(producto.getTipo()) && 
@@ -666,7 +763,6 @@ public class MainController implements Initializable {
                     );
                 }
                 
-                // 6. Actualizar todas las vistas
                 actualizarTodasLasVistas();
                 deseleccionarTodos();
                 
@@ -730,7 +826,6 @@ public class MainController implements Initializable {
                 
                 tablaTransaccionesObservable.remove(e);
                 
-                // Actualizar todas las vistas después de borrar
                 actualizarTodasLasVistas();
                 deseleccionarTodos();
             } catch (Exception ex) {
@@ -793,7 +888,6 @@ public class MainController implements Initializable {
         Usuario usuario = tablaUsuario.getSelectionModel().getSelectedItem();
         if(usuario != null){
             try {
-                // Primero: Obtener todas las transacciones del usuario para restar emisiones
                 String queryTransacciones = "SELECT r.Tipo, r.Numero_barras, p.Emisiones_Reducibles " +
                                         "FROM Recicla r " +
                                         "JOIN Productos p ON r.Tipo = p.Tipo AND r.Numero_barras = p.Numero_barras " +
@@ -802,31 +896,23 @@ public class MainController implements Initializable {
                 pstTrans.setInt(1, usuario.getIdUsuario());
                 ResultSet rsTrans = pstTrans.executeQuery();
                 
-                // Calcular total de emisiones a restar
                 float totalEmisiones = 0;
                 while (rsTrans.next()) {
                     totalEmisiones += rsTrans.getFloat("Emisiones_Reducibles");
                 }
                 
-                // Restar emisiones del usuario (aunque se vaya a eliminar, mantenemos consistencia)
-                // NOTA: En realidad, como el usuario se eliminará, esto no es necesario pero mantiene consistencia
                 
-                // Eliminar todas las transacciones del usuario
                 Statement stmt = conn.createStatement();
                 stmt.executeUpdate("DELETE FROM Recicla WHERE Id_Usuario = '" + usuario.getIdUsuario() + "'");
                 
-                // Finalmente, eliminar el usuario
                 stmt.executeUpdate("DELETE FROM Usuarios WHERE Id_Usuario = '" + usuario.getIdUsuario() + "'");
                 
-                // Actualizar listas observables
                 tablaUsuarioObservable.remove(usuario);
                 
-                // Actualizar transacciones observables
                 if (tablaTransaccionesObservable != null) {
                     tablaTransaccionesObservable.removeIf(t -> t.getIdUsuario() == usuario.getIdUsuario());
                 }
                 
-                // Actualizar todas las vistas
                 actualizarTodasLasVistas();
                 deseleccionarTodos();
                 
@@ -945,32 +1031,26 @@ public class MainController implements Initializable {
                 }
             }
         }
-        // Actualizar las vistas
         MainController controller = getInstance();
         if (controller != null) {
             if (o instanceof Usuario) {
                 Usuario usuarioModificado = (Usuario) o;
                 controller.tablaUsuario.refresh();
                 controller.cargarDatosUsuarios();
-                // Actualizar TODAS las vistas
                 controller.actualizarTodasLasVistas();
-                // Si es el usuario actual, actualizar también la vista personal
                 if (usuarioModificado.getIdUsuario() == id_user) {
                     controller.actualizarDatosUsuarioActualEnVista();
                 }
             } else if (o instanceof Producto) {
                 controller.tablaProductos.refresh();
                 controller.cargarDatosProductos();
-                // Actualizar TODAS las vistas
                 controller.actualizarTodasLasVistas();
             } else if (o instanceof Transaccion) {
                 Transaccion transaccionModificada = (Transaccion) o;
                 controller.tablaTransacciones.refresh();
                 controller.cargarDatosTransacciones();
                 controller.cargarDatosUsuarios();
-                // Actualizar TODAS las vistas
                 controller.actualizarTodasLasVistas();
-                // Si la transacción es del usuario actual, actualizar la vista personal
                 if (transaccionModificada.getIdUsuario() == id_user) {
                     controller.actualizarDatosUsuarioActualEnVista();
                 }
@@ -978,7 +1058,6 @@ public class MainController implements Initializable {
         }
     }
 
-    // Método público para actualizar la vista personal desde otros controladores
     public static void actualizarVistaPersonal() {
         MainController controller = getInstance();
         if (controller != null) {

@@ -11,7 +11,7 @@
 
 <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="322.0" prefWidth="295.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.LoginController">
    <children>
-      <Label alignment="CENTER" prefHeight="62.0" prefWidth="274.0" text="ReciInventario">
+      <Label id="titulo-principal" alignment="CENTER" prefHeight="62.0" prefWidth="274.0" text="ReciInventario">
          <font>
             <Font size="36.0" />
          </font>

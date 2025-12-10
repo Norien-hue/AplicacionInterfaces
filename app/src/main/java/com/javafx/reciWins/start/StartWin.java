@@ -1,5 +1,16 @@
 package com.javafx.reciWins.start;
 
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -7,15 +18,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
-
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 /**
  *
@@ -56,13 +60,18 @@ public class StartWin extends Application {
     @Override
     public void start(Stage primeraEscena) throws Exception {
         primaryStage = primeraEscena;
-        Parent root = FXMLLoader.load(this.getClass().getResource("/view/loginStart_win.fxml"));
+        
+        // Establecer conexión a BD
+        establecerConexionBD();
+        
+        // Cargar icono
+        cargarIcono();
+        
+        // Mostrar ventana de login
+        mostrarLogin();
+    }
 
-        Scene scene = new Scene(root);
-        primeraEscena.setScene(scene);
-        primeraEscena.setTitle("Reci Inventario");
-        primeraEscena.show();
-
+    private void establecerConexionBD() {
         try {
             Properties props = new Properties();
             URL configUrl = getClass().getResource("/configuration.properties");
@@ -76,194 +85,157 @@ public class StartWin extends Application {
             System.out.println("Conexión a BD establecida correctamente");
         } catch (Exception e) {
             System.out.println("Error al conectar con la base de datos: " + e.getMessage());
+            Alert a = new Alert(AlertType.ERROR);
+            a.setHeaderText("Error de conexión");
+            a.setContentText("Error al conectar con la base de datos: " + e.getMessage());
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+            a.showAndWait();
+            System.exit(1);
         }
-
-        icon = new Image(this.getClass().getResourceAsStream("/img/logo.png"));
-        primeraEscena.getIcons().add(icon);
     }
-    //dios todo esto era mucho mas facil de lo que parecia solo que da error por alguna razon si intento cargarlo de golpe en ugar de dividirlo entre new FXML y luego load?¿
 
+    private void cargarIcono() {
+        icon = new Image(getClass().getResourceAsStream("/img/logo.png"));
+    }
 
-    public static void mostrarRegistro(){
+    // ===== MÉTODOS PARA CSS =====
+    private static void aplicarEstilosCSS(Scene scene) {
         try {
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/singUp_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            primaryStage.setScene(scene);
-        } catch (IOException e) {
+            // Cargar CSS desde resources/css/styles.css
+            URL cssUrl = StartWin.class.getResource("/css/styles.css");
+            if (cssUrl != null) {
+                String cssUrlString = cssUrl.toExternalForm();
+                scene.getStylesheets().add(cssUrlString);
+                System.out.println("CSS cargado correctamente desde: " + cssUrlString);
+            } else {
+                System.err.println("CSS no encontrado en resources/css/styles.css");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al cargar CSS: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    // ===== MÉTODOS PARA ICONOS =====
+    private static void agregarIcono(Stage stage) {
+        if (icon != null) {
+            stage.getIcons().add(icon);
+        }
+    }
+
+    private static void configurarIconoAlert(Alert alert) {
+        try {
+            Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+            agregarIcono(alertStage);
+        } catch (Exception e) {
+            // Ignorar si no se puede configurar
+        }
+    }
+
+    // ===== VENTANAS PRINCIPALES =====
+    public static void mostrarLogin() {
+        cargarVentana("/view/loginStart_win.fxml", "Reci Inventario");
+    }
+
+    public static void mostrarRegistro(){
+        cargarVentana("/view/singUp_win.fxml", "Reci Inventario - Registro");
     }
 
     public static void mostrarMain(){
+        cargarVentana("/view/main_win.fxml", "Reci Inventario - Principal");
+    }
+
+    private static void cargarVentana(String fxml, String titulo) {
         try {
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/main_win.fxml"));
+            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource(fxml));
             Scene scene = new Scene(loader.load());
+            aplicarEstilosCSS(scene);
+            
+            primaryStage.setTitle(titulo);
             primaryStage.setScene(scene);
+            agregarIcono(primaryStage);
+            
+            if (!primaryStage.isShowing()) {
+                primaryStage.show();
+            }
         } catch (IOException e) {
             e.printStackTrace();
+            Alert a = new Alert(AlertType.ERROR);
+            a.setHeaderText("Error al cargar la ventana");
+            a.setContentText("No se pudo cargar la ventana: " + e.getMessage());
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+            a.showAndWait();
         }
     }
 
-    public static void mostrarLogin() {
-        try {
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/loginStart_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            primaryStage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+    // ===== VENTANAS MODALES =====
     public static void lanzarAjustes() {
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("Settings");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/settings_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/settings_win.fxml", "Settings");
     }
 
     public static void lanzarNuevoProducto() {
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("New Producto");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/newProducto_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/newProducto_win.fxml", "New Producto");
     }
 
     public static void lanzarNuevoUsuario() {
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("New Usuario");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/newUser_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/newUser_win.fxml", "New Usuario");
     }
 
     public static void lanzarNuevaTransaccion() {
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("Transaction");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/newTransaccion_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/newTransaccion_win.fxml", "Transaction");
     }
 
     public static void lanzarEscanear() {
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("Escaneo");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/escanear_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/escanear_win.fxml", "Escaneo");
     }
 
     public static void lanzarCambioContraseña() {
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("Escaneo");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/changePasswd_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/changePasswd_win.fxml", "Cambiar Contraseña");
     }
 
     public static void lanzarModTransaccion(){
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("Mod");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/modTransaccion_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/modTransaccion_win.fxml", "Mod");
     }
 
     public static void lanzarModUser(){
-        try {
-            Stage modal = new Stage();
-            modal.setTitle("Mod");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
-
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/modUser_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mostrarModalSimple("/view/modUser_win.fxml", "Mod");
     }
 
     public static void lanzarModProducto(){
+        mostrarModalSimple("/view/modProducto_win.fxml", "Mod");
+    }
+
+    // MÉTODO PARA MODALES SIMPLES (sin parámetros especiales)
+    private static void mostrarModalSimple(String fxml, String titulo) {
         try {
-            Stage modal = new Stage();
-            modal.setTitle("Mod");
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.initOwner(primaryStage);
+            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource(fxml));
+            Parent root = loader.load();
 
-            FXMLLoader loader = new FXMLLoader(StartWin.class.getResource("/view/modProducto_win.fxml"));
-            Scene scene = new Scene(loader.load());
-            modal.setScene(scene);
-
-            modal.show();
+            Stage modalStage = new Stage();
+            modalStage.setTitle(titulo);
+            modalStage.initModality(Modality.APPLICATION_MODAL);
+            modalStage.initOwner(primaryStage);
+            Scene scene = new Scene(root);
+            aplicarEstilosCSS(scene);
+            modalStage.setScene(scene);
+            
+            agregarIcono(modalStage);
+            modalStage.show();
+            
         } catch (IOException e) {
             e.printStackTrace();
+            Alert a = new Alert(AlertType.ERROR);
+            a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+            a.showAndWait();
         }
     }
 }

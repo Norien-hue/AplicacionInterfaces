@@ -17,19 +17,20 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="955.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.MainController">
+<VBox fx:id="rootVBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="955.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.MainController"> <!-- AGREGADO fx:id para animaciones -->
+   
    <children>
       <HBox prefHeight="53.0" prefWidth="908.0" spacing="10.0">
          <opaqueInsets>
             <Insets />
          </opaqueInsets>
          <children>
-            <HBox alignment="CENTER" prefHeight="53.0" prefWidth="682.0" spacing="10.0">
+            <HBox alignment="CENTER" prefHeight="38.0" prefWidth="825.0" spacing="10.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_personal" minWidth="80" mnemonicParsing="true" onAction="#tab_personal" style="-fx-font-size: 11px;" text="_Personal">
+                  <Button fx:id="btn_personal" minWidth="80" mnemonicParsing="true" onAction="#tab_personal" prefHeight="30.0" prefWidth="107.0" style="-fx-font-size: 11px;" text="_Personal">
                      <graphic>
                         <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -42,7 +43,7 @@
                      </font>
                   </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Button fx:id="btn_users" minWidth="80" mnemonicParsing="true" onAction="#tab_users" prefHeight="30.0" prefWidth="108.0" style="-fx-font-size: 11px;" text="_Usuarios">
+                  <Button fx:id="btn_users" minWidth="80" mnemonicParsing="true" onAction="#tab_users" prefHeight="30.0" prefWidth="122.0" style="-fx-font-size: 11px;" text="_Usuarios">
                      <graphic>
                         <ImageView fitHeight="22.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -51,7 +52,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button fx:id="btn_products" minWidth="90" mnemonicParsing="true" onAction="#tab_products" style="-fx-font-size: 11px;" text="P_roductos">
+                  <Button fx:id="btn_products" minWidth="90" mnemonicParsing="true" onAction="#tab_products" prefHeight="34.0" prefWidth="114.0" style="-fx-font-size: 11px;" text="P_roductos">
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="39.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -60,7 +61,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button fx:id="btn_transactions" minWidth="100" mnemonicParsing="true" onAction="#tab_transactions" style="-fx-font-size: 11px;" text="Tra_nsacciones">
+                  <Button fx:id="btn_transactions" minWidth="100" mnemonicParsing="true" onAction="#tab_transactions" prefHeight="32.0" prefWidth="129.0" style="-fx-font-size: 11px;" text="Tra_nsacciones">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -70,7 +71,7 @@
                      </graphic>
                   </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Button fx:id="btn_graph" minWidth="80" mnemonicParsing="true" onAction="#tab_graph" style="-fx-font-size: 11px;" text="_Gráfico">
+                  <Button fx:id="btn_graph" minWidth="80" mnemonicParsing="true" onAction="#tab_graph" prefHeight="34.0" prefWidth="106.0" style="-fx-font-size: 11px;" text="_Gráfico">
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="29.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -80,7 +81,7 @@
                      </graphic>
                   </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Button fx:id="btn_settings" minWidth="80" mnemonicParsing="true" onAction="#launch_settings" style="-fx-font-size: 11px;" text="A_justes">
+                  <Button fx:id="btn_settings" minWidth="80" mnemonicParsing="true" onAction="#launch_settings" prefHeight="34.0" prefWidth="102.0" style="-fx-font-size: 11px;" text="A_justes">
                      <graphic>
                         <ImageView fitHeight="25.0" fitWidth="29.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -94,7 +95,7 @@
                   <Insets top="5.0" />
                </padding>
             </HBox>
-            <HBox alignment="CENTER_RIGHT" layoutX="10.0" layoutY="10.0" prefHeight="53.0" prefWidth="160.0" spacing="10.0">
+            <HBox alignment="CENTER_RIGHT" layoutX="10.0" layoutY="10.0" prefHeight="38.0" prefWidth="111.0" spacing="10.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -103,12 +104,12 @@
                </padding>
             </HBox>
             <Separator orientation="VERTICAL" prefHeight="200.0" />
-            <HBox alignment="TOP_RIGHT" layoutX="300.0" layoutY="10.0" prefHeight="38.0" prefWidth="65.0">
+            <HBox alignment="TOP_RIGHT" layoutX="300.0" layoutY="10.0" prefHeight="38.0" prefWidth="166.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <children>
-                  <Button fx:id="btn_exit" mnemonicParsing="true" onAction="#logout" prefHeight="32.0" prefWidth="65.0" style="-fx-font-size: 11px;" text="_Salir">
+                  <Button fx:id="btn_exit" mnemonicParsing="true" onAction="#logout" prefHeight="32.0" prefWidth="98.0" style="-fx-font-size: 11px;" text="_Salir">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                               <image>
@@ -124,6 +125,7 @@
             <Insets top="10.0" />
          </VBox.margin>
       </HBox>
+      
       <TabPane fx:id="tabMain" prefHeight="400.0" prefWidth="680.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Personal">
@@ -165,13 +167,14 @@
                               </HBox>
                            </children>
                         </VBox>
-                        <Button fx:id="btn_scan" layoutX="822.0" layoutY="265.0" mnemonicParsing="true" onAction="#launch_scan" prefHeight="66.0" prefWidth="97.0" text="_ESCANEAR" />
-                        <Button fx:id="btn_generarTap" layoutX="712.0" layoutY="265.0" mnemonicParsing="true" onAction="#generarTap" prefHeight="66.0" prefWidth="97.0" text="GENERAR _TAP" />
+                        <Button fx:id="btn_scan" layoutX="822.0" layoutY="231.0" mnemonicParsing="true" onAction="#launch_scan" prefHeight="66.0" prefWidth="97.0" text="_ESCANEAR" />
+                        <Button fx:id="btn_generarTap" layoutX="704.0" layoutY="231.0" mnemonicParsing="true" onAction="#generarTap" prefHeight="66.0" prefWidth="111.0" text="GENERAR _TAP" />
                      </children>
                   </AnchorPane>
             </content>
           </Tab>
-            <Tab disable="false" text="Tablas">
+          
+          <Tab disable="false" text="Tablas">
                <content>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
@@ -238,8 +241,9 @@
                      </children>
                   </StackPane>
                </content>
-            </Tab>
-            <Tab text="Gráfico de Emisiones">
+          </Tab>
+          
+          <Tab text="Gráfico de Emisiones">
                <content>
                   <ScrollPane fx:id="scrollPaneGraph" fitToHeight="true" fitToWidth="true" prefHeight="400.0" prefWidth="680.0">
                      <content>
@@ -248,14 +252,16 @@
                      </content>
                   </ScrollPane>
                </content>
-            </Tab>
+          </Tab>
         </tabs>
       </TabPane>
    </children>
+   
    <opaqueInsets>
       <Insets />
    </opaqueInsets>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
    </padding>
+   
 </VBox>

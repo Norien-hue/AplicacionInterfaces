@@ -12,7 +12,7 @@
    <children>
       <VBox prefHeight="54.0" prefWidth="300.0">
          <children>
-            <Label text="Nombre">
+            <Label id="label-nombre" text="Nombre">
                <font>
                   <Font size="18.0" />
                </font>
@@ -22,7 +22,7 @@
       </VBox>
       <VBox layoutX="20.0" layoutY="20.0" prefHeight="54.0" prefWidth="300.0">
          <children>
-            <Label text="Contraseña">
+            <Label id="label-contrasena" text="Contraseña">
                <font>
                   <Font size="18.0" />
                </font>
@@ -32,7 +32,7 @@
       </VBox>
       <VBox layoutX="20.0" layoutY="90.0" prefHeight="70.0" prefWidth="300.0">
          <children>
-            <Label text="TAP">
+            <Label id="label-tap" text="TAP">
                <font>
                   <Font size="18.0" />
                </font>
