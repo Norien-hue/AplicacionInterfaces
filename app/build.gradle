@@ -21,6 +21,9 @@ dependencies {
     // implementation("de.gsi:chartfx:11.2.7")
     // https://mvnrepository.com/artifact/io.fair-acc/chartfx
     implementation("io.fair-acc:chartfx:11.3.1")
+    implementation 'net.sf.jasperreports:jasperreports:7.0.1'
+    implementation 'net.sf.jasperreports:jasperreports-pdf:7.0.0'
+    implementation 'net.sf.jasperreports:jasperreports-charts:7.0.1'
 }
 
 java { //Se indica la versión de JDK que ha de utilizar
