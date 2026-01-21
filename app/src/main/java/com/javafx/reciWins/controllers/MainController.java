@@ -12,6 +12,8 @@ import io.fair_acc.chartfx.axes.spi.format.SimpleFormatter;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
@@ -25,10 +27,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -38,6 +42,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.SequentialTransition;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -51,10 +56,259 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import javafx.scene.web.WebView;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.util.JRLoader;
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashMap;
+
 public class MainController implements Initializable {
 
     public static int id_user; 
     private boolean esAdministrador = false;
+
+    private Map<String, Object> parametrosInforme = new HashMap<>();
+
+    private void configurarInformes() {
+    // Configurar WebView
+    if (webViewInforme != null) {
+        webViewInforme.getEngine().setJavaScriptEnabled(true);
+    }
+    
+    // Configurar checkbox para filtro de usuarios
+    if (chk_todosUsuarios != null && txt_filtroUsuario != null) {
+        chk_todosUsuarios.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            txt_filtroUsuario.setDisable(newVal);
+            if (newVal) {
+                txt_filtroUsuario.setText("");
+            }
+        });
+        txt_filtroUsuario.setDisable(true);
+    }
+    
+    // Listener para cuando se selecciona el tab de informes
+    tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+        if (newTab != null && newTab.getText().equals("Informes")) {
+            Platform.runLater(() -> {
+                // Generar automáticamente el informe 1 al entrar al tab
+                generarInforme1Automatico();
+            });
+        }
+    });
+}
+
+    @FXML
+    void generarInforme1(ActionEvent event) {
+        lanzarInforme("/reports/informe1.jasper", new HashMap<>(), 0);
+    }
+    @FXML
+    void exportarInforme1PDF(ActionEvent event) {
+        lanzarInforme("/reports/informe1.jasper", new HashMap<>(), 1);
+    }
+
+    private void generarInforme1Automatico() {
+        if (tabMain.getSelectionModel().getSelectedItem() != null && 
+            tabMain.getSelectionModel().getSelectedItem().getText().equals("Informes")) {
+            lanzarInforme("/reports/informe1.jasper", new HashMap<>(), 0);
+        }
+    }
+
+    @FXML
+    void generarInforme2(ActionEvent event) {
+        Map<String, Object> params = new HashMap<>();
+        
+        // Configurar parámetro de filtro
+        if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
+            params.put("NombreUsuario", "%");
+        } else if (txt_filtroUsuario != null && !txt_filtroUsuario.getText().trim().isEmpty()) {
+            params.put("NombreUsuario", "%" + txt_filtroUsuario.getText().trim() + "%");
+        } else {
+            params.put("NombreUsuario", "%");
+        }
+        
+        lanzarInforme("/reports/informe2.jasper", params, 0); // Modo embedido
+    }
+
+
+    private String obtenerTituloInforme(String nombreArchivo) {
+        switch (nombreArchivo) {
+            case "informe1":
+                return "Catálogo de Productos";
+            case "informe2":
+                return "Histórico de Reciclaje por Usuario";
+            default:
+                return nombreArchivo;
+        }
+    }
+
+    @FXML
+    void tab_informes(ActionEvent event) {
+        deseleccionarTodos();
+        tabMain.getSelectionModel().select(3); // Tab de informes (índice 3)
+    }
+
+    private void mostrarError(String titulo, String header, String contenido) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setOnShown(e -> {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            if (StartWin.icon != null) {
+                stage.getIcons().add(StartWin.icon);
+            }
+        });
+        alert.setTitle(titulo);
+        alert.setHeaderText(header);
+        alert.setContentText(contenido);
+        alert.showAndWait();
+    }
+
+    
+    private void lanzarInforme(String rutaInf, Map<String, Object> param, int tipo) {
+        try {
+            // Cargar el informe compilado (.jasper)
+            InputStream reportStream = getClass().getResourceAsStream(rutaInf);
+            
+            if (reportStream == null) {
+                mostrarError("Error al cargar informe", 
+                            "No se encontró el archivo del informe en: " + rutaInf,
+                            "Verifica que el archivo .jasper esté en la carpeta resources/reports/");
+                return;
+            }
+            
+            JasperReport report = (JasperReport) JRLoader.loadObject(reportStream);
+            
+            try {
+                // Llenar el informe con datos de la conexión
+                JasperPrint jasperPrint = JasperFillManager.fillReport(
+                    report, 
+                    param, 
+                    conn
+                );
+
+                if (!jasperPrint.getPages().isEmpty()) {
+                    // Extraer nombre del fichero jasper
+                    String nombreArchivo = rutaInf.substring(
+                        rutaInf.lastIndexOf('/') + 1, 
+                        rutaInf.lastIndexOf('.')
+                    );
+                    
+                    // Crear carpetas si no existen
+                    File carpetaHTML = new File("html_informes");
+                    if (!carpetaHTML.exists()) {
+                        carpetaHTML.mkdirs(); // Crear si no existe
+                    }
+                    
+                    File carpetaPDF = new File("pdf_informes");
+                    if (!carpetaPDF.exists()) {
+                        carpetaPDF.mkdirs();
+                    }
+                    
+                    // Exportar a HTML y PDF
+                    String outputHtmlFile = "html_informes/" + nombreArchivo + ".html";
+                    String outputPdfFile = "pdf_informes/" + nombreArchivo + ".pdf";
+                    
+                    JasperExportManager.exportReportToHtmlFile(jasperPrint, outputHtmlFile);
+                    JasperExportManager.exportReportToPdfFile(jasperPrint, outputPdfFile);
+
+                    System.out.println("✓ Informe generado exitosamente:");
+                    System.out.println("  - HTML: " + outputHtmlFile);
+                    System.out.println("  - PDF: " + outputPdfFile);
+
+                    File htmlFile = new File(outputHtmlFile);
+                    
+                    // Mostrar según el tipo
+                    if (tipo == 0) {
+                        // EMBEDIDO: Incrustado en el WebView del tab
+                        if (webViewInforme != null) {
+                            webViewInforme.getEngine().load(
+                                htmlFile.toURI().toString()
+                            );
+                            
+                            System.out.println("✓ Informe mostrado en WebView embedido");
+                        } else {
+                            mostrarError("Error", 
+                                        "Debe proporcionar un WebView para modo incrustado",
+                                        "El WebView para informes no está disponible.");
+                        }
+                    } else {
+                        // EXTERNO: En ventana nueva (modal)
+                        WebView wvNuevo = new WebView();
+                        wvNuevo.getEngine().load(
+                            htmlFile.toURI().toString()
+                        );
+                        
+                        StackPane stackPane = new StackPane(wvNuevo);
+                        Scene scene = new Scene(stackPane, 900, 700);
+                        
+                        Stage stage = new Stage();
+                        stage.setTitle("Informe - " + obtenerTituloInforme(nombreArchivo));
+                        stage.initModality(Modality.APPLICATION_MODAL);
+                        stage.initOwner(tabMain.getScene().getWindow());
+                        stage.setResizable(true);
+                        stage.setScene(scene);
+                        
+                        if (StartWin.icon != null) {
+                            stage.getIcons().add(StartWin.icon);
+                        }
+                        
+                        stage.show();
+                        
+                        System.out.println("✓ Informe mostrado en ventana externa");
+                    }
+                } else {
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setOnShown(e -> {
+                        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                        if (StartWin.icon != null) {
+                            stage.getIcons().add(StartWin.icon);
+                        }
+                    });
+                    alert.setTitle("Información");
+                    alert.setHeaderText("Informe vacío");
+                    alert.setContentText("El informe no generó páginas. Verifica que haya datos en la base de datos.");
+                    alert.showAndWait();
+                }
+
+            } catch (JRException e) {
+                System.err.println("✗ Error al generar el informe: " + e.getMessage());
+                e.printStackTrace();
+                
+                mostrarError("Error al generar informe",
+                            "No se pudo generar el informe",
+                            e.getMessage());
+            }
+        } catch (JRException ex) {
+            System.err.println("✗ Error al cargar el informe: " + ex.getMessage());
+            ex.printStackTrace();
+            
+            mostrarError("Error al cargar informe",
+                        "No se pudo cargar el archivo del informe",
+                        ex.getMessage());
+        }
+    }
+    @FXML
+    void exportarInforme2PDF(ActionEvent event) {
+        Map<String, Object> params = new HashMap<>();
+        
+        if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
+            params.put("NombreUsuario", "%");
+        } else if (txt_filtroUsuario != null && !txt_filtroUsuario.getText().trim().isEmpty()) {
+            params.put("NombreUsuario", "%" + txt_filtroUsuario.getText().trim() + "%");
+        } else {
+            params.put("NombreUsuario", "%");
+        }
+        
+        lanzarInforme("/reports/informe2.jasper", params, 1);
+    }
+
+
+    @FXML private WebView webViewInforme;
+    @FXML private Button btn_generarInforme1;
+    @FXML private Button btn_generarInforme2;
+    @FXML private Button btn_exportarPDF1;
+    @FXML private Button btn_exportarPDF2;
+    @FXML private TextField txt_filtroUsuario;
+    @FXML private CheckBox chk_todosUsuarios;
 
     @FXML private AnchorPane tab_graph_content;
     @FXML private ScrollPane scrollPaneGraph;
@@ -169,6 +423,8 @@ public class MainController implements Initializable {
         configurarTooltips();
         
         configurarAnimacionesTab();
+
+        configurarInformes();
         
         tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab != null && newTab.getText().equals("Gráfico de Emisiones")) {

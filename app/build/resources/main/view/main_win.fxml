@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
@@ -9,6 +10,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -16,6 +18,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
 
 <VBox fx:id="rootVBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="955.0" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.MainController">
    
@@ -76,6 +79,15 @@
                         <ImageView fitHeight="25.0" fitWidth="29.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../img/graph-27130_640.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="btn_informes" minWidth="80" mnemonicParsing="true" onAction="#tab_informes" prefHeight="34.0" prefWidth="106.0" style="-fx-font-size: 11px;" text="_Informes">
+                     <graphic>
+                        <ImageView fitHeight="25.0" fitWidth="29.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../img/document-icon.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -251,6 +263,85 @@
                         </AnchorPane>
                      </content>
                   </ScrollPane>
+               </content>
+          </Tab>
+          
+          <!-- ==================== TAB DE INFORMES ==================== -->
+          <Tab text="Informes">
+               <content>
+                  <AnchorPane prefHeight="400.0" prefWidth="955.0">
+                     <children>
+                        <!-- Panel izquierdo: Controles de informes -->
+                        <VBox layoutX="14.0" layoutY="10.0" spacing="15.0" prefWidth="300" 
+                              AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+                           
+                           <!-- SECCIÓN INFORME 1: Catálogo de Productos -->
+                           <VBox spacing="8.0" style="-fx-border-color: #CCCCCC; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 10;">
+                              <children>
+                                 <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="📋 Informe 1: Catálogo de Productos" />
+                                 <Label style="-fx-font-size: 11px; -fx-text-fill: #666666;" wrapText="true" 
+                                        text="Muestra todos los productos con gráfico de distribución por material" />
+                                 <HBox spacing="10.0">
+                                    <children>
+                                       <Button fx:id="btn_generarInforme1" mnemonicParsing="true" onAction="#generarInforme1" 
+                                               style="-fx-background-color: #4CAF50; -fx-text-fill: white;" 
+                                               text="_Mostrar aquí" />
+                                       <Button fx:id="btn_exportarPDF1" mnemonicParsing="true" onAction="#exportarInforme1PDF" 
+                                               style="-fx-background-color: #2196F3; -fx-text-fill: white;" 
+                                               text="Nueva _Ventana" />
+                                    </children>
+                                 </HBox>
+                              </children>
+                           </VBox>
+                           
+                           <!-- SECCIÓN INFORME 2: Histórico de Reciclaje -->
+                           <VBox spacing="8.0" style="-fx-border-color: #CCCCCC; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 10;">
+                              <children>
+                                 <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="📊 Informe 2: Histórico de Reciclaje" />
+                                 <Label style="-fx-font-size: 11px; -fx-text-fill: #666666;" wrapText="true" 
+                                        text="Historial de transacciones agrupadas por usuario con filtro" />
+                                 
+                                 <!-- Controles de filtro -->
+                                 <VBox spacing="5.0">
+                                    <CheckBox fx:id="chk_todosUsuarios" selected="true" text="Todos los usuarios" />
+                                    <Label text="Filtrar por nombre:" />
+                                    <TextField fx:id="txt_filtroUsuario" disable="true" 
+                                               promptText="Ej: Juan, María..." />
+                                 </VBox>
+                                 
+                                 <HBox spacing="10.0">
+                                    <children>
+                                       <Button fx:id="btn_generarInforme2" mnemonicParsing="true" onAction="#generarInforme2" 
+                                               style="-fx-background-color: #2196F3; -fx-text-fill: white;" 
+                                               text="_Generar Informe" />
+                                       <Button fx:id="btn_exportarPDF2" mnemonicParsing="true" onAction="#exportarInforme2PDF" 
+                                               style="-fx-background-color: #9C27B0; -fx-text-fill: white;" 
+                                               text="Nueva _Ventana" />
+                                    </children>
+                                 </HBox>
+                              </children>
+                           </VBox>
+                           
+                           <!-- Información adicional -->
+                           <Label style="-fx-font-size: 10px; -fx-text-fill: #999999;" wrapText="true" 
+                                  text="💡 Los informes se exportan automáticamente a PDF y HTML en las carpetas 'html_informes/' y 'pdf_informes/'" />
+                        </VBox>
+                        
+                        <!-- WebView para mostrar el informe embedido -->
+                        <VBox layoutX="330.0" layoutY="10.0" spacing="5.0" 
+                              AnchorPane.leftAnchor="330.0" AnchorPane.rightAnchor="14.0" 
+                              AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <Label style="-fx-font-weight: bold;" text="📄 Vista Previa del Informe" />
+                                 <Label style="-fx-font-size: 10px; -fx-text-fill: #666;" 
+                                        text="(Informe 1 - Catálogo de Productos)" />
+                              </HBox>
+                              <WebView fx:id="webViewInforme" VBox.vgrow="ALWAYS" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
                </content>
           </Tab>
         </tabs>

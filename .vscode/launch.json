@@ -9,7 +9,7 @@
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}",
-            "vmArgs": "--module-path C:\\javafx-sdk-25\\lib --add-modules javafx.base,javafx.controls,javafx.fxml --enable-native-access=javafx.graphics",
+            "vmArgs": "--module-path C:\\javafx-sdk-25\\lib --add-modules javafx.base,javafx.controls,javafx.fxml,javafx.web --enable-native-access=ALL-UNNAMED",
             "projectName": "app"
         }
     ]
