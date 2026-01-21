@@ -201,7 +201,7 @@ public class MainController implements Initializable {
                     JasperExportManager.exportReportToHtmlFile(jasperPrint, outputHtmlFile);
                     JasperExportManager.exportReportToPdfFile(jasperPrint, outputPdfFile);
 
-                    System.out.println("✓ Informe generado exitosamente:");
+                    System.out.println("Informe generado exitosamente:");
                     System.out.println("  - HTML: " + outputHtmlFile);
                     System.out.println("  - PDF: " + outputPdfFile);
 
@@ -243,7 +243,7 @@ public class MainController implements Initializable {
                         
                         stage.show();
                         
-                        System.out.println("✓ Informe mostrado en ventana externa");
+                        System.out.println("Informe mostrado en ventana externa");
                     }
                 } else {
                     Alert alert = new Alert(AlertType.INFORMATION);
