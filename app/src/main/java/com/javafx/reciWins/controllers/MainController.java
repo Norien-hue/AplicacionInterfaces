@@ -71,12 +71,10 @@ public class MainController implements Initializable {
     private Map<String, Object> parametrosInforme = new HashMap<>();
 
     private void configurarInformes() {
-    // Configurar WebView
     if (webViewInforme != null) {
         webViewInforme.getEngine().setJavaScriptEnabled(true);
     }
     
-    // Configurar checkbox para filtro de usuarios
     if (chk_todosUsuarios != null && txt_filtroUsuario != null) {
         chk_todosUsuarios.selectedProperty().addListener((obs, oldVal, newVal) -> {
             txt_filtroUsuario.setDisable(newVal);
@@ -87,11 +85,9 @@ public class MainController implements Initializable {
         txt_filtroUsuario.setDisable(true);
     }
     
-    // Listener para cuando se selecciona el tab de informes
     tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
         if (newTab != null && newTab.getText().equals("Informes")) {
             Platform.runLater(() -> {
-                // Generar automáticamente el informe 1 al entrar al tab
                 generarInforme1Automatico();
             });
         }
@@ -118,7 +114,6 @@ public class MainController implements Initializable {
     void generarInforme2(ActionEvent event) {
         Map<String, Object> params = new HashMap<>();
         
-        // Configurar parámetro de filtro
         if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
             params.put("NombreUsuario", "%");
         } else if (txt_filtroUsuario != null && !txt_filtroUsuario.getText().trim().isEmpty()) {
@@ -145,7 +140,7 @@ public class MainController implements Initializable {
     @FXML
     void tab_informes(ActionEvent event) {
         deseleccionarTodos();
-        tabMain.getSelectionModel().select(3); // Tab de informes (índice 3)
+        tabMain.getSelectionModel().select(3); 
     }
 
     private void mostrarError(String titulo, String header, String contenido) {
@@ -165,7 +160,6 @@ public class MainController implements Initializable {
     
     private void lanzarInforme(String rutaInf, Map<String, Object> param, int tipo) {
         try {
-            // Cargar el informe compilado (.jasper)
             InputStream reportStream = getClass().getResourceAsStream(rutaInf);
             
             if (reportStream == null) {
@@ -178,7 +172,6 @@ public class MainController implements Initializable {
             JasperReport report = (JasperReport) JRLoader.loadObject(reportStream);
             
             try {
-                // Llenar el informe con datos de la conexión
                 JasperPrint jasperPrint = JasperFillManager.fillReport(
                     report, 
                     param, 
@@ -186,7 +179,6 @@ public class MainController implements Initializable {
                 );
 
                 if (!jasperPrint.getPages().isEmpty()) {
-                    // Extraer nombre del fichero jasper
                     String nombreArchivo = rutaInf.substring(
                         rutaInf.lastIndexOf('/') + 1, 
                         rutaInf.lastIndexOf('.')
@@ -195,7 +187,7 @@ public class MainController implements Initializable {
                     // Crear carpetas si no existen
                     File carpetaHTML = new File("html_informes");
                     if (!carpetaHTML.exists()) {
-                        carpetaHTML.mkdirs(); // Crear si no existe
+                        carpetaHTML.mkdirs(); 
                     }
                     
                     File carpetaPDF = new File("pdf_informes");
@@ -203,7 +195,6 @@ public class MainController implements Initializable {
                         carpetaPDF.mkdirs();
                     }
                     
-                    // Exportar a HTML y PDF
                     String outputHtmlFile = "html_informes/" + nombreArchivo + ".html";
                     String outputPdfFile = "pdf_informes/" + nombreArchivo + ".pdf";
                     
@@ -216,7 +207,6 @@ public class MainController implements Initializable {
 
                     File htmlFile = new File(outputHtmlFile);
                     
-                    // Mostrar según el tipo
                     if (tipo == 0) {
                         // EMBEDIDO: Incrustado en el WebView del tab
                         if (webViewInforme != null) {
@@ -224,7 +214,7 @@ public class MainController implements Initializable {
                                 htmlFile.toURI().toString()
                             );
                             
-                            System.out.println("✓ Informe mostrado en WebView embedido");
+                            System.out.println("Informe mostrado en WebView embedido");
                         } else {
                             mostrarError("Error", 
                                         "Debe proporcionar un WebView para modo incrustado",
