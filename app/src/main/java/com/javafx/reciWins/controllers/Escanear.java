@@ -56,6 +56,12 @@ public class Escanear implements Initializable {
     @FXML
     void crearTransaccionEscaner(ActionEvent event) {
         if(!launchAlertsEscanear()) {
+            // Verificar conexión antes de proceder
+            if (!StartWin.verificarConexion()) {
+                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
+                return;
+            }
+            
             int tapIngresado;
             try {
                 tapIngresado = Integer.parseInt(tapField.getText().trim());
@@ -162,6 +168,22 @@ public class Escanear implements Initializable {
                 alert.showAndWait();
                 
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (SQLException e) {
+                // Detectar si es un error de conexión
+                if (esErrorDeConexion(e)) {
+                    System.err.println("Error de conexión detectado: " + e.getMessage());
+                    StartWin.manejarPerdidaConexion(e.getMessage());
+                } else {
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setOnShown(ex -> {
+                        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                        stage.getIcons().add(StartWin.icon);
+                    });
+                    alert.setHeaderText("Error al escanear");
+                    alert.setContentText("No se pudo registrar el escaneo: " + e.getMessage());
+                    alert.showAndWait();
+                    e.printStackTrace();
+                }
             } catch (Exception e) {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setOnShown(ex -> {
@@ -324,7 +346,12 @@ public class Escanear implements Initializable {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -341,7 +368,12 @@ public class Escanear implements Initializable {
                 return rs.getFloat("Emisiones_Reducibles");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
         return 0.0f;
     }
@@ -357,8 +389,43 @@ public class Escanear implements Initializable {
                 return rs.getInt("TAP");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
         return -1;
+    }
+    
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        int errorCode = e.getErrorCode();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
+        return false;
     }
 }

@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -27,7 +28,11 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <Button fx:id="btn_passwd" mnemonicParsing="true" onAction="#launch_cambiarPwd" prefWidth="300.0" text="Cambiar contrase_ña" />
+            <Button fx:id="btn_passwd" mnemonicParsing="true" onAction="#launch_cambiarPwd" prefWidth="300.0" text="Cambiar contrase_ña">
+               <tooltip>
+                  <Tooltip text="Abrir ventana para cambiar la contraseña de la cuenta" />
+               </tooltip>
+            </Button>
          </children>
       </VBox>
       <VBox layoutX="20.0" layoutY="90.0" prefHeight="70.0" prefWidth="300.0">
@@ -40,15 +45,27 @@
             <HBox spacing="10.0">
                <children>
                   <TextField fx:id="txtFld_tap" prefWidth="220.0" editable="false" />
-                  <Button fx:id="btn_mostrarTap" mnemonicParsing="true" onAction="#alternarMostrarTap" prefWidth="70.0" text="_Mostrar" />
+                  <Button fx:id="btn_mostrarTap" mnemonicParsing="true" onAction="#alternarMostrarTap" prefWidth="70.0" text="_Mostrar">
+                     <tooltip>
+                        <Tooltip text="Mostrar u ocultar el código TAP personal" />
+                     </tooltip>
+                  </Button>
                </children>
             </HBox>
          </children>
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_accept" mnemonicParsing="true" onAction="#guardarCambios" text="_Guardar cambios" />
-            <Button fx:id="btn_cancel" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
+            <Button fx:id="btn_accept" mnemonicParsing="true" onAction="#guardarCambios" text="_Guardar cambios">
+               <tooltip>
+                  <Tooltip text="Guardar los cambios realizados en la configuración" />
+               </tooltip>
+            </Button>
+            <Button fx:id="btn_cancel" mnemonicParsing="true" onAction="#kill" text="_Cancelar">
+               <tooltip>
+                  <Tooltip text="Cancelar y cerrar sin guardar cambios" />
+               </tooltip>
+            </Button>
          </children>
       </HBox>
    </children>

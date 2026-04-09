@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -42,8 +43,16 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="260.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#crearProducto" text="_Aceptar" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#crearProducto" text="_Aceptar">
+               <tooltip>
+                  <Tooltip text="Crear el nuevo producto en el catálogo" />
+               </tooltip>
+            </Button>
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar">
+               <tooltip>
+                  <Tooltip text="Cancelar y cerrar sin crear el producto" />
+               </tooltip>
+            </Button>
          </children>
       </HBox>
    </children>

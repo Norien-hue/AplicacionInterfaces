@@ -62,20 +62,20 @@ public class SingUpController {
             }
             
             String hashContrasenia = "$2y$10$" + contrasenia.hashCode();
-            
+
             String role = "cliente";
-            
-            String insertQuery = "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('" 
-                + nombre + "', '" 
-                + hashContrasenia + "', '" 
-                + role + "', " 
-                + "0, " 
+
+            String insertQuery = "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('"
+                + nombre + "', '"
+                + hashContrasenia + "', '"
+                + role + "', "
+                + "0, "
                 + "NULL)";
-            
+
             try {
                 Statement stmt = StartWin.conn.createStatement();
                 stmt.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
-                
+
                 ResultSet rs = stmt.getGeneratedKeys();
                 if(rs.next()) {
                     int nuevoId = rs.getInt(1);
@@ -177,8 +177,42 @@ public class SingUpController {
                 return count > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
+        return false;
+    }
+
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
         return false;
     }
 }

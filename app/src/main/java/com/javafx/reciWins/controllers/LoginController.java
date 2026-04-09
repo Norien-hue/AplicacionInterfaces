@@ -61,6 +61,12 @@ public class LoginController {
         }
         
         try {
+            // Verificar conexión antes de intentar la consulta
+            if (!StartWin.verificarConexion()) {
+                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
+                return false;
+            }
+            
             String query = "SELECT Id_Usuario, Hash_Contraseña FROM Usuarios WHERE Nombre = ?";
             PreparedStatement pst = StartWin.conn.prepareStatement(query);
             pst.setString(1, nombre);
@@ -70,9 +76,9 @@ public class LoginController {
             if(rs.next()) {
                 String hashAlmacenado = rs.getString("Hash_Contraseña");
                 int idUsuario = rs.getInt("Id_Usuario");
-                
+
                 String hashIngresado = "$2y$10$" + contrasenia.hashCode();
-                
+
                 if(hashAlmacenado.equals(hashIngresado)) {
                     MainController.id_user = idUsuario;
                     System.out.println("Login exitoso. ID Usuario: " + idUsuario);
@@ -87,10 +93,46 @@ public class LoginController {
             }
             
         } catch (SQLException e) {
-            mostrarError("Error de conexión", "No se pudo conectar con la base de datos: " + e.getMessage());
+            // Detectar si es un error de conexión
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                mostrarError("Error de base de datos", "Error al consultar la base de datos: " + e.getMessage());
+            }
             e.printStackTrace();
             return false;
         }
+    }
+    
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        int errorCode = e.getErrorCode();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
+        return false;
     }
     
     private void mostrarError(String titulo, String mensaje) {

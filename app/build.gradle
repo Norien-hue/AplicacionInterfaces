@@ -1,6 +1,6 @@
 plugins {
   id 'application'
-  id 'org.openjfx.javafxplugin' version '0.1.0' //Plugin que ayuda a construir proyectos JAVAFX
+  id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 repositories {
@@ -27,13 +27,14 @@ dependencies {
     implementation 'org.openjfx:javafx-web:21.0.1'
 }
 
-java { //Se indica la versión de JDK que ha de utilizar
+java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(24)
     }
 }
 
-application { //Definimos clase principal del proyecto
+
+application {
     mainClass = 'com.javafx.reciWins.start.StartWin.main'
 }
 
@@ -46,7 +47,6 @@ sourceSets {
   }
 }
 
-// CONFIGURACIÓN UTF-8 AÑADIDA AQUÍ
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
@@ -61,7 +61,25 @@ tasks.withType(Javadoc) {
 
 run {
     jvmArgs = [
-        '--add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls'
+        '--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED'
     ]
 }
 
+// Tarea para copiar todas las dependencias a la carpeta build/libs/lib
+tasks.register('copyDependencies', Copy) {
+    from configurations.runtimeClasspath
+    into "$buildDir/libs/lib"
+}
+
+// Configuración del JAR normal
+tasks.jar {
+    dependsOn copyDependencies // Hace que siempre se copien las librerías al hacer el jar
+
+    manifest {
+        attributes(
+            'Main-Class': application.mainClass.get(),
+            // Esto crea el "Class-Path" dentro del manifiesto del JAR
+            'Class-Path': configurations.runtimeClasspath.files.collect { "lib/" + it.name }.join(' ')
+        )
+    }
+}

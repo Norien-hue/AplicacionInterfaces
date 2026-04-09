@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class StartWin extends Application {
     private static Stage primaryStage;
     public static Connection conn;
     public static Image icon;
+    private static Properties dbProps;
 
     public static void main(String[] args) {
         launch(args);
@@ -61,44 +63,243 @@ public class StartWin extends Application {
     public void start(Stage primeraEscena) throws Exception {
         primaryStage = primeraEscena;
         
-        // Establecer conexión a BD
-        establecerConexionBD();
-        
-        // Cargar icono
+        // Cargar icono primero
         cargarIcono();
+        
+        // Cargar propiedades de la BD
+        cargarPropiedadesBD();
+        
+        // Establecer conexión a BD
+        if (!establecerConexionBD()) {
+            // Si falla la conexión, mostrar diálogo y esperar decisión del usuario
+            return;
+        }
         
         // Mostrar ventana de login
         mostrarLogin();
     }
 
-    private void establecerConexionBD() {
+    private void cargarPropiedadesBD() {
         try {
-            Properties props = new Properties();
+            dbProps = new Properties();
             URL configUrl = getClass().getResource("/configuration.properties");
             InputStream input = configUrl.openStream();
-            props.load(input);
-            String url = props.getProperty("db.url");
-            String user = props.getProperty("db.username");
-            String password = props.getProperty("db.password");
+            dbProps.load(input);
+            System.out.println("Propiedades de BD cargadas correctamente");
+        } catch (Exception e) {
+            System.err.println("Error al cargar propiedades de BD: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private boolean establecerConexionBD() {
+        try {
+            if (dbProps == null) {
+                throw new Exception("No se han cargado las propiedades de la base de datos");
+            }
+            
+            String url = dbProps.getProperty("db.url");
+            String user = dbProps.getProperty("db.username");
+            String password = dbProps.getProperty("db.password");
             
             conn = DriverManager.getConnection(url, user, password);
             System.out.println("Conexión a BD establecida correctamente");
+            return true;
         } catch (Exception e) {
             System.out.println("Error al conectar con la base de datos: " + e.getMessage());
-            Alert a = new Alert(AlertType.ERROR);
-            a.setHeaderText("Error de conexión");
-            a.setContentText("Error al conectar con la base de datos: " + e.getMessage());
-            a.setOnShown(ex -> {
-                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(StartWin.icon);
-                });
-            a.showAndWait();
-            System.exit(1);
+            mostrarDialogoErrorConexion(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si la conexión a la BD está activa
+     * @return true si la conexión es válida, false si está cerrada o es nula
+     */
+    public static boolean verificarConexion() {
+        try {
+            if (conn == null || conn.isClosed()) {
+                return false;
+            }
+            // Hacer un test simple de conexión
+            conn.isValid(2); // timeout de 2 segundos
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error al verificar conexión: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Maneja la pérdida de conexión mostrando un diálogo con opciones
+     * Este método debe ser llamado cuando se detecte un SQLException
+     * @param errorDetalle Mensaje de error detallado (opcional)
+     */
+    public static void manejarPerdidaConexion(String errorDetalle) {
+        System.err.println("Conexión perdida con la base de datos");
+        
+        // Crear botones personalizados
+        ButtonType btnReintentar = new ButtonType("Reintentar");
+        ButtonType btnSalir = new ButtonType("Salir");
+        
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Error de Conexión");
+        alert.setHeaderText("Se ha perdido la conexión con la base de datos");
+        
+        String contenido = "No se puede conectar con el servidor de base de datos.\n\n";
+        if (errorDetalle != null && !errorDetalle.isEmpty()) {
+            contenido += "Detalle: " + errorDetalle + "\n\n";
+        }
+        contenido += "¿Qué deseas hacer?";
+        alert.setContentText(contenido);
+        
+        // Configurar el icono del alert
+        alert.setOnShown(ex -> {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            if (icon != null) {
+                stage.getIcons().add(icon);
+            }
+        });
+        
+        // Agregar los botones personalizados
+        alert.getButtonTypes().setAll(btnReintentar, btnSalir);
+        
+        // Mostrar el diálogo y esperar respuesta
+        Optional<ButtonType> resultado = alert.showAndWait();
+        
+        if (resultado.isPresent()) {
+            if (resultado.get() == btnReintentar) {
+                // Reintentar la conexión
+                System.out.println("Reintentando conexión a la base de datos...");
+                if (intentarReconexion()) {
+                    // Conexión restaurada exitosamente
+                    Alert exito = new Alert(AlertType.INFORMATION);
+                    exito.setTitle("Conexión Restaurada");
+                    exito.setHeaderText("Conexión exitosa");
+                    exito.setContentText("La conexión con la base de datos se ha restaurado correctamente.");
+                    exito.setOnShown(ex -> {
+                        Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
+                        if (icon != null) {
+                            stage.getIcons().add(icon);
+                        }
+                    });
+                    exito.showAndWait();
+                }
+                // Si falla, se volverá a mostrar el diálogo de error recursivamente
+            } else if (resultado.get() == btnSalir) {
+                // Salir de la aplicación
+                System.out.println("Cerrando aplicación...");
+                cerrarAplicacion();
+            }
+        } else {
+            // Si el usuario cierra el diálogo sin seleccionar nada, salir
+            System.out.println("Diálogo cerrado sin selección. Cerrando aplicación...");
+            cerrarAplicacion();
+        }
+    }
+
+    /**
+     * Intenta reconectar a la base de datos
+     * @return true si la reconexión fue exitosa, false en caso contrario
+     */
+    private static boolean intentarReconexion() {
+        try {
+            // Cerrar la conexión anterior si existe
+            if (conn != null && !conn.isClosed()) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    System.err.println("Error al cerrar conexión anterior: " + e.getMessage());
+                }
+            }
+            
+            // Intentar nueva conexión
+            if (dbProps == null) {
+                throw new Exception("No se han cargado las propiedades de la base de datos");
+            }
+            
+            String url = dbProps.getProperty("db.url");
+            String user = dbProps.getProperty("db.username");
+            String password = dbProps.getProperty("db.password");
+            
+            conn = DriverManager.getConnection(url, user, password);
+            System.out.println("Reconexión exitosa a la base de datos");
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error al reconectar: " + e.getMessage());
+            manejarPerdidaConexion(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Cierra la aplicación de forma segura
+     */
+    private static void cerrarAplicacion() {
+        try {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+                System.out.println("Conexión a BD cerrada");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al cerrar conexión: " + e.getMessage());
+        }
+        System.exit(0);
+    }
+
+    private void mostrarDialogoErrorConexion(String mensajeError) {
+        // Crear botones personalizados
+        ButtonType btnReintentar = new ButtonType("Reintentar");
+        ButtonType btnSalir = new ButtonType("Salir");
+        
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Error de Conexión");
+        alert.setHeaderText("No se pudo conectar con la base de datos");
+        alert.setContentText("Error: " + mensajeError + "\n\n¿Qué deseas hacer?");
+        
+        // Configurar el icono del alert
+        alert.setOnShown(ex -> {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            if (icon != null) {
+                stage.getIcons().add(icon);
+            }
+        });
+        
+        // Agregar los botones personalizados
+        alert.getButtonTypes().setAll(btnReintentar, btnSalir);
+        
+        // Mostrar el diálogo y esperar respuesta
+        Optional<ButtonType> resultado = alert.showAndWait();
+        
+        if (resultado.isPresent()) {
+            if (resultado.get() == btnReintentar) {
+                // Reintentar la conexión
+                System.out.println("Reintentando conexión a la base de datos...");
+                if (establecerConexionBD()) {
+                    // Si la conexión fue exitosa, mostrar el login
+                    mostrarLogin();
+                }
+                // Si falla, se volverá a mostrar el diálogo de error recursivamente
+            } else if (resultado.get() == btnSalir) {
+                // Salir de la aplicación
+                System.out.println("Cerrando aplicación...");
+                cerrarAplicacion();
+            }
+        } else {
+            // Si el usuario cierra el diálogo sin seleccionar nada, salir
+            System.out.println("Diálogo cerrado sin selección. Cerrando aplicación...");
+            cerrarAplicacion();
         }
     }
 
     private void cargarIcono() {
-        icon = new Image(getClass().getResourceAsStream("/img/logo.png"));
+        try {
+            icon = new Image(getClass().getResourceAsStream("/img/logo.png"));
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
+            icon = null;
+        }
     }
 
     // ===== MÉTODOS PARA CSS =====

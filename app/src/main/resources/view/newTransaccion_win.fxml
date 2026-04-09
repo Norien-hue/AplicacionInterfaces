@@ -6,6 +6,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -14,25 +15,41 @@
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
             <Label text="Usuario (ID - Nombre)" />
-            <ComboBox fx:id="usuarioTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true" />
+            <ComboBox fx:id="usuarioTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true">
+               <tooltip>
+                  <Tooltip text="Selecciona o escribe el usuario de la transacción" />
+               </tooltip>
+            </ComboBox>
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
             <Label text="Tipo" />
-            <ComboBox fx:id="tipoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="false" />
+            <ComboBox fx:id="tipoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="false">
+               <tooltip>
+                  <Tooltip text="Selecciona el tipo de transacción" />
+               </tooltip>
+            </ComboBox>
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="53.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
             <Label text="Código Barras" />
-            <ComboBox fx:id="codigoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true" />
+            <ComboBox fx:id="codigoTransaccion" prefHeight="26.0" prefWidth="300.0" editable="true">
+               <tooltip>
+                  <Tooltip text="Selecciona o escribe el código de barras del producto" />
+               </tooltip>
+            </ComboBox>
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
          <children>
             <Label text="Emisiones reducibles (kg CO₂)" />
-            <TextField fx:id="emisionesTransaccion" prefHeight="26.0" prefWidth="300.0" disable="true" text="0.0" />
+            <TextField fx:id="emisionesTransaccion" prefHeight="26.0" prefWidth="300.0" disable="true" text="0.0">
+               <tooltip>
+                  <Tooltip text="Este campo se calcula automáticamente según el producto" />
+               </tooltip>
+            </TextField>
          </children>
       </VBox>
       <VBox layoutX="10.0" layoutY="139.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="300.0" spacing="5.0">
@@ -40,7 +57,11 @@
             <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
                <children>
                   <Label text="Fecha" />
-                  <DatePicker fx:id="fechaTransaccion" prefHeight="26.0" prefWidth="300.0" />
+                  <DatePicker fx:id="fechaTransaccion" prefHeight="26.0" prefWidth="300.0">
+                     <tooltip>
+                        <Tooltip text="Selecciona la fecha de la transacción" />
+                     </tooltip>
+                  </DatePicker>
                </children>
             </VBox>
             <VBox layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="300.0">
@@ -48,11 +69,23 @@
                   <Label text="Hora (HH:MM:SS)" />
                   <HBox spacing="5.0">
                      <children>
-                        <TextField fx:id="horaTransaccion" prefHeight="26.0" prefWidth="70.0" promptText="HH" maxWidth="70.0" />
+                        <TextField fx:id="horaTransaccion" prefHeight="26.0" prefWidth="70.0" promptText="HH" maxWidth="70.0">
+                           <tooltip>
+                              <Tooltip text="Hora (00-23)" />
+                           </tooltip>
+                        </TextField>
                         <Label text=":" />
-                        <TextField fx:id="minutoTransaccion" prefHeight="26.0" prefWidth="70.0" promptText="MM" maxWidth="70.0" />
+                        <TextField fx:id="minutoTransaccion" prefHeight="26.0" prefWidth="70.0" promptText="MM" maxWidth="70.0">
+                           <tooltip>
+                              <Tooltip text="Minutos (00-59)" />
+                           </tooltip>
+                        </TextField>
                         <Label text=":" />
-                        <TextField fx:id="segundoTransaccion" prefHeight="26.0" prefWidth="70.0" promptText="SS" maxWidth="70.0" />
+                        <TextField fx:id="segundoTransaccion" prefHeight="26.0" prefWidth="70.0" promptText="SS" maxWidth="70.0">
+                           <tooltip>
+                              <Tooltip text="Segundos (00-59)" />
+                           </tooltip>
+                        </TextField>
                      </children>
                   </HBox>
                </children>
@@ -61,8 +94,16 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#crearTransaccion" text="_Aceptar" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#crearTransaccion" text="_Aceptar">
+               <tooltip>
+                  <Tooltip text="Crear la nueva transacción" />
+               </tooltip>
+            </Button>
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar">
+               <tooltip>
+                  <Tooltip text="Cancelar y cerrar sin crear la transacción" />
+               </tooltip>
+            </Button>
          </children>
       </HBox>
    </children>

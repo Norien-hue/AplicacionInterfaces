@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -41,8 +42,16 @@
                   <Label fx:id="txt_loginAccount" onMouseClicked="#changeToLogin" prefHeight="18.0" prefWidth="110.0" text="¿Ya tienes cuenta?" textFill="#51a4cf" />
                   <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="173.0" spacing="10.0">
                      <children>
-                        <Button fx:id="btn_singUp" mnemonicParsing="true" onAction="#changeToMain" text="_Aceptar" />
-                        <Button fx:id="btn_cancelSingUp" mnemonicParsing="true" onAction="#killApp" text="_Salir" />
+                        <Button fx:id="btn_singUp" mnemonicParsing="true" onAction="#changeToMain" text="_Aceptar">
+                           <tooltip>
+                              <Tooltip text="Registrar la nueva cuenta en el sistema" />
+                           </tooltip>
+                        </Button>
+                        <Button fx:id="btn_cancelSingUp" mnemonicParsing="true" onAction="#killApp" text="_Salir">
+                           <tooltip>
+                              <Tooltip text="Cerrar la aplicación" />
+                           </tooltip>
+                        </Button>
                      </children>
                   </HBox>
                </children>

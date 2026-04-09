@@ -11,6 +11,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -44,6 +45,9 @@
                      <font>
                         <Font size="10.0" />
                      </font>
+                     <tooltip>
+                        <Tooltip text="Ver información personal del usuario actual" />
+                     </tooltip>
                   </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <Button fx:id="btn_users" minWidth="80" mnemonicParsing="true" onAction="#tab_users" prefHeight="30.0" prefWidth="122.0" style="-fx-font-size: 11px;" text="_Usuarios">
@@ -54,6 +58,9 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Gestionar usuarios del sistema" />
+                     </tooltip>
                   </Button>
                   <Button fx:id="btn_products" minWidth="90" mnemonicParsing="true" onAction="#tab_products" prefHeight="34.0" prefWidth="114.0" style="-fx-font-size: 11px;" text="P_roductos">
                      <graphic>
@@ -63,6 +70,9 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Gestionar productos reciclables del catálogo" />
+                     </tooltip>
                   </Button>
                   <Button fx:id="btn_transactions" minWidth="100" mnemonicParsing="true" onAction="#tab_transactions" prefHeight="32.0" prefWidth="129.0" style="-fx-font-size: 11px;" text="Tra_nsacciones">
                      <graphic>
@@ -72,6 +82,9 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Ver y gestionar transacciones de reciclaje" />
+                     </tooltip>
                   </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <Button fx:id="btn_graph" minWidth="80" mnemonicParsing="true" onAction="#tab_graph" prefHeight="34.0" prefWidth="106.0" style="-fx-font-size: 11px;" text="_Gráfico">
@@ -82,6 +95,9 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Ver gráficos de emisiones reducidas" />
+                     </tooltip>
                   </Button>
                   <Button fx:id="btn_informes" minWidth="80" mnemonicParsing="true" onAction="#tab_informes" prefHeight="34.0" prefWidth="106.0" style="-fx-font-size: 11px;" text="_Informes">
                      <graphic>
@@ -91,6 +107,9 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Generar y exportar informes estadísticos" />
+                     </tooltip>
                   </Button>
                   <Separator orientation="VERTICAL" prefHeight="200.0" />
                   <Button fx:id="btn_settings" minWidth="80" mnemonicParsing="true" onAction="#launch_settings" prefHeight="34.0" prefWidth="102.0" style="-fx-font-size: 11px;" text="A_justes">
@@ -101,6 +120,9 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Configurar ajustes de cuenta y preferencias" />
+                     </tooltip>
                   </Button>
                </children>
                <padding>
@@ -129,6 +151,9 @@
                               </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Cerrar sesión y volver a la pantalla de inicio" />
+                     </tooltip>
                   </Button>
                </children>
             </HBox>
@@ -141,6 +166,9 @@
       <TabPane fx:id="tabMain" prefHeight="400.0" prefWidth="680.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Personal">
+            <tooltip>
+               <Tooltip text="Información personal y estadísticas del usuario actual" />
+            </tooltip>
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="231.0" prefWidth="680.0">
                      <children>
@@ -179,14 +207,25 @@
                               </HBox>
                            </children>
                         </VBox>
-                        <Button fx:id="btn_scan" layoutX="822.0" layoutY="231.0" mnemonicParsing="true" onAction="#launch_scan" prefHeight="66.0" prefWidth="97.0" text="_ESCANEAR" />
-                        <Button fx:id="btn_generarTap" layoutX="704.0" layoutY="231.0" mnemonicParsing="true" onAction="#generarTap" prefHeight="66.0" prefWidth="111.0" text="GENERAR _TAP" />
+                        <Button fx:id="btn_scan" layoutX="822.0" layoutY="231.0" mnemonicParsing="true" onAction="#launch_scan" prefHeight="66.0" prefWidth="97.0" text="_ESCANEAR">
+                           <tooltip>
+                              <Tooltip text="Escanear código de barras para registrar reciclaje" />
+                           </tooltip>
+                        </Button>
+                        <Button fx:id="btn_generarTap" layoutX="704.0" layoutY="231.0" mnemonicParsing="true" onAction="#generarTap" prefHeight="66.0" prefWidth="111.0" text="GENERAR _TAP">
+                           <tooltip>
+                              <Tooltip text="Generar nuevo código TAP personal" />
+                           </tooltip>
+                        </Button>
                      </children>
                   </AnchorPane>
             </content>
           </Tab>
           
           <Tab disable="false" text="Tablas">
+               <tooltip>
+                  <Tooltip text="Gestión de usuarios, productos y transacciones" />
+               </tooltip>
                <content>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
@@ -203,9 +242,21 @@
                               </TableView>
                               <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="879.0" spacing="5.0">
                                  <children>
-                                    <Button fx:id="btn_addProducto" mnemonicParsing="true" onAction="#launch_newProducto" text="_Crear producto" />
-                                    <Button fx:id="btn_borrarProducto" mnemonicParsing="true" onAction="#borrarProducto" text="_Borrar producto" />
-                                    <Button fx:id="btn_modProducto" layoutX="397.0" layoutY="59.0" mnemonicParsing="true" onAction="#launch_modProducto" text="_Modificar producto" />
+                                    <Button fx:id="btn_addProducto" mnemonicParsing="true" onAction="#launch_newProducto" text="_Crear producto">
+                                       <tooltip>
+                                          <Tooltip text="Añadir un nuevo producto al catálogo" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btn_borrarProducto" mnemonicParsing="true" onAction="#borrarProducto" text="_Borrar producto">
+                                       <tooltip>
+                                          <Tooltip text="Eliminar el producto seleccionado" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btn_modProducto" layoutX="397.0" layoutY="59.0" mnemonicParsing="true" onAction="#launch_modProducto" text="_Modificar producto">
+                                       <tooltip>
+                                          <Tooltip text="Editar la información del producto seleccionado" />
+                                       </tooltip>
+                                    </Button>
                                  </children>
                               </HBox>
                            </children>
@@ -223,9 +274,21 @@
                               </TableView>
                               <HBox alignment="BOTTOM_RIGHT" layoutX="21.0" layoutY="14.0" prefHeight="74.0" prefWidth="880.0" spacing="5.0">
                                  <children>
-                                    <Button fx:id="btn_addTransaccion" mnemonicParsing="true" onAction="#launch_newTransaccion" text="_Crear transacción" />
-                                    <Button fx:id="btn_borrarTransaccion" mnemonicParsing="true" onAction="#borrarTransaccion" text="_Borrar transacción" />
-                                    <Button fx:id="btn_modTransaccion" layoutX="375.0" layoutY="59.0" mnemonicParsing="true" onAction="#launch_modTransaccion" text="_Modificar transacción" />
+                                    <Button fx:id="btn_addTransaccion" mnemonicParsing="true" onAction="#launch_newTransaccion" text="_Crear transacción">
+                                       <tooltip>
+                                          <Tooltip text="Registrar una nueva transacción de reciclaje" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btn_borrarTransaccion" mnemonicParsing="true" onAction="#borrarTransaccion" text="_Borrar transacción">
+                                       <tooltip>
+                                          <Tooltip text="Eliminar la transacción seleccionada" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btn_modTransaccion" layoutX="375.0" layoutY="59.0" mnemonicParsing="true" onAction="#launch_modTransaccion" text="_Modificar transacción">
+                                       <tooltip>
+                                          <Tooltip text="Editar los datos de la transacción seleccionada" />
+                                       </tooltip>
+                                    </Button>
                                  </children>
                               </HBox>
                            </children>
@@ -243,9 +306,21 @@
                               </TableView>
                               <HBox alignment="BOTTOM_RIGHT" layoutX="14.0" layoutY="13.0" prefHeight="70.0" prefWidth="896.0" spacing="10.0">
                                  <children>
-                                    <Button fx:id="btn_addUsuario" mnemonicParsing="true" onAction="#launch_newUser" text="_Crear usuario" />
-                                    <Button fx:id="btn_borrarUsuario" mnemonicParsing="true" onAction="#borrarUsuario" text="_Borrar usuario" />
-                                    <Button fx:id="btn_modUsuario" mnemonicParsing="true" onAction="#launch_modUsuario" text="_Modificar usuario" />
+                                    <Button fx:id="btn_addUsuario" mnemonicParsing="true" onAction="#launch_newUser" text="_Crear usuario">
+                                       <tooltip>
+                                          <Tooltip text="Registrar un nuevo usuario en el sistema" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btn_borrarUsuario" mnemonicParsing="true" onAction="#borrarUsuario" text="_Borrar usuario">
+                                       <tooltip>
+                                          <Tooltip text="Eliminar el usuario seleccionado" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btn_modUsuario" mnemonicParsing="true" onAction="#launch_modUsuario" text="_Modificar usuario">
+                                       <tooltip>
+                                          <Tooltip text="Editar la información del usuario seleccionado" />
+                                       </tooltip>
+                                    </Button>
                                  </children>
                               </HBox>
                            </children>
@@ -256,6 +331,9 @@
           </Tab>
           
           <Tab text="Gráfico de Emisiones">
+               <tooltip>
+                  <Tooltip text="Visualización gráfica de emisiones reducidas por usuario" />
+               </tooltip>
                <content>
                   <ScrollPane fx:id="scrollPaneGraph" fitToHeight="true" fitToWidth="true" prefHeight="400.0" prefWidth="680.0">
                      <content>
@@ -268,27 +346,32 @@
           
           <!-- ==================== TAB DE INFORMES ==================== -->
           <Tab text="Informes">
+               <tooltip>
+                  <Tooltip text="Generación de informes estadísticos en PDF y HTML" />
+               </tooltip>
                <content>
                   <AnchorPane prefHeight="400.0" prefWidth="955.0">
                      <children>
                         <!-- Panel izquierdo: Controles de informes -->
-                        <VBox layoutX="14.0" layoutY="10.0" spacing="15.0" prefWidth="300" 
-                              AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+                        <VBox layoutX="14.0" layoutY="10.0" prefWidth="300" spacing="15.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="10.0">
                            
                            <!-- SECCIÓN INFORME 1: Catálogo de Productos -->
                            <VBox spacing="8.0" style="-fx-border-color: #CCCCCC; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 10;">
                               <children>
                                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="📋 Informe 1: Catálogo de Productos" />
-                                 <Label style="-fx-font-size: 11px; -fx-text-fill: #666666;" wrapText="true" 
-                                        text="Muestra todos los productos con gráfico de distribución por material" />
+                                 <Label style="-fx-font-size: 11px; -fx-text-fill: #666666;" text="Muestra todos los productos con gráfico de distribución por material" wrapText="true" />
                                  <HBox spacing="10.0">
                                     <children>
-                                       <Button fx:id="btn_generarInforme1" mnemonicParsing="true" onAction="#generarInforme1" 
-                                               style="-fx-background-color: #4CAF50; -fx-text-fill: white;" 
-                                               text="_Mostrar aquí" />
-                                       <Button fx:id="btn_exportarPDF1" mnemonicParsing="true" onAction="#exportarInforme1PDF" 
-                                               style="-fx-background-color: #2196F3; -fx-text-fill: white;" 
-                                               text="Nueva _Ventana" />
+                                       <Button fx:id="btn_generarInforme1" mnemonicParsing="true" onAction="#generarInforme1" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="_Mostrar aquí">
+                                          <tooltip>
+                                             <Tooltip text="Generar y mostrar el informe del catálogo de productos en el panel derecho" />
+                                          </tooltip>
+                                       </Button>
+                                       <Button fx:id="btn_exportarPDF1" mnemonicParsing="true" onAction="#exportarInforme1PDF" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Nueva _Ventana">
+                                          <tooltip>
+                                             <Tooltip text="Abrir el informe en una nueva ventana del navegador" />
+                                          </tooltip>
+                                       </Button>
                                     </children>
                                  </HBox>
                               </children>
@@ -298,44 +381,42 @@
                            <VBox spacing="8.0" style="-fx-border-color: #CCCCCC; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 10;">
                               <children>
                                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="📊 Informe 2: Histórico de Reciclaje" />
-                                 <Label style="-fx-font-size: 11px; -fx-text-fill: #666666;" wrapText="true" 
-                                        text="Historial de transacciones agrupadas por usuario con filtro" />
+                                 <Label style="-fx-font-size: 11px; -fx-text-fill: #666666;" text="Historial de transacciones agrupadas por usuario con filtro" wrapText="true" />
                                  
                                  <!-- Controles de filtro -->
                                  <VBox spacing="5.0">
                                     <CheckBox fx:id="chk_todosUsuarios" selected="true" text="Todos los usuarios" />
                                     <Label text="Filtrar por nombre:" />
-                                    <TextField fx:id="txt_filtroUsuario" disable="true" 
-                                               promptText="Ej: Juan, María..." />
+                                    <TextField fx:id="txt_filtroUsuario" disable="true" promptText="Ej: Juan, María..." />
                                  </VBox>
                                  
                                  <HBox spacing="10.0">
                                     <children>
-                                       <Button fx:id="btn_generarInforme2" mnemonicParsing="true" onAction="#generarInforme2" 
-                                               style="-fx-background-color: #2196F3; -fx-text-fill: white;" 
-                                               text="_Generar Informe" />
-                                       <Button fx:id="btn_exportarPDF2" mnemonicParsing="true" onAction="#exportarInforme2PDF" 
-                                               style="-fx-background-color: #9C27B0; -fx-text-fill: white;" 
-                                               text="Nueva _Ventana" />
+                                       <Button fx:id="btn_generarInforme2" mnemonicParsing="true" onAction="#generarInforme2" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="_Generar Informe">
+                                          <tooltip>
+                                             <Tooltip text="Generar informe histórico de reciclaje con los filtros aplicados" />
+                                          </tooltip>
+                                       </Button>
+                                       <Button fx:id="btn_exportarPDF2" mnemonicParsing="true" onAction="#exportarInforme2PDF" style="-fx-background-color: #9C27B0; -fx-text-fill: white;" text="Nueva _Ventana">
+                                          <tooltip>
+                                             <Tooltip text="Abrir el informe en una nueva ventana del navegador" />
+                                          </tooltip>
+                                       </Button>
                                     </children>
                                  </HBox>
                               </children>
                            </VBox>
                            
                            <!-- Información adicional -->
-                           <Label style="-fx-font-size: 10px; -fx-text-fill: #999999;" wrapText="true" 
-                                  text="💡 Los informes se exportan automáticamente a PDF y HTML en las carpetas 'html_informes/' y 'pdf_informes/'" />
+                           <Label style="-fx-font-size: 10px; -fx-text-fill: #999999;" text="💡 Los informes se exportan automáticamente a PDF y HTML en las carpetas 'html_informes/' y 'pdf_informes/'" wrapText="true" />
                         </VBox>
                         
                         <!-- WebView para mostrar el informe embedido -->
-                        <VBox layoutX="330.0" layoutY="10.0" spacing="5.0" 
-                              AnchorPane.leftAnchor="330.0" AnchorPane.rightAnchor="14.0" 
-                              AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+                        <VBox layoutX="330.0" layoutY="10.0" spacing="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="330.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0">
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="5.0">
                                  <Label style="-fx-font-weight: bold;" text="📄 Vista Previa del Informe" />
-                                 <Label style="-fx-font-size: 10px; -fx-text-fill: #666;" 
-                                        text="(Informe 1 - Catálogo de Productos)" />
+                                 <Label style="-fx-font-size: 10px; -fx-text-fill: #666;" text="(Informe 1 - Catálogo de Productos)" />
                               </HBox>
                               <WebView fx:id="webViewInforme" VBox.vgrow="ALWAYS" />
                            </children>

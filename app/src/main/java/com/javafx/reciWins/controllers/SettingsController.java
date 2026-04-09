@@ -55,6 +55,12 @@ public class SettingsController implements Initializable {
 
     @FXML
     void guardarCambios(ActionEvent event) {
+        // Verificar conexión antes de proceder
+        if (!StartWin.verificarConexion()) {
+            StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
+            return;
+        }
+        
         String nuevoNombre = txtFld_nombre.getText().trim();
         
         if(nuevoNombre.isEmpty()) {
@@ -83,8 +89,13 @@ public class SettingsController implements Initializable {
                 return;
             }
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo verificar la disponibilidad del nombre.");
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                mostrarError("Error de base de datos", "No se pudo verificar la disponibilidad del nombre.");
+                e.printStackTrace();
+            }
             return;
         }
         
@@ -107,6 +118,14 @@ public class SettingsController implements Initializable {
             exito.showAndWait();
             
             kill(event);
+        } catch (SQLException e) {
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                mostrarError("Error al guardar", "No se pudieron guardar los cambios: " + e.getMessage());
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             mostrarError("Error al guardar", "No se pudieron guardar los cambios: " + e.getMessage());
             e.printStackTrace();
@@ -157,9 +176,14 @@ public class SettingsController implements Initializable {
                 txtFld_tap.setText("No disponible");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            txtFld_nombre.setText("Error al cargar");
-            txtFld_tap.setText("Error");
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+                txtFld_nombre.setText("Error al cargar");
+                txtFld_tap.setText("Error");
+            }
         }
     }
 
@@ -179,5 +203,34 @@ public class SettingsController implements Initializable {
         a.setHeaderText(titulo);
         a.setContentText(mensaje);
         a.showAndWait();
+    }
+
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
+        return false;
     }
 }

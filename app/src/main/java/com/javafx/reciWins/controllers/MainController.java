@@ -347,7 +347,7 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<Producto, String> colMaterialProducto;
 
-    @FXML 
+    @FXML
     private TableView<Transaccion> tablaTransacciones;
 
     @FXML
@@ -607,7 +607,19 @@ public class MainController implements Initializable {
                 rolBD.setText(permisos);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            if (esErrorDeConexion(e)) {
+
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+
+                StartWin.manejarPerdidaConexion(e.getMessage());
+
+            } else {
+
+                e.printStackTrace();
+
+            }
+
         }
     }
 
@@ -705,7 +717,12 @@ public class MainController implements Initializable {
                 rolBD.setText("N/A");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
             nombreBD.setText("Error");
             saldoBD.setText("0.0 kg CO₂");
             rolBD.setText("N/A");
@@ -735,7 +752,19 @@ public class MainController implements Initializable {
                 tablaProductos.setItems(tablaProductosObservable);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            if (esErrorDeConexion(e)) {
+
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+
+                StartWin.manejarPerdidaConexion(e.getMessage());
+
+            } else {
+
+                e.printStackTrace();
+
+            }
+
         }
     }
 
@@ -762,7 +791,19 @@ public class MainController implements Initializable {
                 tablaTransacciones.setItems(tablaTransaccionesObservable);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            if (esErrorDeConexion(e)) {
+
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+
+                StartWin.manejarPerdidaConexion(e.getMessage());
+
+            } else {
+
+                e.printStackTrace();
+
+            }
+
         }
     }
 
@@ -789,7 +830,19 @@ public class MainController implements Initializable {
                 tablaUsuario.setItems(tablaUsuarioObservable);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            if (esErrorDeConexion(e)) {
+
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+
+                StartWin.manejarPerdidaConexion(e.getMessage());
+
+            } else {
+
+                e.printStackTrace();
+
+            }
+
         }
     }
 
@@ -1021,6 +1074,21 @@ public class MainController implements Initializable {
                 alerta.setContentText("El producto y todas sus transacciones asociadas han sido eliminados.\nLas emisiones de los usuarios afectados se han actualizado.");
                 alerta.showAndWait();
                 
+            } catch (SQLException ex) {
+                if (esErrorDeConexion(ex)) {
+                    System.err.println("Error de conexión detectado: " + ex.getMessage());
+                    StartWin.manejarPerdidaConexion(ex.getMessage());
+                } else {
+                    Alert alerta = new Alert(AlertType.ERROR);
+                    alerta.setOnShown(e -> {
+                    Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                    alerta.setHeaderText("Error al eliminar");
+                    alerta.setContentText("No se pudo eliminar el producto: " + ex.getMessage());
+                    alerta.showAndWait();
+                    ex.printStackTrace();
+                }
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
                 alerta.setOnShown(e -> {
@@ -1074,6 +1142,21 @@ public class MainController implements Initializable {
                 
                 actualizarTodasLasVistas();
                 deseleccionarTodos();
+            } catch (SQLException ex) {
+                if (esErrorDeConexion(ex)) {
+                    System.err.println("Error de conexión detectado: " + ex.getMessage());
+                    StartWin.manejarPerdidaConexion(ex.getMessage());
+                } else {
+                    Alert alerta = new Alert(AlertType.ERROR);
+                    alerta.setOnShown(ea -> {
+                    Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                    alerta.setHeaderText("Error al eliminar");
+                    alerta.setContentText("No se pudo eliminar la transacción: " + ex.getMessage());
+                    alerta.showAndWait();
+                    ex.printStackTrace();
+                }
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
                 alerta.setOnShown(ea -> {
@@ -1119,7 +1202,19 @@ public class MainController implements Initializable {
                 return rs.getFloat("Emisiones_Reducibles");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+
+            if (esErrorDeConexion(ex)) {
+
+                System.err.println("Error de conexión detectado: " + ex.getMessage());
+
+                StartWin.manejarPerdidaConexion(ex.getMessage());
+
+            } else {
+
+                ex.printStackTrace();
+
+            }
+
         }
         return 0.0f;
     }
@@ -1171,6 +1266,21 @@ public class MainController implements Initializable {
                 alerta.setContentText("El usuario y todas sus transacciones han sido eliminados.");
                 alerta.showAndWait();
                 
+            } catch (SQLException ex) {
+                if (esErrorDeConexion(ex)) {
+                    System.err.println("Error de conexión detectado: " + ex.getMessage());
+                    StartWin.manejarPerdidaConexion(ex.getMessage());
+                } else {
+                    Alert alerta = new Alert(AlertType.ERROR);
+                    alerta.setOnShown(e -> {
+                    Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                    alerta.setHeaderText("Error al eliminar");
+                    alerta.setContentText("No se pudo eliminar el usuario: " + ex.getMessage());
+                    alerta.showAndWait();
+                    ex.printStackTrace();
+                }
             } catch (Exception ex) {
                 Alert alerta = new Alert(AlertType.ERROR);
                 alerta.setOnShown(e -> {
@@ -1329,7 +1439,7 @@ public class MainController implements Initializable {
             StorageSharer.itemStorage.add(m.getMaterial());
             StorageSharer.itemToMod = m;
             StorageSharer.itemPre = m;
-            
+
             StartWin.lanzarModProducto();
         } else {
             Alert alerta = new Alert(AlertType.WARNING);
@@ -1405,6 +1515,21 @@ public class MainController implements Initializable {
             alerta.setContentText("Tu nuevo número TAP es: " + nuevoTap);
             alerta.showAndWait();
             
+        } catch (SQLException e) {
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                Alert alerta = new Alert(AlertType.ERROR);
+                alerta.setOnShown(xe -> {
+                    Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                alerta.setHeaderText("Error al generar TAP");
+                alerta.setContentText("No se pudo generar el nuevo TAP: " + e.getMessage());
+                alerta.showAndWait();
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             Alert alerta = new Alert(AlertType.ERROR);
             alerta.setOnShown(xe -> {
@@ -1427,5 +1552,34 @@ public class MainController implements Initializable {
         alerta.setHeaderText("Acceso denegado");
         alerta.setContentText("Esta función solo está disponible para administradores.");
         alerta.showAndWait();
+    }
+
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
+        return false;
     }
 }

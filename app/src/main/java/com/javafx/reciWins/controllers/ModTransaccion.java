@@ -72,6 +72,13 @@ public class ModTransaccion implements Initializable {
     @FXML
     void modificarTransaccion(ActionEvent event) {
         if(!launchAlertsModTransaccion()) {
+            
+            // Verificar conexión antes de proceder
+            if (!StartWin.verificarConexion()) {
+                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
+                return;
+            }
+            
             int idUsuario = MainController.obtenerIdUsuarioDesdeBusqueda(usuarioTransaccion.getValue());
             String tipo = tipoTransaccion.getValue();
             long codigoBarras = Long.parseLong(codigoTransaccion.getValue());
@@ -387,7 +394,12 @@ public class ModTransaccion implements Initializable {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -403,7 +415,12 @@ public class ModTransaccion implements Initializable {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -420,8 +437,42 @@ public class ModTransaccion implements Initializable {
                 return rs.getFloat("Emisiones_Reducibles");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (esErrorDeConexion(e)) {
+                System.err.println("Error de conexión detectado: " + e.getMessage());
+                StartWin.manejarPerdidaConexion(e.getMessage());
+            } else {
+                e.printStackTrace();
+            }
         }
         return 0.0f;
+    }
+
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
+        return false;
     }
 }

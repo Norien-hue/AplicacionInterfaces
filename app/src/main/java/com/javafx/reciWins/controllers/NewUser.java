@@ -1,6 +1,7 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -51,20 +52,27 @@ public class NewUser implements Initializable {
     @FXML
     void crearUsuario(ActionEvent event) {
         if(!launchAlertsNewUser()) {
+            
+            // Verificar conexión antes de proceder
+            if (!StartWin.verificarConexion()) {
+                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
+                return;
+            }
+            
             String nombre = nombreUsuario.getText().trim();
             String contrasenia = contraseniaUsuario.getText();
             String role = userRoleUsuario.isSelected() ? "cliente" : "administrador";
             
-            String hashContrasenia = "$2y$10$" + contrasenia.hashCode(); 
-            
+            String hashContrasenia = "$2y$10$" + contrasenia.hashCode();
+
             try {
                 Statement stmt = StartWin.conn.createStatement();
                 stmt.executeUpdate(
-                    "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('" 
-                    + nombre + "', '" 
-                    + hashContrasenia + "', '" 
-                    + role + "', " 
-                    + "0, " 
+                    "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('"
+                    + nombre + "', '"
+                    + hashContrasenia + "', '"
+                    + role + "', "
+                    + "0, "
                     + "NULL)"
                 );
                 
@@ -81,6 +89,23 @@ public class NewUser implements Initializable {
                 MainController.actualizarVistasDesdeExterno();
                 
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
+            } catch (SQLException e) {
+                // Detectar si es un error de conexión
+                if (esErrorDeConexion(e)) {
+                    System.err.println("Error de conexión detectado: " + e.getMessage());
+                    StartWin.manejarPerdidaConexion(e.getMessage());
+                } else {
+                Alert a = new Alert(AlertType.ERROR);
+                a.setOnShown(ex -> {
+                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(StartWin.icon);
+                });
+                a.setHeaderText("Error al crear");
+                a.setContentText("No se pudo crear el usuario: " + e.getMessage());
+                a.showAndWait();
+                e.printStackTrace();
+            
+                }
             } catch (Exception e) {
                 Alert a = new Alert(AlertType.ERROR);
                 a.setOnShown(ex -> {
@@ -91,6 +116,7 @@ public class NewUser implements Initializable {
                 a.setContentText("No se pudo crear el usuario: " + e.getMessage());
                 a.showAndWait();
                 e.printStackTrace();
+            
             }
         }
     }
@@ -185,5 +211,34 @@ public class NewUser implements Initializable {
         checkAlert = false;
         alertMessage = "";
         return ret;
+    }
+
+    /**
+     * Determina si una SQLException es debido a un problema de conexión
+     * @param e La excepción SQL a verificar
+     * @return true si es un error de conexión, false en caso contrario
+     */
+    private boolean esErrorDeConexion(SQLException e) {
+        // Códigos de error comunes para problemas de conexión
+        String sqlState = e.getSQLState();
+        String mensaje = e.getMessage().toLowerCase();
+        
+        // SQLState codes para problemas de comunicación
+        if (sqlState != null && (
+            sqlState.startsWith("08") ||  // Connection exception
+            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
+            return true;
+        }
+        
+        // Mensajes comunes de error de conexión
+        if (mensaje.contains("connection") || 
+            mensaje.contains("timeout") ||
+            mensaje.contains("closed") ||
+            mensaje.contains("socket") ||
+            mensaje.contains("communications link failure")) {
+            return true;
+        }
+        
+        return false;
     }
 }
