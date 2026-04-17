@@ -1,0 +1,8 @@
+# Configuración ORIGINAL de la base de datos (antes de los cambios del 2026-04-09)
+# Este es el contenido que tenía configuration.properties cuando se recibió el proyecto.
+# Se mantiene como referencia. La configuración activa está en configuration.properties
+# y ahora apunta a localhost.
+
+db.url=jdbc:mysql://100.52.49.57:3306/reciInventario_db2
+db.username=admin
+db.password=LAT7v8Z7mWOM

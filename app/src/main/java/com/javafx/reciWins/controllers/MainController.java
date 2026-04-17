@@ -348,6 +348,9 @@ public class MainController implements Initializable {
     private TableColumn<Producto, String> colMaterialProducto;
 
     @FXML
+    private TableColumn<Producto, String> colImagenProducto;
+
+    @FXML
     private TableView<Transaccion> tablaTransacciones;
 
     @FXML
@@ -679,6 +682,25 @@ public class MainController implements Initializable {
         colNombreProducto.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colEmisionesProducto.setCellValueFactory(new PropertyValueFactory<>("emisionesReducibles"));
         colMaterialProducto.setCellValueFactory(new PropertyValueFactory<>("material"));
+
+        colImagenProducto.setCellValueFactory(cellData -> {
+            boolean tiene = cellData.getValue().tieneImagen();
+            return new javafx.beans.property.SimpleStringProperty(tiene ? "✓" : "✗");
+        });
+        colImagenProducto.setCellFactory(col -> new javafx.scene.control.TableCell<Producto, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
+                    setStyle("-fx-alignment: CENTER; -fx-font-weight: bold; -fx-text-fill: "
+                        + ("✓".equals(item) ? "green" : "red") + ";");
+                }
+            }
+        });
     }
 
     private void configurarColumnasTransacciones() {
@@ -743,7 +765,8 @@ public class MainController implements Initializable {
                     rs.getLong("Numero_barras"),
                     rs.getString("Nombre"),
                     rs.getFloat("Emisiones_Reducibles"),
-                    rs.getString("Material")
+                    rs.getString("Material"),
+                    rs.getString("Imagen")
                 );
                 tablaProductosObservable.add(producto);
             }
@@ -1437,6 +1460,7 @@ public class MainController implements Initializable {
             StorageSharer.itemStorage.add(m.getNombre());
             StorageSharer.itemStorage.add(m.getEmisionesReducibles() + "");
             StorageSharer.itemStorage.add(m.getMaterial());
+            StorageSharer.itemStorage.add(m.getImagenBase64() == null ? "" : m.getImagenBase64());
             StorageSharer.itemToMod = m;
             StorageSharer.itemPre = m;
 

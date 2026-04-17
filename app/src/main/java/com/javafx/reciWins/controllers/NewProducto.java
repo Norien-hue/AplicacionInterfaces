@@ -1,9 +1,12 @@
 package com.javafx.reciWins.controllers;
 
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Producto;
@@ -45,6 +48,9 @@ public class NewProducto implements Initializable {
     private ComboBox<String> materialesProducto; // Cambiado de TextField a ComboBox<String>
 
     @FXML
+    private TextField rutaImagenProducto;
+
+    @FXML
     private Button btn_aceptar;
 
     @FXML
@@ -80,18 +86,55 @@ public class NewProducto implements Initializable {
                 return;
             }
             
-            try {
-                Statement stmt = StartWin.conn.createStatement();
-                stmt.executeUpdate(
-                    "INSERT INTO Productos (Tipo, Numero_barras, Nombre, Emisiones_Reducibles, Material) VALUES ('"
-                    + tipo + "', '"
-                    + codigoBarras + "', '"
-                    + nombre + "', '"
-                    + emisiones + "', '"
-                    + material + "')"
-                );
+            // Procesar imagen si se indicó ruta
+            String imagenBase64 = null;
+            String ruta = rutaImagenProducto.getText() == null ? "" : rutaImagenProducto.getText().trim();
+            if (!ruta.isEmpty()) {
+                try {
+                    File f = new File(ruta);
+                    if (!f.exists() || !f.isFile()) {
+                        Alert a = new Alert(AlertType.ERROR);
+                        a.setOnShown(ex -> {
+                            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                            stage.getIcons().add(StartWin.icon);
+                        });
+                        a.setHeaderText("Imagen no encontrada");
+                        a.setContentText("La ruta de imagen no es válida: " + ruta);
+                        a.showAndWait();
+                        return;
+                    }
+                    byte[] bytes = Files.readAllBytes(f.toPath());
+                    imagenBase64 = Base64.getEncoder().encodeToString(bytes);
+                } catch (Exception ex) {
+                    Alert a = new Alert(AlertType.ERROR);
+                    a.setOnShown(e2 -> {
+                        Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                        stage.getIcons().add(StartWin.icon);
+                    });
+                    a.setHeaderText("Error al leer imagen");
+                    a.setContentText("No se pudo leer la imagen: " + ex.getMessage());
+                    a.showAndWait();
+                    return;
+                }
+            }
 
-                Producto nuevoProducto = new Producto(tipo, codigoBarras, nombre, emisiones, material);
+            try {
+                PreparedStatement pst = StartWin.conn.prepareStatement(
+                    "INSERT INTO Productos (Tipo, Numero_barras, Nombre, Emisiones_Reducibles, Material, Imagen) VALUES (?, ?, ?, ?, ?, ?)"
+                );
+                pst.setString(1, tipo);
+                pst.setLong(2, codigoBarras);
+                pst.setString(3, nombre);
+                pst.setFloat(4, emisiones);
+                pst.setString(5, material);
+                if (imagenBase64 == null) {
+                    pst.setNull(6, java.sql.Types.LONGVARCHAR);
+                } else {
+                    pst.setString(6, imagenBase64);
+                }
+                pst.executeUpdate();
+
+                Producto nuevoProducto = new Producto(tipo, codigoBarras, nombre, emisiones, material, imagenBase64);
                 MainController.tablaProductosObservable.add(nuevoProducto);
                 
                 // ACTUALIZAR TODAS LAS VISTAS DESPUÉS DE CREAR

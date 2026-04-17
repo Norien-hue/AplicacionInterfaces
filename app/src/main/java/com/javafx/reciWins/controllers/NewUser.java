@@ -1,13 +1,14 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
+import com.javafx.reciWins.utiles.BCryptUtils;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -63,18 +64,16 @@ public class NewUser implements Initializable {
             String contrasenia = contraseniaUsuario.getText();
             String role = userRoleUsuario.isSelected() ? "cliente" : "administrador";
             
-            String hashContrasenia = "$2y$10$" + contrasenia.hashCode();
+            String hashContrasenia = BCryptUtils.hash(contrasenia);
 
             try {
-                Statement stmt = StartWin.conn.createStatement();
-                stmt.executeUpdate(
-                    "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('"
-                    + nombre + "', '"
-                    + hashContrasenia + "', '"
-                    + role + "', "
-                    + "0, "
-                    + "NULL)"
+                PreparedStatement pst = StartWin.conn.prepareStatement(
+                    "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES (?, ?, ?, 0, NULL)"
                 );
+                pst.setString(1, nombre);
+                pst.setString(2, hashContrasenia);
+                pst.setString(3, role);
+                pst.executeUpdate();
                 
                 Usuario nuevoUsuario = new Usuario(
                     0,

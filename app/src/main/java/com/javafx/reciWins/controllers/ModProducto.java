@@ -1,11 +1,14 @@
 package com.javafx.reciWins.controllers;
 
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -24,8 +27,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 
 public class ModProducto implements Initializable {
@@ -49,12 +55,50 @@ public class ModProducto implements Initializable {
     private ComboBox<String> materialesProducto; // Cambiado de TextField a ComboBox<String>
 
     @FXML
+    private TextField rutaImagenProducto;
+
+    @FXML
+    private Label estadoImagenLabel;
+
+    @FXML
+    private Button btn_copiarImagen;
+
+    @FXML
     private Button btn_aceptar;
+
+    private String imagenBase64Actual;
 
     @FXML
     void kill(ActionEvent event) {
         StorageSharer.itemStorage.clear();
         ((Stage)btn_cancelar.getScene().getWindow()).close();
+    }
+
+    @FXML
+    void copiarImagenBase64(ActionEvent event) {
+        if (imagenBase64Actual == null || imagenBase64Actual.isEmpty()) {
+            Alert a = new Alert(AlertType.INFORMATION);
+            a.setOnShown(e -> {
+                Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(StartWin.icon);
+            });
+            a.setHeaderText("Sin imagen");
+            a.setContentText("Este producto no tiene imagen que copiar.");
+            a.showAndWait();
+            return;
+        }
+        ClipboardContent content = new ClipboardContent();
+        content.putString(imagenBase64Actual);
+        Clipboard.getSystemClipboard().setContent(content);
+
+        Alert a = new Alert(AlertType.INFORMATION);
+        a.setOnShown(e -> {
+            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(StartWin.icon);
+        });
+        a.setHeaderText("Imagen copiada");
+        a.setContentText("La imagen en Base64 se ha copiado al portapapeles.");
+        a.showAndWait();
     }
 
     @FXML
@@ -98,6 +142,38 @@ public class ModProducto implements Initializable {
             // Calcular la diferencia de emisiones
             float diferenciaEmisiones = emisiones - emisionesOriginales;
 
+            // Procesar nueva imagen si se indicó ruta, si no mantener la actual
+            String nuevaImagenBase64 = imagenBase64Actual;
+            String ruta = rutaImagenProducto.getText() == null ? "" : rutaImagenProducto.getText().trim();
+            if (!ruta.isEmpty()) {
+                try {
+                    File f = new File(ruta);
+                    if (!f.exists() || !f.isFile()) {
+                        Alert a = new Alert(AlertType.ERROR);
+                        a.setOnShown(ex -> {
+                            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                            stage.getIcons().add(StartWin.icon);
+                        });
+                        a.setHeaderText("Imagen no encontrada");
+                        a.setContentText("La ruta de imagen no es válida: " + ruta);
+                        a.showAndWait();
+                        return;
+                    }
+                    byte[] bytes = Files.readAllBytes(f.toPath());
+                    nuevaImagenBase64 = Base64.getEncoder().encodeToString(bytes);
+                } catch (Exception ex) {
+                    Alert a = new Alert(AlertType.ERROR);
+                    a.setOnShown(e2 -> {
+                        Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+                        stage.getIcons().add(StartWin.icon);
+                    });
+                    a.setHeaderText("Error al leer imagen");
+                    a.setContentText("No se pudo leer la imagen: " + ex.getMessage());
+                    a.showAndWait();
+                    return;
+                }
+            }
+            
             try {
                 Statement stmt = StartWin.conn.createStatement();
                 
@@ -124,14 +200,24 @@ public class ModProducto implements Initializable {
                 }
                 
                 // 2. ACTUALIZAR EL PRODUCTO
-                stmt.executeUpdate(
-                    "UPDATE Productos SET Tipo = '" + tipo + "', " +
-                    "Numero_barras = '" + codigoBarras + "', " +
-                    "Nombre = '" + nombre + "', " +
-                    "Emisiones_Reducibles = '" + emisiones + "', " +
-                    "Material = '" + material + "' " +
-                    "WHERE Tipo = '" + tipoOriginal + "' AND Numero_barras = '" + codigoOriginal + "'"
+                PreparedStatement pstUpd = StartWin.conn.prepareStatement(
+                    "UPDATE Productos SET Tipo = ?, Numero_barras = ?, Nombre = ?, " +
+                    "Emisiones_Reducibles = ?, Material = ?, Imagen = ? " +
+                    "WHERE Tipo = ? AND Numero_barras = ?"
                 );
+                pstUpd.setString(1, tipo);
+                pstUpd.setLong(2, codigoBarras);
+                pstUpd.setString(3, nombre);
+                pstUpd.setFloat(4, emisiones);
+                pstUpd.setString(5, material);
+                if (nuevaImagenBase64 == null || nuevaImagenBase64.isEmpty()) {
+                    pstUpd.setNull(6, java.sql.Types.LONGVARCHAR);
+                } else {
+                    pstUpd.setString(6, nuevaImagenBase64);
+                }
+                pstUpd.setString(7, tipoOriginal);
+                pstUpd.setLong(8, Long.parseLong(codigoOriginal));
+                pstUpd.executeUpdate();
                 
                 // 3. ACTUALIZAR LAS TRANSACCIONES EXISTENTES
                 if (!tipo.equals(tipoOriginal) || codigoBarras != Long.parseLong(codigoOriginal)) {
@@ -142,7 +228,7 @@ public class ModProducto implements Initializable {
                     );
                 }
                 
-                StorageSharer.itemToMod = new Producto(tipo, codigoBarras, nombre, emisiones, material);
+                StorageSharer.itemToMod = new Producto(tipo, codigoBarras, nombre, emisiones, material, nuevaImagenBase64);
                 MainController.modItem();
                 
                 // 4. ACTUALIZAR TODAS LAS VISTAS
@@ -218,6 +304,21 @@ public class ModProducto implements Initializable {
         String materialActual = StorageSharer.itemStorage.get(4);
         if (materialActual != null && !materialActual.trim().isEmpty()) {
             materialesProducto.setValue(materialActual);
+        }
+
+        // Cargar imagen actual (base64) si existe
+        if (StorageSharer.itemStorage.size() > 5) {
+            String img = StorageSharer.itemStorage.get(5);
+            imagenBase64Actual = (img == null || img.isEmpty()) ? null : img;
+        } else {
+            imagenBase64Actual = null;
+        }
+        if (imagenBase64Actual != null) {
+            estadoImagenLabel.setText("Imagen actual: sí (" + imagenBase64Actual.length() + " caracteres)");
+            btn_copiarImagen.setDisable(false);
+        } else {
+            estadoImagenLabel.setText("Imagen actual: ninguna");
+            btn_copiarImagen.setDisable(true);
         }
 
         tipoProducto.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {

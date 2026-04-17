@@ -4,10 +4,10 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ResourceBundle;
 
 import com.javafx.reciWins.start.StartWin;
+import com.javafx.reciWins.utiles.BCryptUtils;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -45,14 +45,15 @@ public class ChangePasswd implements Initializable {
     void cambiarContraseña(ActionEvent event) {
         if(validarCambioContraseña()) {
             String nuevaContrasenia = passwdNueva.getText();
-            String hashNuevaContrasenia = "$2y$10$" + nuevaContrasenia.hashCode();
-            
+            String hashNuevaContrasenia = BCryptUtils.hash(nuevaContrasenia);
+
             try {
-                Statement stmt = StartWin.conn.createStatement();
-                stmt.executeUpdate(
-                    "UPDATE Usuarios SET Hash_Contraseña = '" + hashNuevaContrasenia + 
-                    "' WHERE Id_Usuario = " + MainController.id_user
+                PreparedStatement pst = StartWin.conn.prepareStatement(
+                    "UPDATE Usuarios SET Hash_Contraseña = ? WHERE Id_Usuario = ?"
                 );
+                pst.setString(1, hashNuevaContrasenia);
+                pst.setInt(2, MainController.id_user);
+                pst.executeUpdate();
                 
                 Alert exito = new Alert(AlertType.INFORMATION);
                 exito.setOnShown(e -> {
@@ -96,9 +97,8 @@ public class ChangePasswd implements Initializable {
             
             if(rs.next()) {
                 String hashAlmacenado = rs.getString("Hash_Contraseña");
-                String hashIngresado = "$2y$10$" + passwdActual.getText().hashCode();
-                
-                if(!hashAlmacenado.equals(hashIngresado)) {
+
+                if(!BCryptUtils.verify(passwdActual.getText(), hashAlmacenado)) {
                     mostrarError("Contraseña incorrecta", "La contraseña actual no es correcta.");
                     return false;
                 }

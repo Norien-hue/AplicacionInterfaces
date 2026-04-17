@@ -2,6 +2,7 @@ package com.javafx.reciWins.controllers;
 
 import com.javafx.model.Usuario;
 import com.javafx.reciWins.start.StartWin;
+import com.javafx.reciWins.utiles.BCryptUtils;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,22 +63,21 @@ public class SingUpController {
                 return;
             }
             
-            String hashContrasenia = "$2y$10$" + contrasenia.hashCode();
+            String hashContrasenia = BCryptUtils.hash(contrasenia);
 
             String role = "cliente";
 
-            String insertQuery = "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES ('"
-                + nombre + "', '"
-                + hashContrasenia + "', '"
-                + role + "', "
-                + "0, "
-                + "NULL)";
-
             try {
-                Statement stmt = StartWin.conn.createStatement();
-                stmt.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement pst = StartWin.conn.prepareStatement(
+                    "INSERT INTO Usuarios (Nombre, Hash_Contraseña, Permisos, Emisiones_Reducidas, TAP) VALUES (?, ?, ?, 0, NULL)",
+                    Statement.RETURN_GENERATED_KEYS
+                );
+                pst.setString(1, nombre);
+                pst.setString(2, hashContrasenia);
+                pst.setString(3, role);
+                pst.executeUpdate();
 
-                ResultSet rs = stmt.getGeneratedKeys();
+                ResultSet rs = pst.getGeneratedKeys();
                 if(rs.next()) {
                     int nuevoId = rs.getInt(1);
                     

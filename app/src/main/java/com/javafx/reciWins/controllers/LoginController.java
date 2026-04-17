@@ -1,6 +1,7 @@
 package com.javafx.reciWins.controllers;
 
 import com.javafx.reciWins.start.StartWin;
+import com.javafx.reciWins.utiles.BCryptUtils;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -77,9 +78,7 @@ public class LoginController {
                 String hashAlmacenado = rs.getString("Hash_Contraseña");
                 int idUsuario = rs.getInt("Id_Usuario");
 
-                String hashIngresado = "$2y$10$" + contrasenia.hashCode();
-
-                if(hashAlmacenado.equals(hashIngresado)) {
+                if(BCryptUtils.verify(contrasenia, hashAlmacenado)) {
                     MainController.id_user = idUsuario;
                     System.out.println("Login exitoso. ID Usuario: " + idUsuario);
                     return true;

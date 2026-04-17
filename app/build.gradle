@@ -25,6 +25,8 @@ dependencies {
     implementation 'net.sf.jasperreports:jasperreports-pdf:7.0.0'
     implementation 'net.sf.jasperreports:jasperreports-charts:7.0.1'
     implementation 'org.openjfx:javafx-web:21.0.1'
+    // BCrypt para hash de contraseñas (compatible con Node bcrypt $2b$)
+    implementation("at.favre.lib:bcrypt:0.10.2")
 }
 
 java {
@@ -35,7 +37,7 @@ java {
 
 
 application {
-    mainClass = 'com.javafx.reciWins.start.StartWin.main'
+    mainClass = 'com.javafx.reciWins.start.StartWin'
 }
 
 sourceSets {

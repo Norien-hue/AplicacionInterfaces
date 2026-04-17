@@ -238,6 +238,7 @@
                                     <TableColumn fx:id="colNombreProducto" prefWidth="307.9999694824219" text="Nombre" />
                                     <TableColumn fx:id="colEmisionesProducto" prefWidth="92.79998779296875" text="Emisiones" />
                                     <TableColumn fx:id="colMaterialProducto" prefWidth="150.4000244140625" text="Material" />
+                                    <TableColumn fx:id="colImagenProducto" prefWidth="67.0" text="Imagen" />
                                  </columns>
                               </TableView>
                               <HBox alignment="BOTTOM_RIGHT" layoutX="20.0" layoutY="14.0" prefHeight="74.0" prefWidth="879.0" spacing="5.0">

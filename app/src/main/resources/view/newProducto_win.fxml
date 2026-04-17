@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="280.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewProducto">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="475.0" prefWidth="280.0" spacing="15.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javafx.reciWins.controllers.NewProducto">
    <children>
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
          <children>
@@ -41,7 +41,13 @@
             <ComboBox fx:id="materialesProducto" prefHeight="26.0" prefWidth="260.0" editable="false" />
          </children>
       </VBox>
-      <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="260.0" spacing="10.0">
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="43.0" prefWidth="260.0">
+         <children>
+            <Label text="Ruta imagen (opcional)" />
+            <TextField fx:id="rutaImagenProducto" prefHeight="26.0" prefWidth="260.0" promptText="Ej: C:\imagenes\producto.png" />
+         </children>
+      </VBox>
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="75.0" prefWidth="260.0" spacing="10.0">
          <children>
             <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#crearProducto" text="_Aceptar">
                <tooltip>

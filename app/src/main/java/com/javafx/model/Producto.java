@@ -6,13 +6,19 @@ public class Producto {
     private String nombre;
     private float emisionesReducibles;
     private String material;
+    private String imagenBase64;
 
     public Producto(String tipo, long numeroBarras, String nombre, float emisionesReducibles, String material) {
+        this(tipo, numeroBarras, nombre, emisionesReducibles, material, null);
+    }
+
+    public Producto(String tipo, long numeroBarras, String nombre, float emisionesReducibles, String material, String imagenBase64) {
         this.tipo = tipo;
         this.numeroBarras = numeroBarras;
         this.nombre = nombre;
         this.emisionesReducibles = emisionesReducibles;
         this.material = material;
+        this.imagenBase64 = imagenBase64;
     }
 
     // Getters y Setters
@@ -54,5 +60,17 @@ public class Producto {
 
     public void setMaterial(String material) {
         this.material = material;
+    }
+
+    public String getImagenBase64() {
+        return imagenBase64;
+    }
+
+    public void setImagenBase64(String imagenBase64) {
+        this.imagenBase64 = imagenBase64;
+    }
+
+    public boolean tieneImagen() {
+        return imagenBase64 != null && !imagenBase64.trim().isEmpty();
     }
 }
