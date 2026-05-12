@@ -60,10 +60,8 @@ import java.util.Set;
 import java.util.Random;
 
 import javafx.scene.web.WebView;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.util.JRLoader;
 import java.io.File;
-import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 
 public class MainController implements Initializable {
@@ -99,23 +97,23 @@ public class MainController implements Initializable {
 
     @FXML
     void generarInforme1(ActionEvent event) {
-        lanzarInforme("/reports/informe1.jasper", new HashMap<>(), 0);
+        lanzarInforme("informe1", new HashMap<>(), 0);
     }
     @FXML
     void exportarInforme1PDF(ActionEvent event) {
-        lanzarInforme("/reports/informe1.jasper", new HashMap<>(), 1);
+        lanzarInforme("informe1", new HashMap<>(), 1);
     }
 
     private void generarInforme1Automatico() {
         if (tabMain.getSelectionModel().getSelectedItem() != null &&
             tabMain.getSelectionModel().getSelectedItem().getText().equals("Informes")) {
-            lanzarInforme("/reports/informe1.jasper", new HashMap<>(), 0);
+            lanzarInforme("informe1", new HashMap<>(), 0);
         }
     }
 
     @FXML
     void generarInforme2(ActionEvent event) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
 
         if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
             params.put("NombreUsuario", "%");
@@ -125,7 +123,7 @@ public class MainController implements Initializable {
             params.put("NombreUsuario", "%");
         }
 
-        lanzarInforme("/reports/informe2.jasper", params, 0);
+        lanzarInforme("informe2", params, 0);
     }
 
 
@@ -161,26 +159,59 @@ public class MainController implements Initializable {
     }
 
 
-    private void lanzarInforme(String rutaInf, Map<String, Object> param, int tipo) {
-        // Los informes JasperReports necesitan una conexion JDBC directa.
-        // Como la app ya no tiene conexion JDBC, mostramos un mensaje informativo.
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setOnShown(e -> {
-            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            if (StartWin.icon != null) {
-                stage.getIcons().add(StartWin.icon);
+    private void lanzarInforme(String nombreInforme, Map<String, String> params, int tipo) {
+        try {
+            ApiClient api = ApiClient.getInstance();
+            byte[] pdfBytes = api.downloadReport(nombreInforme, params);
+
+            // Crear carpeta si no existe
+            File carpetaPDF = new File("pdf_informes");
+            if (!carpetaPDF.exists()) {
+                carpetaPDF.mkdirs();
             }
-        });
-        alert.setTitle("Informes");
-        alert.setHeaderText("Funcion temporalmente no disponible");
-        alert.setContentText("Los informes JasperReports requieren conexion directa a la base de datos.\n" +
-                           "Esta funcionalidad se migrara a la API en una futura version.");
-        alert.showAndWait();
+
+            String outputPdfFile = "pdf_informes/" + nombreInforme + ".pdf";
+            try (FileOutputStream fos = new FileOutputStream(outputPdfFile)) {
+                fos.write(pdfBytes);
+            }
+
+            System.out.println("Informe PDF descargado: " + outputPdfFile);
+
+            File pdfFile = new File(outputPdfFile);
+
+            if (tipo == 0) {
+                // EMBEDIDO: Mostrar en WebView del tab
+                if (webViewInforme != null) {
+                    webViewInforme.getEngine().load(pdfFile.toURI().toString());
+                    System.out.println("Informe mostrado en WebView embedido");
+                } else {
+                    // Fallback: abrir con visor del sistema
+                    if (java.awt.Desktop.isDesktopSupported()) {
+                        java.awt.Desktop.getDesktop().open(pdfFile);
+                    }
+                }
+            } else {
+                // EXTERNO: Abrir PDF con el visor del sistema
+                if (java.awt.Desktop.isDesktopSupported()) {
+                    java.awt.Desktop.getDesktop().open(pdfFile);
+                    System.out.println("Informe abierto en visor externo");
+                } else {
+                    mostrarError("Error", "No se puede abrir el PDF",
+                        "No se encontro un visor de PDF. El archivo se guardo en: " + outputPdfFile);
+                }
+            }
+
+        } catch (Exception e) {
+            mostrarError("Error al generar informe",
+                "No se pudo generar el informe",
+                e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
     void exportarInforme2PDF(ActionEvent event) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
 
         if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
             params.put("NombreUsuario", "%");
@@ -190,7 +221,7 @@ public class MainController implements Initializable {
             params.put("NombreUsuario", "%");
         }
 
-        lanzarInforme("/reports/informe2.jasper", params, 1);
+        lanzarInforme("informe2", params, 1);
     }
 
 

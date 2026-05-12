@@ -377,6 +377,50 @@ public class ApiClient {
         parseResponse(response);
     }
 
+    // ===== INFORMES =====
+
+    /**
+     * Descarga un informe PDF generado por la API.
+     * @param nombre nombre del informe (informe1, informe2)
+     * @param params parametros del informe (ej: NombreUsuario)
+     * @return bytes del PDF
+     */
+    public byte[] downloadReport(String nombre, java.util.Map<String, String> params) throws Exception {
+        StringBuilder path = new StringBuilder("/api/admin/reports/" + encodeUri(nombre));
+        if (params != null && !params.isEmpty()) {
+            path.append("?");
+            boolean first = true;
+            for (java.util.Map.Entry<String, String> entry : params.entrySet()) {
+                if (!first) path.append("&");
+                path.append(encodeUri(entry.getKey())).append("=").append(encodeUri(entry.getValue()));
+                first = false;
+            }
+        }
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + path.toString()))
+                .timeout(Duration.ofSeconds(30))
+                .header("Authorization", jwtToken != null ? "Bearer " + jwtToken : "")
+                .GET()
+                .build();
+
+        HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            return response.body();
+        } else {
+            String errorBody = new String(response.body());
+            String errorMsg = "Error al generar informe (HTTP " + response.statusCode() + ")";
+            try {
+                JsonObject errorJson = JsonParser.parseString(errorBody).getAsJsonObject();
+                if (errorJson.has("message")) {
+                    errorMsg = errorJson.get("message").getAsString();
+                }
+            } catch (Exception ignored) {}
+            throw new Exception(errorMsg);
+        }
+    }
+
     // ===== HEALTH CHECK =====
 
     /**
