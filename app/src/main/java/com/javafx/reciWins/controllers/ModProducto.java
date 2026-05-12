@@ -3,18 +3,13 @@ package com.javafx.reciWins.controllers;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.javafx.model.Producto;
 import com.javafx.reciWins.start.StartWin;
+import com.javafx.reciWins.utiles.ApiClient;
 import com.javafx.reciWins.utiles.StorageSharer;
 
 import javafx.application.Platform;
@@ -36,35 +31,16 @@ import javafx.stage.Stage;
 
 public class ModProducto implements Initializable {
 
-    @FXML
-    private Button btn_cancelar;
-    
-    @FXML
-    private TextField nombreProducto;
-    
-    @FXML
-    private TextField codigoBarrasProducto;
-    
-    @FXML
-    private ComboBox<String> tipoProducto;
-    
-    @FXML
-    private TextField emisionesProducto;
-    
-    @FXML
-    private ComboBox<String> materialesProducto; // Cambiado de TextField a ComboBox<String>
-
-    @FXML
-    private TextField rutaImagenProducto;
-
-    @FXML
-    private Label estadoImagenLabel;
-
-    @FXML
-    private Button btn_copiarImagen;
-
-    @FXML
-    private Button btn_aceptar;
+    @FXML private Button btn_cancelar;
+    @FXML private TextField nombreProducto;
+    @FXML private TextField codigoBarrasProducto;
+    @FXML private ComboBox<String> tipoProducto;
+    @FXML private TextField emisionesProducto;
+    @FXML private ComboBox<String> materialesProducto;
+    @FXML private TextField rutaImagenProducto;
+    @FXML private Label estadoImagenLabel;
+    @FXML private Button btn_copiarImagen;
+    @FXML private Button btn_aceptar;
 
     private String imagenBase64Actual;
 
@@ -77,206 +53,64 @@ public class ModProducto implements Initializable {
     @FXML
     void copiarImagenBase64(ActionEvent event) {
         if (imagenBase64Actual == null || imagenBase64Actual.isEmpty()) {
-            Alert a = new Alert(AlertType.INFORMATION);
-            a.setOnShown(e -> {
-                Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                stage.getIcons().add(StartWin.icon);
-            });
-            a.setHeaderText("Sin imagen");
-            a.setContentText("Este producto no tiene imagen que copiar.");
-            a.showAndWait();
+            mostrarAlerta(AlertType.INFORMATION, "Sin imagen", "Este producto no tiene imagen que copiar.");
             return;
         }
         ClipboardContent content = new ClipboardContent();
         content.putString(imagenBase64Actual);
         Clipboard.getSystemClipboard().setContent(content);
-
-        Alert a = new Alert(AlertType.INFORMATION);
-        a.setOnShown(e -> {
-            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(StartWin.icon);
-        });
-        a.setHeaderText("Imagen copiada");
-        a.setContentText("La imagen en Base64 se ha copiado al portapapeles.");
-        a.showAndWait();
+        mostrarAlerta(AlertType.INFORMATION, "Imagen copiada", "La imagen en Base64 se ha copiado al portapapeles.");
     }
 
     @FXML
     void modificarProducto(ActionEvent event) {
         if(!launchAlertsModProducto()) {
-            
-            // Verificar conexión antes de proceder
-            if (!StartWin.verificarConexion()) {
-                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
-                return;
-            }
-            
-            // Verificar conexión antes de proceder
-            if (!StartWin.verificarConexion()) {
-                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
-                return;
-            }
-            
+
             String nombre = nombreProducto.getText().trim();
-            String tipo = tipoProducto.getEditor().getText().trim();
-            long codigoBarras = Long.parseLong(codigoBarrasProducto.getText().trim());
+            // tipo y codigo de barras son read-only (la API no permite cambiar PK compuesta)
+            String tipoOriginal = StorageSharer.itemStorage.get(0);
+            long codigoOriginal = Long.parseLong(StorageSharer.itemStorage.get(1));
             float emisiones = Float.parseFloat(emisionesProducto.getText().trim());
-            String material = materialesProducto.getValue(); // Cambiado de getText() a getValue()
-            
+            String material = materialesProducto.getValue();
+
             if (material == null || material.trim().isEmpty()) {
-                Alert a = new Alert(AlertType.ERROR);
-                a.setOnShown(e -> {
-                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(StartWin.icon);
-                });
-                a.setHeaderText("Material requerido");
-                a.setContentText("Debes seleccionar un material de la lista.");
-                a.showAndWait();
+                mostrarAlerta(AlertType.ERROR, "Material requerido", "Debes seleccionar un material de la lista.");
                 return;
             }
-            
-            String tipoOriginal = StorageSharer.itemStorage.get(0);
-            String codigoOriginal = StorageSharer.itemStorage.get(1);
-            float emisionesOriginales = Float.parseFloat(StorageSharer.itemStorage.get(3));
 
-            // Calcular la diferencia de emisiones
-            float diferenciaEmisiones = emisiones - emisionesOriginales;
-
-            // Procesar nueva imagen si se indicó ruta, si no mantener la actual
+            // Procesar nueva imagen si se indico ruta, si no mantener la actual
             String nuevaImagenBase64 = imagenBase64Actual;
             String ruta = rutaImagenProducto.getText() == null ? "" : rutaImagenProducto.getText().trim();
             if (!ruta.isEmpty()) {
                 try {
                     File f = new File(ruta);
                     if (!f.exists() || !f.isFile()) {
-                        Alert a = new Alert(AlertType.ERROR);
-                        a.setOnShown(ex -> {
-                            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                            stage.getIcons().add(StartWin.icon);
-                        });
-                        a.setHeaderText("Imagen no encontrada");
-                        a.setContentText("La ruta de imagen no es válida: " + ruta);
-                        a.showAndWait();
+                        mostrarAlerta(AlertType.ERROR, "Imagen no encontrada", "La ruta de imagen no es valida: " + ruta);
                         return;
                     }
                     byte[] bytes = Files.readAllBytes(f.toPath());
                     nuevaImagenBase64 = Base64.getEncoder().encodeToString(bytes);
                 } catch (Exception ex) {
-                    Alert a = new Alert(AlertType.ERROR);
-                    a.setOnShown(e2 -> {
-                        Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                        stage.getIcons().add(StartWin.icon);
-                    });
-                    a.setHeaderText("Error al leer imagen");
-                    a.setContentText("No se pudo leer la imagen: " + ex.getMessage());
-                    a.showAndWait();
+                    mostrarAlerta(AlertType.ERROR, "Error al leer imagen", "No se pudo leer la imagen: " + ex.getMessage());
                     return;
                 }
             }
-            
+
             try {
-                Statement stmt = StartWin.conn.createStatement();
-                
-                // 1. ACTUALIZAR EMISIONES DE USUARIOS SI HAY DIFERENCIA
-                if (diferenciaEmisiones != 0) {
-                    // Obtener todos los usuarios que han reciclado este producto
-                    Map<Integer, Integer> transaccionesPorUsuario = obtenerTransaccionesPorUsuario(tipoOriginal, Long.parseLong(codigoOriginal));
-                    
-                    // Para cada usuario, actualizar sus emisiones totales
-                    for (Map.Entry<Integer, Integer> entry : transaccionesPorUsuario.entrySet()) {
-                        int idUsuario = entry.getKey();
-                        int cantidadTransacciones = entry.getValue();
-                        float cambioTotal = diferenciaEmisiones * cantidadTransacciones;
-                        
-                        // Actualizar emisiones del usuario en la base de datos
-                        stmt.executeUpdate(
-                            "UPDATE Usuarios SET Emisiones_Reducidas = Emisiones_Reducidas + " 
-                            + cambioTotal + " WHERE Id_Usuario = " + idUsuario
-                        );
-                        
-                        // Actualizar emisiones en la lista observable
-                        MainController.actualizarEmisionesUsuarioObservable(idUsuario, cambioTotal);
-                    }
-                }
-                
-                // 2. ACTUALIZAR EL PRODUCTO
-                PreparedStatement pstUpd = StartWin.conn.prepareStatement(
-                    "UPDATE Productos SET Tipo = ?, Numero_barras = ?, Nombre = ?, " +
-                    "Emisiones_Reducibles = ?, Material = ?, Imagen = ? " +
-                    "WHERE Tipo = ? AND Numero_barras = ?"
-                );
-                pstUpd.setString(1, tipo);
-                pstUpd.setLong(2, codigoBarras);
-                pstUpd.setString(3, nombre);
-                pstUpd.setFloat(4, emisiones);
-                pstUpd.setString(5, material);
-                if (nuevaImagenBase64 == null || nuevaImagenBase64.isEmpty()) {
-                    pstUpd.setNull(6, java.sql.Types.LONGVARCHAR);
-                } else {
-                    pstUpd.setString(6, nuevaImagenBase64);
-                }
-                pstUpd.setString(7, tipoOriginal);
-                pstUpd.setLong(8, Long.parseLong(codigoOriginal));
-                pstUpd.executeUpdate();
-                
-                // 3. ACTUALIZAR LAS TRANSACCIONES EXISTENTES
-                if (!tipo.equals(tipoOriginal) || codigoBarras != Long.parseLong(codigoOriginal)) {
-                    stmt.executeUpdate(
-                        "UPDATE Recicla SET Tipo = '" + tipo + "', " +
-                        "Numero_barras = '" + codigoBarras + "' " +
-                        "WHERE Tipo = '" + tipoOriginal + "' AND Numero_barras = '" + codigoOriginal + "'"
-                    );
-                }
-                
-                StorageSharer.itemToMod = new Producto(tipo, codigoBarras, nombre, emisiones, material, nuevaImagenBase64);
-                MainController.modItem();
-                
-                // 4. ACTUALIZAR TODAS LAS VISTAS
+                ApiClient api = ApiClient.getInstance();
+                api.updateProducto(tipoOriginal, codigoOriginal, nombre, emisiones, material, nuevaImagenBase64);
+
                 MainController.actualizarVistasDesdeExterno();
-                
-                // 5. ACTUALIZAR LA VISTA PERSONAL DEL USUARIO ACTUAL SI ES NECESARIO
-                MainController.actualizarVistaPersonal();
-                
+
                 StorageSharer.itemToMod = null;
                 StorageSharer.itemStorage.clear();
                 ((Stage)btn_cancelar.getScene().getWindow()).close();
-                
-                // Mostrar mensaje de éxito
-                Alert exito = new Alert(AlertType.INFORMATION);
-                exito.setOnShown(e -> {
-                    Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(StartWin.icon);
-                });
-                exito.setHeaderText("Producto modificado");
-                exito.setContentText("El producto se modificó correctamente.\n" +
-                                   "Las emisiones de los usuarios afectados se han actualizado.");
-                exito.showAndWait();
-                
-            } catch (SQLException e) {
-                // Detectar si es un error de conexión
-                if (esErrorDeConexion(e)) {
-                    System.err.println("Error de conexión detectado: " + e.getMessage());
-                    StartWin.manejarPerdidaConexion(e.getMessage());
-                } else {
-                    Alert a = new Alert(AlertType.ERROR);
-                    a.setOnShown(ex -> {
-                        Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                        stage.getIcons().add(StartWin.icon);
-                    });
-                    a.setHeaderText("Error al modificar");
-                    a.setContentText("No se pudo modificar el producto: " + e.getMessage());
-                    a.showAndWait();
-                    e.printStackTrace();
-                }
+
+                mostrarAlerta(AlertType.INFORMATION, "Producto modificado",
+                    "El producto se modifico correctamente.\nLas emisiones de los usuarios afectados se han actualizado.");
+
             } catch (Exception e) {
-                Alert a = new Alert(AlertType.ERROR);
-                a.setOnShown(ex -> {
-                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(StartWin.icon);
-                });
-                a.setHeaderText("Error al modificar");
-                a.setContentText("No se pudo modificar el producto: " + e.getMessage());
-                a.showAndWait();
+                mostrarAlerta(AlertType.ERROR, "Error al modificar", "No se pudo modificar el producto: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -286,21 +120,24 @@ public class ModProducto implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // Configurar tipos de productos
         ObservableList<String> tipos = MainController.getTiposProductos();
-        
         FilteredList<String> filteredItems = new FilteredList<>(tipos, p -> true);
         tipoProducto.setItems(filteredItems);
-        
+
         // Cargar datos del producto a modificar
         tipoProducto.getEditor().setText(StorageSharer.itemStorage.get(0));
         codigoBarrasProducto.setText(StorageSharer.itemStorage.get(1));
         nombreProducto.setText(StorageSharer.itemStorage.get(2));
         emisionesProducto.setText(StorageSharer.itemStorage.get(3));
-        
-        // Configurar materiales (lista fija) y seleccionar el actual
+
+        // Tipo y codigo de barras son read-only (PK compuesta no se puede cambiar via API)
+        tipoProducto.setDisable(true);
+        codigoBarrasProducto.setEditable(false);
+
+        // Configurar materiales
         ObservableList<String> materiales = FXCollections.observableArrayList(StartWin.getMateriales());
         FXCollections.sort(materiales);
         materialesProducto.setItems(materiales);
-        
+
         String materialActual = StorageSharer.itemStorage.get(4);
         if (materialActual != null && !materialActual.trim().isEmpty()) {
             materialesProducto.setValue(materialActual);
@@ -314,73 +151,16 @@ public class ModProducto implements Initializable {
             imagenBase64Actual = null;
         }
         if (imagenBase64Actual != null) {
-            estadoImagenLabel.setText("Imagen actual: sí (" + imagenBase64Actual.length() + " caracteres)");
+            estadoImagenLabel.setText("Imagen actual: si (" + imagenBase64Actual.length() + " caracteres)");
             btn_copiarImagen.setDisable(false);
         } else {
             estadoImagenLabel.setText("Imagen actual: ninguna");
             btn_copiarImagen.setDisable(true);
         }
 
-        tipoProducto.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
-            final String selected = tipoProducto.getSelectionModel().getSelectedItem();
-            
-            if (newValue == null || newValue.trim().isEmpty()) {
-                filteredItems.setPredicate(p -> true);
-                tipoProducto.hide();
-                return;
-            }
-            
-            if (selected == null || !selected.equals(newValue)) {
-                filteredItems.setPredicate(p -> p.toLowerCase().startsWith(newValue.toLowerCase().trim()));
-                tipoProducto.setVisibleRowCount(5);
-                tipoProducto.show();
-            } else {
-                filteredItems.setPredicate(p -> true);
-            }
-        });
-        
-        tipoProducto.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                tipoProducto.getEditor().positionCaret(tipoProducto.getEditor().getText().length());
-            }
-        });
-        
         Platform.runLater(() -> {
             ((Stage)btn_cancelar.getScene().getWindow()).getIcons().add(StartWin.icon);
         });
-    }
-
-    // Método para obtener las transacciones por usuario para un producto específico
-    private Map<Integer, Integer> obtenerTransaccionesPorUsuario(String tipo, long codigoBarras) {
-        Map<Integer, Integer> transaccionesPorUsuario = new HashMap<>();
-        
-        try {
-            String query = "SELECT Id_Usuario, COUNT(*) as Cantidad " +
-                          "FROM Recicla " +
-                          "WHERE Tipo = ? AND Numero_barras = ? " +
-                          "GROUP BY Id_Usuario";
-            
-            PreparedStatement pst = StartWin.conn.prepareStatement(query);
-            pst.setString(1, tipo);
-            pst.setLong(2, codigoBarras);
-            ResultSet rs = pst.executeQuery();
-            
-            while (rs.next()) {
-                int idUsuario = rs.getInt("Id_Usuario");
-                int cantidad = rs.getInt("Cantidad");
-                transaccionesPorUsuario.put(idUsuario, cantidad);
-            }
-            
-        } catch (SQLException e) {
-            if (esErrorDeConexion(e)) {
-                System.err.println("Error de conexión detectado: " + e.getMessage());
-                StartWin.manejarPerdidaConexion(e.getMessage());
-            } else {
-                e.printStackTrace();
-            }
-        }
-        
-        return transaccionesPorUsuario;
     }
 
     private static boolean checkAlert = false;
@@ -388,110 +168,51 @@ public class ModProducto implements Initializable {
 
     private void checkForAlertModProducto() {
         alertMessage = "";
-        
+
         ArrayList<TextField> camposTexto = new ArrayList<>();
         camposTexto.add(nombreProducto);
 
         for(TextField campo : camposTexto) {
-            if(campo.getText().contains("@") || campo.getText().contains("?") || 
-               campo.getText().contains("=") || campo.getText().contains("'") || 
-               campo.getText().contains("\"") || campo.getText().contains("|") || 
-               campo.getText().contains("&") || campo.getText().contains("*") || 
-               campo.getText().contains("+") || campo.getText().contains("\\") || 
+            if(campo.getText().contains("@") || campo.getText().contains("?") ||
+               campo.getText().contains("=") || campo.getText().contains("'") ||
+               campo.getText().contains("\"") || campo.getText().contains("|") ||
+               campo.getText().contains("&") || campo.getText().contains("*") ||
+               campo.getText().contains("+") || campo.getText().contains("\\") ||
                campo.getText().strip().equals("")) {
                 checkAlert = true;
-                alertMessage = "Algún campo contiene caracteres inválidos o está vacío";
+                alertMessage = "Algun campo contiene caracteres invalidos o esta vacio";
                 return;
             }
         }
-        
-        if(tipoProducto.getEditor().getText().contains("@") || 
-           tipoProducto.getEditor().getText().contains("?") || 
-           tipoProducto.getEditor().getText().contains("=") || 
-           tipoProducto.getEditor().getText().contains("'") || 
-           tipoProducto.getEditor().getText().contains("\"") || 
-           tipoProducto.getEditor().getText().contains("|") || 
-           tipoProducto.getEditor().getText().contains("&") || 
-           tipoProducto.getEditor().getText().contains("*") || 
-           tipoProducto.getEditor().getText().contains("+") || 
-           tipoProducto.getEditor().getText().contains("\\") || 
-           tipoProducto.getEditor().getText().strip().equals("")) {
-            checkAlert = true;
-            alertMessage = "El tipo contiene caracteres inválidos o está vacío";
-            return;
-        }
-        
-        // Validar que se haya seleccionado un material
+
         if(materialesProducto.getValue() == null || materialesProducto.getValue().trim().isEmpty()) {
-            checkAlert = true;
-            alertMessage = "Debes seleccionar un material de la lista";
-            return;
+            checkAlert = true; alertMessage = "Debes seleccionar un material de la lista"; return;
         }
 
-        try {
-            Long.parseLong(codigoBarrasProducto.getText().trim());
-        } catch (NumberFormatException e) {
-            checkAlert = true;
-            alertMessage = "El código de barras debe ser un número válido";
-            return;
-        }
-
-        try {
-            Float.parseFloat(emisionesProducto.getText().trim());
-        } catch (NumberFormatException e) {
-            checkAlert = true;
-            alertMessage = "Las emisiones deben ser un número válido";
-            return;
-        }
+        try { Float.parseFloat(emisionesProducto.getText().trim()); }
+        catch (NumberFormatException e) { checkAlert = true; alertMessage = "Las emisiones deben ser un numero valido"; return; }
     }
 
     private boolean launchAlertsModProducto() {
         checkForAlertModProducto();
         boolean ret = false;
-
         if(checkAlert) {
-            Alert a = new Alert(AlertType.ERROR);
-            a.setOnShown(e -> {
-                    Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(StartWin.icon);
-                });
-            a.setHeaderText("Error en los campos");
-            a.setContentText(alertMessage + "\n\nAsegúrate de que:\n- Todos los campos están completos\n- El código de barras es numérico\n- Las emisiones son numéricas\n- No uses caracteres especiales: @, ?, =, ', \", |, *, &, +, \\\n- Selecciona un material de la lista");
-            a.showAndWait();
+            mostrarAlerta(AlertType.ERROR, "Error en los campos", alertMessage);
             ret = true;
         }
-
         checkAlert = false;
         alertMessage = "";
         return ret;
     }
 
-    /**
-     * Determina si una SQLException es debido a un problema de conexión
-     * @param e La excepción SQL a verificar
-     * @return true si es un error de conexión, false en caso contrario
-     */
-    private boolean esErrorDeConexion(SQLException e) {
-        // Códigos de error comunes para problemas de conexión
-        String sqlState = e.getSQLState();
-        String mensaje = e.getMessage().toLowerCase();
-        
-        // SQLState codes para problemas de comunicación
-        if (sqlState != null && (
-            sqlState.startsWith("08") ||  // Connection exception
-            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
-            return true;
-        }
-        
-        // Mensajes comunes de error de conexión
-        if (mensaje.contains("connection") || 
-            mensaje.contains("timeout") ||
-            mensaje.contains("closed") ||
-            mensaje.contains("socket") ||
-            mensaje.contains("communications link failure")) {
-            return true;
-        }
-        
-        return false;
+    private void mostrarAlerta(AlertType tipo, String titulo, String mensaje) {
+        Alert a = new Alert(tipo);
+        a.setOnShown(e -> {
+            Stage stage = (Stage) a.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(StartWin.icon);
+        });
+        a.setHeaderText(titulo);
+        a.setContentText(mensaje);
+        a.showAndWait();
     }
 }

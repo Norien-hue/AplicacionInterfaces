@@ -6,6 +6,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -61,8 +62,16 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="142.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#modificarTransaccion" text="_Aceptar" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
+            <Button fx:id="btn_aceptar" mnemonicParsing="true" onAction="#modificarTransaccion" text="_Aceptar">
+               <tooltip>
+                  <Tooltip text="Guardar las modificaciones de la transacción" />
+               </tooltip>
+            </Button>
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar">
+               <tooltip>
+                  <Tooltip text="Cancelar y cerrar sin guardar cambios" />
+               </tooltip>
+            </Button>
          </children>
       </HBox>
    </children>

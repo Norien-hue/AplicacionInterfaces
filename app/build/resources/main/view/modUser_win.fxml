@@ -6,6 +6,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -52,8 +53,16 @@
       </VBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
-            <Button fx:id="modUsuarioConfirmar" mnemonicParsing="true" onAction="#modUsuarioPulsado" text="_Confirmar" />
-            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar" />
+            <Button fx:id="modUsuarioConfirmar" mnemonicParsing="true" onAction="#modUsuarioPulsado" text="_Confirmar">
+               <tooltip>
+                  <Tooltip text="Confirmar y guardar los cambios del usuario" />
+               </tooltip>
+            </Button>
+            <Button fx:id="btn_cancelar" mnemonicParsing="true" onAction="#kill" text="_Cancelar">
+               <tooltip>
+                  <Tooltip text="Cancelar y cerrar sin guardar cambios" />
+               </tooltip>
+            </Button>
          </children>
       </HBox>
    </children>

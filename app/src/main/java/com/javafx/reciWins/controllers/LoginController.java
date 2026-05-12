@@ -1,8 +1,9 @@
 package com.javafx.reciWins.controllers;
 
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.BCryptUtils;
+import com.javafx.reciWins.utiles.ApiClient;
 
+import com.google.gson.JsonObject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -14,10 +15,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 public class LoginController {
 
     @FXML
@@ -28,10 +25,10 @@ public class LoginController {
 
     @FXML
     private Label txt_createAccount;
-    
+
     @FXML
     private TextField nombreUsuario;
-    
+
     @FXML
     private PasswordField contraseniaUsuario;
 
@@ -51,89 +48,41 @@ public class LoginController {
     void killApp(ActionEvent event) {
         ((Stage)this.btn_cancelLogin.getScene().getWindow()).close();
     }
-    
+
     private boolean validarLogin() {
         String nombre = nombreUsuario.getText().trim();
         String contrasenia = contraseniaUsuario.getText();
-        
-        if(nombre.isEmpty() || contrasenia.isEmpty()) {
-            mostrarError("Campos vacíos", "Por favor, ingresa tu nombre de usuario y contraseña.");
-            return false;
-        }
-        
-        try {
-            // Verificar conexión antes de intentar la consulta
-            if (!StartWin.verificarConexion()) {
-                StartWin.manejarPerdidaConexion("La conexión con la base de datos no está disponible");
-                return false;
-            }
-            
-            String query = "SELECT Id_Usuario, Hash_Contraseña FROM Usuarios WHERE Nombre = ?";
-            PreparedStatement pst = StartWin.conn.prepareStatement(query);
-            pst.setString(1, nombre);
-            
-            ResultSet rs = pst.executeQuery();
-            
-            if(rs.next()) {
-                String hashAlmacenado = rs.getString("Hash_Contraseña");
-                int idUsuario = rs.getInt("Id_Usuario");
 
-                if(BCryptUtils.verify(contrasenia, hashAlmacenado)) {
-                    MainController.id_user = idUsuario;
-                    System.out.println("Login exitoso. ID Usuario: " + idUsuario);
-                    return true;
-                } else {
-                    mostrarError("Contraseña incorrecta", "La contraseña ingresada no es correcta.");
-                    return false;
-                }
+        if(nombre.isEmpty() || contrasenia.isEmpty()) {
+            mostrarError("Campos vacios", "Por favor, ingresa tu nombre de usuario y contrasena.");
+            return false;
+        }
+
+        try {
+            ApiClient api = ApiClient.getInstance();
+            JsonObject result = api.login(nombre, contrasenia);
+
+            if (result.has("id")) {
+                int idUsuario = result.get("id").getAsInt();
+                MainController.id_user = idUsuario;
+                System.out.println("Login exitoso. ID Usuario: " + idUsuario);
+                return true;
             } else {
-                mostrarError("Usuario no encontrado", "No existe un usuario con ese nombre.");
+                mostrarError("Error de login", "Respuesta inesperada del servidor.");
                 return false;
             }
-            
-        } catch (SQLException e) {
-            // Detectar si es un error de conexión
-            if (esErrorDeConexion(e)) {
-                System.err.println("Error de conexión detectado: " + e.getMessage());
-                StartWin.manejarPerdidaConexion(e.getMessage());
+
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            if (msg != null && (msg.contains("connection") || msg.contains("Connection") || msg.contains("timeout"))) {
+                StartWin.manejarPerdidaConexion(msg);
             } else {
-                mostrarError("Error de base de datos", "Error al consultar la base de datos: " + e.getMessage());
+                mostrarError("Error de login", msg != null ? msg : "Error desconocido");
             }
-            e.printStackTrace();
             return false;
         }
     }
-    
-    /**
-     * Determina si una SQLException es debido a un problema de conexión
-     * @param e La excepción SQL a verificar
-     * @return true si es un error de conexión, false en caso contrario
-     */
-    private boolean esErrorDeConexion(SQLException e) {
-        // Códigos de error comunes para problemas de conexión
-        String sqlState = e.getSQLState();
-        int errorCode = e.getErrorCode();
-        String mensaje = e.getMessage().toLowerCase();
-        
-        // SQLState codes para problemas de comunicación
-        if (sqlState != null && (
-            sqlState.startsWith("08") ||  // Connection exception
-            sqlState.equals("HY000"))) {   // General error (puede ser conexión)
-            return true;
-        }
-        
-        // Mensajes comunes de error de conexión
-        if (mensaje.contains("connection") || 
-            mensaje.contains("timeout") ||
-            mensaje.contains("closed") ||
-            mensaje.contains("socket") ||
-            mensaje.contains("communications link failure")) {
-            return true;
-        }
-        
-        return false;
-    }
-    
+
     private void mostrarError(String titulo, String mensaje) {
         Alert alerta = new Alert(AlertType.ERROR);
         alerta.setOnShown(e -> {

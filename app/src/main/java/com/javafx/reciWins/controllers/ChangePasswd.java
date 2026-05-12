@@ -1,13 +1,10 @@
 package com.javafx.reciWins.controllers;
 
 import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import com.javafx.reciWins.start.StartWin;
-import com.javafx.reciWins.utiles.BCryptUtils;
+import com.javafx.reciWins.utiles.ApiClient;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -42,40 +39,34 @@ public class ChangePasswd implements Initializable {
     }
 
     @FXML
-    void cambiarContraseña(ActionEvent event) {
-        if(validarCambioContraseña()) {
-            String nuevaContrasenia = passwdNueva.getText();
-            String hashNuevaContrasenia = BCryptUtils.hash(nuevaContrasenia);
+    void cambiarContrasena(ActionEvent event) {
+        if(validarCambioContrasena()) {
+            String contrasenaActual = passwdActual.getText();
+            String nuevaContrasena = passwdNueva.getText();
 
             try {
-                PreparedStatement pst = StartWin.conn.prepareStatement(
-                    "UPDATE Usuarios SET Hash_Contraseña = ? WHERE Id_Usuario = ?"
-                );
-                pst.setString(1, hashNuevaContrasenia);
-                pst.setInt(2, MainController.id_user);
-                pst.executeUpdate();
-                
+                ApiClient api = ApiClient.getInstance();
+                api.updatePassword(MainController.id_user, contrasenaActual, nuevaContrasena);
+
                 Alert exito = new Alert(AlertType.INFORMATION);
                 exito.setOnShown(e -> {
                     Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
                     stage.getIcons().add(StartWin.icon);
                 });
-                exito.setHeaderText("Contraseña cambiada");
-                exito.setContentText("La contraseña se ha cambiado correctamente.");
+                exito.setHeaderText("Contrasena cambiada");
+                exito.setContentText("La contrasena se ha cambiado correctamente.");
                 exito.showAndWait();
 
-                
-                
                 kill(event);
+
             } catch (Exception e) {
-                Alert error = new Alert(AlertType.ERROR);
-                error.setOnShown(ex -> {
-                    Stage stage = (Stage) error.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(StartWin.icon);
-                });
-                error.setHeaderText("Error al cambiar contraseña");
-                error.setContentText("No se pudo cambiar la contraseña: " + e.getMessage());
-                error.showAndWait();
+                String errorMsg = e.getMessage();
+                // La API devuelve mensajes descriptivos para contrasena incorrecta
+                if (errorMsg != null && (errorMsg.contains("incorrecta") || errorMsg.contains("incorrect") || errorMsg.contains("wrong"))) {
+                    mostrarError("Contrasena incorrecta", "La contrasena actual no es correcta.");
+                } else {
+                    mostrarError("Error al cambiar contrasena", "No se pudo cambiar la contrasena: " + errorMsg);
+                }
                 e.printStackTrace();
             }
         }
@@ -88,51 +79,36 @@ public class ChangePasswd implements Initializable {
         });
     }
 
-    private boolean validarCambioContraseña() {
-        try {
-            String query = "SELECT Hash_Contraseña FROM Usuarios WHERE Id_Usuario = ?";
-            PreparedStatement pst = StartWin.conn.prepareStatement(query);
-            pst.setInt(1, MainController.id_user);
-            ResultSet rs = pst.executeQuery();
-            
-            if(rs.next()) {
-                String hashAlmacenado = rs.getString("Hash_Contraseña");
+    private boolean validarCambioContrasena() {
+        if(passwdActual.getText().isEmpty()) {
+            mostrarError("Campo vacio", "Debes introducir tu contrasena actual.");
+            return false;
+        }
 
-                if(!BCryptUtils.verify(passwdActual.getText(), hashAlmacenado)) {
-                    mostrarError("Contraseña incorrecta", "La contraseña actual no es correcta.");
-                    return false;
-                }
-            }
-        } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo verificar la contraseña actual.");
-            e.printStackTrace();
-            return false;
-        }
-        
         if(passwdNueva.getText().isEmpty() || passwdRepetida.getText().isEmpty()) {
-            mostrarError("Campos vacíos", "Debes completar todos los campos.");
+            mostrarError("Campos vacios", "Debes completar todos los campos.");
             return false;
         }
-        
+
         if(!passwdNueva.getText().equals(passwdRepetida.getText())) {
-            mostrarError("Contraseñas no coinciden", "La nueva contraseña y su repetición no coinciden.");
+            mostrarError("Contrasenas no coinciden", "La nueva contrasena y su repeticion no coinciden.");
             return false;
         }
-        
+
         if(passwdNueva.getText().length() < 6) {
-            mostrarError("Contraseña muy corta", "La nueva contraseña debe tener al menos 6 caracteres.");
+            mostrarError("Contrasena muy corta", "La nueva contrasena debe tener al menos 6 caracteres.");
             return false;
         }
-        
-        if(passwdNueva.getText().contains("@") || passwdNueva.getText().contains("?") || 
-           passwdNueva.getText().contains("=") || passwdNueva.getText().contains("'") || 
-           passwdNueva.getText().contains("\"") || passwdNueva.getText().contains("|") || 
-           passwdNueva.getText().contains("&") || passwdNueva.getText().contains("*") || 
+
+        if(passwdNueva.getText().contains("@") || passwdNueva.getText().contains("?") ||
+           passwdNueva.getText().contains("=") || passwdNueva.getText().contains("'") ||
+           passwdNueva.getText().contains("\"") || passwdNueva.getText().contains("|") ||
+           passwdNueva.getText().contains("&") || passwdNueva.getText().contains("*") ||
            passwdNueva.getText().contains("+") || passwdNueva.getText().contains("\\")) {
-            mostrarError("Caracteres inválidos", "La contraseña contiene caracteres inválidos (@, ?, =, ', \", |, &, *, +, \\)");
+            mostrarError("Caracteres invalidos", "La contrasena contiene caracteres invalidos (@, ?, =, ', \", |, &, *, +, \\)");
             return false;
         }
-        
+
         return true;
     }
 

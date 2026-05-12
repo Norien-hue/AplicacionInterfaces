@@ -11,16 +11,13 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import com.javafx.reciWins.utiles.ApiClient;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 /**
  *
@@ -29,9 +26,7 @@ import java.util.Properties;
 public class StartWin extends Application {
 
     private static Stage primaryStage;
-    public static Connection conn;
     public static Image icon;
-    private static Properties dbProps;
 
     public static void main(String[] args) {
         launch(args);
@@ -42,19 +37,19 @@ public class StartWin extends Application {
     }
 
     public static final List<String> MATERIALES = Arrays.asList(
-        "PET", 
-        "PP", 
-        "Vidrio", 
+        "PET",
+        "PP",
+        "Vidrio",
         "Aluminio",
         "Papel",
-        "Cartón",
+        "Carton",
         "Acero",
         "Cobre",
         "Bronce",
-        "Latón",
-        "Plástico mixto",
-        "Orgánico",
-        "Electrónico",
+        "Laton",
+        "Plastico mixto",
+        "Organico",
+        "Electronico",
         "Textil",
         "Madera"
     );
@@ -62,97 +57,72 @@ public class StartWin extends Application {
     @Override
     public void start(Stage primeraEscena) throws Exception {
         primaryStage = primeraEscena;
-        
+
         // Cargar icono primero
         cargarIcono();
-        
-        // Cargar propiedades de la BD
-        cargarPropiedadesBD();
-        
-        // Establecer conexión a BD
-        if (!establecerConexionBD()) {
-            // Si falla la conexión, mostrar diálogo y esperar decisión del usuario
+
+        // Verificar conexion con la API
+        if (!verificarConexionAPI()) {
+            // Si falla la conexion, mostrar dialogo y esperar decision del usuario
             return;
         }
-        
+
         // Mostrar ventana de login
         mostrarLogin();
     }
 
-    private void cargarPropiedadesBD() {
+    private boolean verificarConexionAPI() {
         try {
-            dbProps = new Properties();
-            URL configUrl = getClass().getResource("/configuration.properties");
-            InputStream input = configUrl.openStream();
-            dbProps.load(input);
-            System.out.println("Propiedades de BD cargadas correctamente");
-        } catch (Exception e) {
-            System.err.println("Error al cargar propiedades de BD: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private boolean establecerConexionBD() {
-        try {
-            if (dbProps == null) {
-                throw new Exception("No se han cargado las propiedades de la base de datos");
+            ApiClient api = ApiClient.getInstance();
+            if (api.verificarConexion()) {
+                System.out.println("Conexion con la API establecida correctamente");
+                return true;
+            } else {
+                mostrarDialogoErrorConexion("No se pudo conectar con el servidor API");
+                return false;
             }
-            
-            String url = dbProps.getProperty("db.url");
-            String user = dbProps.getProperty("db.username");
-            String password = dbProps.getProperty("db.password");
-            
-            conn = DriverManager.getConnection(url, user, password);
-            System.out.println("Conexión a BD establecida correctamente");
-            return true;
         } catch (Exception e) {
-            System.out.println("Error al conectar con la base de datos: " + e.getMessage());
+            System.out.println("Error al conectar con la API: " + e.getMessage());
             mostrarDialogoErrorConexion(e.getMessage());
             return false;
         }
     }
 
     /**
-     * Verifica si la conexión a la BD está activa
-     * @return true si la conexión es válida, false si está cerrada o es nula
+     * Verifica si la conexion a la API esta activa
+     * @return true si la conexion es valida
      */
     public static boolean verificarConexion() {
         try {
-            if (conn == null || conn.isClosed()) {
-                return false;
-            }
-            // Hacer un test simple de conexión
-            conn.isValid(2); // timeout de 2 segundos
-            return true;
-        } catch (SQLException e) {
-            System.err.println("Error al verificar conexión: " + e.getMessage());
+            return ApiClient.getInstance().verificarConexion();
+        } catch (Exception e) {
+            System.err.println("Error al verificar conexion: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * Maneja la pérdida de conexión mostrando un diálogo con opciones
-     * Este método debe ser llamado cuando se detecte un SQLException
+     * Maneja la perdida de conexion mostrando un dialogo con opciones
      * @param errorDetalle Mensaje de error detallado (opcional)
      */
     public static void manejarPerdidaConexion(String errorDetalle) {
-        System.err.println("Conexión perdida con la base de datos");
-        
+        System.err.println("Conexion perdida con la API");
+
         // Crear botones personalizados
         ButtonType btnReintentar = new ButtonType("Reintentar");
         ButtonType btnSalir = new ButtonType("Salir");
-        
+
         Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error de Conexión");
-        alert.setHeaderText("Se ha perdido la conexión con la base de datos");
-        
-        String contenido = "No se puede conectar con el servidor de base de datos.\n\n";
+        alert.setTitle("Error de Conexion");
+        alert.setHeaderText("Se ha perdido la conexion con el servidor");
+
+        String contenido = "No se puede conectar con el servidor API.\n\n";
         if (errorDetalle != null && !errorDetalle.isEmpty()) {
             contenido += "Detalle: " + errorDetalle + "\n\n";
         }
-        contenido += "¿Qué deseas hacer?";
+        contenido += "Que deseas hacer?";
         alert.setContentText(contenido);
-        
+
         // Configurar el icono del alert
         alert.setOnShown(ex -> {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
@@ -160,23 +130,23 @@ public class StartWin extends Application {
                 stage.getIcons().add(icon);
             }
         });
-        
+
         // Agregar los botones personalizados
         alert.getButtonTypes().setAll(btnReintentar, btnSalir);
-        
-        // Mostrar el diálogo y esperar respuesta
+
+        // Mostrar el dialogo y esperar respuesta
         Optional<ButtonType> resultado = alert.showAndWait();
-        
+
         if (resultado.isPresent()) {
             if (resultado.get() == btnReintentar) {
-                // Reintentar la conexión
-                System.out.println("Reintentando conexión a la base de datos...");
+                // Reintentar la conexion
+                System.out.println("Reintentando conexion con la API...");
                 if (intentarReconexion()) {
-                    // Conexión restaurada exitosamente
+                    // Conexion restaurada exitosamente
                     Alert exito = new Alert(AlertType.INFORMATION);
-                    exito.setTitle("Conexión Restaurada");
-                    exito.setHeaderText("Conexión exitosa");
-                    exito.setContentText("La conexión con la base de datos se ha restaurado correctamente.");
+                    exito.setTitle("Conexion Restaurada");
+                    exito.setHeaderText("Conexion exitosa");
+                    exito.setContentText("La conexion con el servidor se ha restaurado correctamente.");
                     exito.setOnShown(ex -> {
                         Stage stage = (Stage) exito.getDialogPane().getScene().getWindow();
                         if (icon != null) {
@@ -185,47 +155,33 @@ public class StartWin extends Application {
                     });
                     exito.showAndWait();
                 }
-                // Si falla, se volverá a mostrar el diálogo de error recursivamente
+                // Si falla, se volvera a mostrar el dialogo de error recursivamente
             } else if (resultado.get() == btnSalir) {
-                // Salir de la aplicación
-                System.out.println("Cerrando aplicación...");
+                // Salir de la aplicacion
+                System.out.println("Cerrando aplicacion...");
                 cerrarAplicacion();
             }
         } else {
-            // Si el usuario cierra el diálogo sin seleccionar nada, salir
-            System.out.println("Diálogo cerrado sin selección. Cerrando aplicación...");
+            // Si el usuario cierra el dialogo sin seleccionar nada, salir
+            System.out.println("Dialogo cerrado sin seleccion. Cerrando aplicacion...");
             cerrarAplicacion();
         }
     }
 
     /**
-     * Intenta reconectar a la base de datos
-     * @return true si la reconexión fue exitosa, false en caso contrario
+     * Intenta reconectar a la API
+     * @return true si la reconexion fue exitosa, false en caso contrario
      */
     private static boolean intentarReconexion() {
         try {
-            // Cerrar la conexión anterior si existe
-            if (conn != null && !conn.isClosed()) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    System.err.println("Error al cerrar conexión anterior: " + e.getMessage());
-                }
+            boolean ok = ApiClient.getInstance().verificarConexion();
+            if (ok) {
+                System.out.println("Reconexion exitosa con la API");
+                return true;
+            } else {
+                manejarPerdidaConexion("El servidor no responde");
+                return false;
             }
-            
-            // Intentar nueva conexión
-            if (dbProps == null) {
-                throw new Exception("No se han cargado las propiedades de la base de datos");
-            }
-            
-            String url = dbProps.getProperty("db.url");
-            String user = dbProps.getProperty("db.username");
-            String password = dbProps.getProperty("db.password");
-            
-            conn = DriverManager.getConnection(url, user, password);
-            System.out.println("Reconexión exitosa a la base de datos");
-            return true;
-            
         } catch (Exception e) {
             System.err.println("Error al reconectar: " + e.getMessage());
             manejarPerdidaConexion(e.getMessage());
@@ -234,17 +190,9 @@ public class StartWin extends Application {
     }
 
     /**
-     * Cierra la aplicación de forma segura
+     * Cierra la aplicacion de forma segura
      */
     private static void cerrarAplicacion() {
-        try {
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-                System.out.println("Conexión a BD cerrada");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al cerrar conexión: " + e.getMessage());
-        }
         System.exit(0);
     }
 
@@ -252,12 +200,12 @@ public class StartWin extends Application {
         // Crear botones personalizados
         ButtonType btnReintentar = new ButtonType("Reintentar");
         ButtonType btnSalir = new ButtonType("Salir");
-        
+
         Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle("Error de Conexión");
-        alert.setHeaderText("No se pudo conectar con la base de datos");
-        alert.setContentText("Error: " + mensajeError + "\n\n¿Qué deseas hacer?");
-        
+        alert.setTitle("Error de Conexion");
+        alert.setHeaderText("No se pudo conectar con el servidor API");
+        alert.setContentText("Error: " + mensajeError + "\n\nQue deseas hacer?");
+
         // Configurar el icono del alert
         alert.setOnShown(ex -> {
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
@@ -265,30 +213,30 @@ public class StartWin extends Application {
                 stage.getIcons().add(icon);
             }
         });
-        
+
         // Agregar los botones personalizados
         alert.getButtonTypes().setAll(btnReintentar, btnSalir);
-        
-        // Mostrar el diálogo y esperar respuesta
+
+        // Mostrar el dialogo y esperar respuesta
         Optional<ButtonType> resultado = alert.showAndWait();
-        
+
         if (resultado.isPresent()) {
             if (resultado.get() == btnReintentar) {
-                // Reintentar la conexión
-                System.out.println("Reintentando conexión a la base de datos...");
-                if (establecerConexionBD()) {
-                    // Si la conexión fue exitosa, mostrar el login
+                // Reintentar la conexion
+                System.out.println("Reintentando conexion con la API...");
+                if (verificarConexionAPI()) {
+                    // Si la conexion fue exitosa, mostrar el login
                     mostrarLogin();
                 }
-                // Si falla, se volverá a mostrar el diálogo de error recursivamente
+                // Si falla, se volvera a mostrar el dialogo de error recursivamente
             } else if (resultado.get() == btnSalir) {
-                // Salir de la aplicación
-                System.out.println("Cerrando aplicación...");
+                // Salir de la aplicacion
+                System.out.println("Cerrando aplicacion...");
                 cerrarAplicacion();
             }
         } else {
-            // Si el usuario cierra el diálogo sin seleccionar nada, salir
-            System.out.println("Diálogo cerrado sin selección. Cerrando aplicación...");
+            // Si el usuario cierra el dialogo sin seleccionar nada, salir
+            System.out.println("Dialogo cerrado sin seleccion. Cerrando aplicacion...");
             cerrarAplicacion();
         }
     }
@@ -302,7 +250,7 @@ public class StartWin extends Application {
         }
     }
 
-    // ===== MÉTODOS PARA CSS =====
+    // ===== METODOS PARA CSS =====
     private static void aplicarEstilosCSS(Scene scene) {
         try {
             // Cargar CSS desde resources/css/styles.css
@@ -320,7 +268,7 @@ public class StartWin extends Application {
         }
     }
 
-    // ===== MÉTODOS PARA ICONOS =====
+    // ===== METODOS PARA ICONOS =====
     private static void agregarIcono(Stage stage) {
         if (icon != null) {
             stage.getIcons().add(icon);
@@ -354,11 +302,11 @@ public class StartWin extends Application {
             FXMLLoader loader = new FXMLLoader(StartWin.class.getResource(fxml));
             Scene scene = new Scene(loader.load());
             aplicarEstilosCSS(scene);
-            
+
             primaryStage.setTitle(titulo);
             primaryStage.setScene(scene);
             agregarIcono(primaryStage);
-            
+
             if (!primaryStage.isShowing()) {
                 primaryStage.show();
             }
@@ -396,8 +344,8 @@ public class StartWin extends Application {
         mostrarModalSimple("/view/escanear_win.fxml", "Escaneo");
     }
 
-    public static void lanzarCambioContraseña() {
-        mostrarModalSimple("/view/changePasswd_win.fxml", "Cambiar Contraseña");
+    public static void lanzarCambioContrasena() {
+        mostrarModalSimple("/view/changePasswd_win.fxml", "Cambiar Contrasena");
     }
 
     public static void lanzarModTransaccion(){
@@ -412,7 +360,7 @@ public class StartWin extends Application {
         mostrarModalSimple("/view/modProducto_win.fxml", "Mod");
     }
 
-    // MÉTODO PARA MODALES SIMPLES (sin parámetros especiales)
+    // METODO PARA MODALES SIMPLES (sin parametros especiales)
     private static void mostrarModalSimple(String fxml, String titulo) {
         try {
             FXMLLoader loader = new FXMLLoader(StartWin.class.getResource(fxml));
@@ -425,10 +373,10 @@ public class StartWin extends Application {
             Scene scene = new Scene(root);
             aplicarEstilosCSS(scene);
             modalStage.setScene(scene);
-            
+
             agregarIcono(modalStage);
             modalStage.show();
-            
+
         } catch (IOException e) {
             e.printStackTrace();
             Alert a = new Alert(AlertType.ERROR);
