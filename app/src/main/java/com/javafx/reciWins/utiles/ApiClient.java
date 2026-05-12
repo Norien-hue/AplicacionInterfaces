@@ -12,8 +12,11 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.KeyStore;
 import java.time.Duration;
 import java.util.Properties;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Cliente HTTP centralizado para comunicarse con la API REST de ReciApp.
@@ -28,13 +31,42 @@ public class ApiClient {
     private final Gson gson;
     private String baseUrl;
     private String jwtToken;
+    private String truststorePassword = "reciapp2025";
 
     private ApiClient() {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
         this.gson = new Gson();
         cargarConfiguracion();
+        this.httpClient = crearHttpClient();
+    }
+
+    private HttpClient crearHttpClient() {
+        try {
+            // Cargar truststore con el certificado self-signed de la API
+            InputStream tsStream = getClass().getResourceAsStream("/reciapp-truststore.p12");
+            if (tsStream != null) {
+                KeyStore trustStore = KeyStore.getInstance("PKCS12");
+                trustStore.load(tsStream, truststorePassword.toCharArray());
+                tsStream.close();
+
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(trustStore);
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, tmf.getTrustManagers(), null);
+
+                System.out.println("SSL configurado con truststore personalizado");
+                return HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(10))
+                        .sslContext(sslContext)
+                        .build();
+            }
+        } catch (Exception e) {
+            System.err.println("Error al configurar SSL, usando configuracion por defecto: " + e.getMessage());
+        }
+        // Fallback sin truststore personalizado
+        return HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
     }
 
     public static synchronized ApiClient getInstance() {
@@ -51,14 +83,15 @@ public class ApiClient {
                 InputStream input = configUrl.openStream();
                 Properties props = new Properties();
                 props.load(input);
-                this.baseUrl = props.getProperty("api.url", "http://52.201.91.206:3000");
+                this.baseUrl = props.getProperty("api.url", "https://52.201.91.206:3000");
+                this.truststorePassword = props.getProperty("ssl.truststore.password", "reciapp2025");
                 input.close();
             } else {
-                this.baseUrl = "http://52.201.91.206:3000";
+                this.baseUrl = "https://52.201.91.206:3000";
             }
             System.out.println("ApiClient configurado con URL: " + baseUrl);
         } catch (Exception e) {
-            this.baseUrl = "http://52.201.91.206:3000";
+            this.baseUrl = "https://52.201.91.206:3000";
             System.err.println("Error al cargar configuracion, usando URL por defecto: " + e.getMessage());
         }
     }
