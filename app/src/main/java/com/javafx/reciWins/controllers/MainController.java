@@ -625,7 +625,7 @@ public class MainController implements Initializable {
             String nombre = user.has("nombre") ? user.get("nombre").getAsString() : "N/A";
             nombreBD.setText(nombre);
 
-            float emisiones = user.has("emisiones") ? user.get("emisiones").getAsFloat() : 0.0f;
+            float emisiones = user.has("emisionesReducidas") ? user.get("emisionesReducidas").getAsFloat() : 0.0f;
             saldoBD.setText(String.format("%.1f", emisiones) + " kg CO2");
 
             String permisos = user.has("permisos") ? user.get("permisos").getAsString() : "cliente";
@@ -708,7 +708,7 @@ public class MainController implements Initializable {
             for (JsonElement elem : usuarios) {
                 JsonObject u = elem.getAsJsonObject();
                 int id = u.has("id") ? u.get("id").getAsInt() : 0;
-                float emisiones = u.has("emisiones") ? u.get("emisiones").getAsFloat() : 0;
+                float emisiones = u.has("emisionesReducidas") ? u.get("emisionesReducidas").getAsFloat() : 0;
                 String permisos = u.has("permisos") ? u.get("permisos").getAsString() : "cliente";
                 String nombre = u.has("nombre") ? u.get("nombre").getAsString() : "";
                 int tap = u.has("tap") && !u.get("tap").isJsonNull() ? u.get("tap").getAsInt() : 0;
