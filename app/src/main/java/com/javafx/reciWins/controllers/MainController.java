@@ -91,35 +91,166 @@ public class MainController implements Initializable {
 
     @FXML
     void generarInforme1(ActionEvent event) {
-        lanzarInforme("informe1", new HashMap<>(), 0);
-    }
-    @FXML
-    void exportarInforme1PDF(ActionEvent event) {
-        lanzarInforme("informe1", new HashMap<>(), 1);
+        generarInforme1Local(false);
     }
 
-    private void generarInforme1Automatico() {
-        if (tabMain.getSelectionModel().getSelectedItem() != null &&
-            tabMain.getSelectionModel().getSelectedItem().getText().equals("Informes")) {
-            lanzarInforme("informe1", new HashMap<>(), 0);
+    @FXML
+    void exportarInforme1PDF(ActionEvent event) {
+        generarInforme1Local(true);
+    }
+
+    private void generarInforme1Local(boolean exportar) {
+        try {
+            ApiClient api = ApiClient.getInstance();
+            JsonArray productos = api.getAllProductos();
+
+            StringBuilder html = new StringBuilder();
+            html.append("<html><head><meta charset='UTF-8'/><style>");
+            html.append("body{font-family:Arial,sans-serif;margin:20px;background:#f9f9f9;}");
+            html.append("h1{color:#16a34a;text-align:center;}");
+            html.append("p.fecha{text-align:center;color:#888;font-size:12px;}");
+            html.append("table{width:100%;border-collapse:collapse;margin-top:15px;}");
+            html.append("th{background:#16a34a;color:white;padding:8px;font-size:12px;}");
+            html.append("td{padding:6px;text-align:center;font-size:11px;border-bottom:1px solid #ddd;}");
+            html.append("tr:nth-child(even){background:#dcfce7;}");
+            html.append(".total{font-weight:bold;margin-top:10px;font-size:13px;}");
+            html.append("</style></head><body>");
+            html.append("<h1>ReciApp - Catalogo de Productos</h1>");
+            html.append("<p class='fecha'>Generado: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("</p>");
+            html.append("<table><tr><th>Tipo</th><th>Codigo Barras</th><th>Nombre</th><th>Material</th><th>CO2 (kg)</th></tr>");
+
+            for (JsonElement elem : productos) {
+                JsonObject p = elem.getAsJsonObject();
+                String tipo = p.has("tipo") && !p.get("tipo").isJsonNull() ? p.get("tipo").getAsString() : "";
+                String barras = p.has("numeroBarras") ? String.valueOf(p.get("numeroBarras").getAsLong()) : "";
+                String nombre = p.has("nombre") && !p.get("nombre").isJsonNull() ? p.get("nombre").getAsString() : "";
+                String material = p.has("material") && !p.get("material").isJsonNull() ? p.get("material").getAsString() : "";
+                String co2 = p.has("emisionesReducibles") && !p.get("emisionesReducibles").isJsonNull() ? String.format("%.3f", p.get("emisionesReducibles").getAsFloat()) : "0";
+                html.append("<tr><td>").append(tipo).append("</td><td>").append(barras).append("</td><td>").append(nombre).append("</td><td>").append(material).append("</td><td>").append(co2).append("</td></tr>");
+            }
+
+            html.append("</table>");
+            html.append("<p class='total'>Total de productos: ").append(productos.size()).append("</p>");
+            html.append("</body></html>");
+
+            if (exportar) {
+                guardarHtmlYAbrir("informe1", html.toString());
+            } else if (webViewInforme != null) {
+                webViewInforme.getEngine().loadContent(html.toString());
+            }
+        } catch (Exception e) {
+            mostrarError("Error al generar informe", "No se pudo generar el informe", e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @FXML
     void generarInforme2(ActionEvent event) {
-        Map<String, String> params = new HashMap<>();
-
-        if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
-            params.put("NombreUsuario", "%");
-        } else if (txt_filtroUsuario != null && !txt_filtroUsuario.getText().trim().isEmpty()) {
-            params.put("NombreUsuario", "%" + txt_filtroUsuario.getText().trim() + "%");
-        } else {
-            params.put("NombreUsuario", "%");
-        }
-
-        lanzarInforme("informe2", params, 0);
+        generarInforme2Local(false);
     }
 
+    @FXML
+    void exportarInforme2PDF(ActionEvent event) {
+        generarInforme2Local(true);
+    }
+
+    private void generarInforme2Local(boolean exportar) {
+        try {
+            ApiClient api = ApiClient.getInstance();
+            JsonArray usuarios = api.getAllUsuarios();
+            JsonArray transacciones = api.getAllTransacciones();
+
+            String filtro = null;
+            if (chk_todosUsuarios == null || !chk_todosUsuarios.isSelected()) {
+                if (txt_filtroUsuario != null && !txt_filtroUsuario.getText().trim().isEmpty()) {
+                    filtro = txt_filtroUsuario.getText().trim().toLowerCase();
+                }
+            }
+
+            StringBuilder html = new StringBuilder();
+            html.append("<html><head><meta charset='UTF-8'/><style>");
+            html.append("body{font-family:Arial,sans-serif;margin:20px;background:#f9f9f9;}");
+            html.append("h1{color:#16a34a;text-align:center;}");
+            html.append("h2{color:#16a34a;margin-top:25px;}");
+            html.append("p.fecha{text-align:center;color:#888;font-size:12px;}");
+            html.append("p.info{font-size:11px;color:#555;}");
+            html.append("p.empty{font-style:italic;color:#888;font-size:11px;}");
+            html.append("table{width:100%;border-collapse:collapse;margin-top:8px;margin-bottom:5px;}");
+            html.append("th{background:#16a34a;color:white;padding:6px;font-size:11px;}");
+            html.append("td{padding:5px;text-align:center;font-size:10px;border-bottom:1px solid #ddd;}");
+            html.append("tr:nth-child(even){background:#dcfce7;}");
+            html.append(".count{font-style:italic;font-size:10px;}");
+            html.append("</style></head><body>");
+            html.append("<h1>ReciApp - Historico de Reciclaje por Usuario</h1>");
+            html.append("<p class='fecha'>Generado: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("</p>");
+
+            for (JsonElement uElem : usuarios) {
+                JsonObject u = uElem.getAsJsonObject();
+                String nombre = u.has("nombre") && !u.get("nombre").isJsonNull() ? u.get("nombre").getAsString() : "";
+                int userId = u.has("id") ? u.get("id").getAsInt() : 0;
+
+                if (filtro != null && !nombre.toLowerCase().contains(filtro)) continue;
+
+                String permisos = u.has("permisos") && !u.get("permisos").isJsonNull() ? u.get("permisos").getAsString() : "cliente";
+                float emis = 0;
+                if (u.has("emisionesReducidas") && !u.get("emisionesReducidas").isJsonNull()) emis = u.get("emisionesReducidas").getAsFloat();
+                else if (u.has("emisiones") && !u.get("emisiones").isJsonNull()) emis = u.get("emisiones").getAsFloat();
+
+                html.append("<h2>Usuario: ").append(nombre).append("</h2>");
+                html.append("<p class='info'>Rol: ").append(permisos).append(" | Emisiones reducidas: ").append(String.format("%.3f", emis)).append(" kg CO2</p>");
+
+                int count = 0;
+                StringBuilder rows = new StringBuilder();
+                for (JsonElement tElem : transacciones) {
+                    JsonObject t = tElem.getAsJsonObject();
+                    int tUser = t.has("idUsuario") ? t.get("idUsuario").getAsInt() : -1;
+                    if (tUser != userId) continue;
+                    String tTipo = t.has("tipo") && !t.get("tipo").isJsonNull() ? t.get("tipo").getAsString() : "";
+                    String tBarras = t.has("numeroBarras") ? String.valueOf(t.get("numeroBarras").getAsLong()) : "";
+                    String tFecha = t.has("fecha") && !t.get("fecha").isJsonNull() ? t.get("fecha").getAsString() : "";
+                    String tHora = t.has("hora") && !t.get("hora").isJsonNull() ? t.get("hora").getAsString() : "";
+                    rows.append("<tr><td>").append(tTipo).append("</td><td>").append(tBarras).append("</td><td>").append(tFecha).append("</td><td>").append(tHora).append("</td></tr>");
+                    count++;
+                }
+
+                if (count == 0) {
+                    html.append("<p class='empty'>Sin transacciones registradas.</p>");
+                } else {
+                    html.append("<table><tr><th>Tipo</th><th>Codigo Barras</th><th>Fecha</th><th>Hora</th></tr>");
+                    html.append(rows);
+                    html.append("</table>");
+                    html.append("<p class='count'>Total transacciones: ").append(count).append("</p>");
+                }
+            }
+
+            html.append("</body></html>");
+
+            if (exportar) {
+                guardarHtmlYAbrir("informe2", html.toString());
+            } else if (webViewInforme != null) {
+                webViewInforme.getEngine().loadContent(html.toString());
+            }
+        } catch (Exception e) {
+            mostrarError("Error al generar informe", "No se pudo generar el informe", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void guardarHtmlYAbrir(String nombre, String html) {
+        try {
+            File carpeta = new File("informes");
+            if (!carpeta.exists()) carpeta.mkdirs();
+            File archivo = new File("informes/" + nombre + ".html");
+            try (FileOutputStream fos = new FileOutputStream(archivo)) {
+                fos.write(html.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+            if (java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop.getDesktop().open(archivo);
+            }
+        } catch (Exception e) {
+            mostrarError("Error", "No se pudo exportar el informe", e.getMessage());
+        }
+    }
 
     private String obtenerTituloInforme(String nombreArchivo) {
         switch (nombreArchivo) {
@@ -150,58 +281,6 @@ public class MainController implements Initializable {
         alert.setHeaderText(header);
         alert.setContentText(contenido);
         alert.showAndWait();
-    }
-
-
-    private void lanzarInforme(String nombreInforme, Map<String, String> params, int tipo) {
-        try {
-            ApiClient api = ApiClient.getInstance();
-            byte[] pdfBytes = api.downloadReport(nombreInforme, params);
-
-            // Crear carpeta si no existe
-            File carpetaPDF = new File("pdf_informes");
-            if (!carpetaPDF.exists()) {
-                carpetaPDF.mkdirs();
-            }
-
-            String outputPdfFile = "pdf_informes/" + nombreInforme + ".pdf";
-            try (FileOutputStream fos = new FileOutputStream(outputPdfFile)) {
-                fos.write(pdfBytes);
-            }
-
-            System.out.println("Informe PDF descargado: " + outputPdfFile);
-
-            File pdfFile = new File(outputPdfFile);
-
-            if (java.awt.Desktop.isDesktopSupported()) {
-                java.awt.Desktop.getDesktop().open(pdfFile);
-                System.out.println("Informe abierto en visor PDF del sistema");
-            } else {
-                mostrarError("Error", "No se puede abrir el PDF",
-                    "No se encontro un visor de PDF. El archivo se guardo en: " + outputPdfFile);
-            }
-
-        } catch (Exception e) {
-            mostrarError("Error al generar informe",
-                "No se pudo generar el informe",
-                e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    void exportarInforme2PDF(ActionEvent event) {
-        Map<String, String> params = new HashMap<>();
-
-        if (chk_todosUsuarios != null && chk_todosUsuarios.isSelected()) {
-            params.put("NombreUsuario", "%");
-        } else if (txt_filtroUsuario != null && !txt_filtroUsuario.getText().trim().isEmpty()) {
-            params.put("NombreUsuario", "%" + txt_filtroUsuario.getText().trim() + "%");
-        } else {
-            params.put("NombreUsuario", "%");
-        }
-
-        lanzarInforme("informe2", params, 1);
     }
 
 
@@ -605,7 +684,12 @@ public class MainController implements Initializable {
             String nombre = user.has("nombre") && !user.get("nombre").isJsonNull() ? user.get("nombre").getAsString() : "N/A";
             nombreBD.setText(nombre);
 
-            float emisiones = user.has("emisionesReducidas") && !user.get("emisionesReducidas").isJsonNull() ? user.get("emisionesReducidas").getAsFloat() : 0.0f;
+            float emisiones = 0.0f;
+            if (user.has("emisionesReducidas") && !user.get("emisionesReducidas").isJsonNull()) {
+                emisiones = user.get("emisionesReducidas").getAsFloat();
+            } else if (user.has("emisiones") && !user.get("emisiones").isJsonNull()) {
+                emisiones = user.get("emisiones").getAsFloat();
+            }
             saldoBD.setText(String.format("%.1f", emisiones) + " kg CO2");
 
             String permisos = user.has("permisos") && !user.get("permisos").isJsonNull() ? user.get("permisos").getAsString() : "cliente";
@@ -681,33 +765,31 @@ public class MainController implements Initializable {
     private void cargarDatosUsuarios() {
         try {
             ApiClient api = ApiClient.getInstance();
-            System.out.println("[MAIN] Cargando usuarios...");
             JsonArray usuarios = api.getAllUsuarios();
-            System.out.println("[MAIN] Usuarios recibidos: " + usuarios.size());
 
             tablaUsuarioObservable = FXCollections.observableArrayList();
 
             for (JsonElement elem : usuarios) {
                 JsonObject u = elem.getAsJsonObject();
-                System.out.println("[MAIN] Usuario JSON: " + u);
                 int id = u.has("id") ? u.get("id").getAsInt() : 0;
-                float emisiones = u.has("emisionesReducidas") && !u.get("emisionesReducidas").isJsonNull() ? u.get("emisionesReducidas").getAsFloat() : 0;
+                float emisiones = 0;
+                if (u.has("emisionesReducidas") && !u.get("emisionesReducidas").isJsonNull()) {
+                    emisiones = u.get("emisionesReducidas").getAsFloat();
+                } else if (u.has("emisiones") && !u.get("emisiones").isJsonNull()) {
+                    emisiones = u.get("emisiones").getAsFloat();
+                }
                 String permisos = u.has("permisos") && !u.get("permisos").isJsonNull() ? u.get("permisos").getAsString() : "cliente";
                 String nombre = u.has("nombre") && !u.get("nombre").isJsonNull() ? u.get("nombre").getAsString() : "";
                 int tap = u.has("tap") && !u.get("tap").isJsonNull() ? u.get("tap").getAsInt() : 0;
 
-                System.out.println("[MAIN] -> id=" + id + " nombre=" + nombre + " emisiones=" + emisiones);
                 Usuario usuario = new Usuario(id, emisiones, permisos, nombre, tap);
                 tablaUsuarioObservable.add(usuario);
             }
-
-            System.out.println("[MAIN] Total usuarios cargados: " + tablaUsuarioObservable.size());
 
             if (tablaUsuario != null) {
                 tablaUsuario.setItems(tablaUsuarioObservable);
             }
         } catch (Exception e) {
-            System.err.println("[MAIN] ERROR cargando usuarios: " + e.getMessage());
             e.printStackTrace();
         }
     }
