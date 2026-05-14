@@ -86,13 +86,7 @@ public class MainController implements Initializable {
         txt_filtroUsuario.setDisable(true);
     }
 
-    tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-        if (newTab != null && newTab.getText().equals("Informes")) {
-            Platform.runLater(() -> {
-                generarInforme1Automatico();
-            });
-        }
-    });
+    // Informes se generan solo cuando el usuario pulsa el boton
 }
 
     @FXML
@@ -179,26 +173,12 @@ public class MainController implements Initializable {
 
             File pdfFile = new File(outputPdfFile);
 
-            if (tipo == 0) {
-                // EMBEDIDO: Mostrar en WebView del tab
-                if (webViewInforme != null) {
-                    webViewInforme.getEngine().load(pdfFile.toURI().toString());
-                    System.out.println("Informe mostrado en WebView embedido");
-                } else {
-                    // Fallback: abrir con visor del sistema
-                    if (java.awt.Desktop.isDesktopSupported()) {
-                        java.awt.Desktop.getDesktop().open(pdfFile);
-                    }
-                }
+            if (java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop.getDesktop().open(pdfFile);
+                System.out.println("Informe abierto en visor PDF del sistema");
             } else {
-                // EXTERNO: Abrir PDF con el visor del sistema
-                if (java.awt.Desktop.isDesktopSupported()) {
-                    java.awt.Desktop.getDesktop().open(pdfFile);
-                    System.out.println("Informe abierto en visor externo");
-                } else {
-                    mostrarError("Error", "No se puede abrir el PDF",
-                        "No se encontro un visor de PDF. El archivo se guardo en: " + outputPdfFile);
-                }
+                mostrarError("Error", "No se puede abrir el PDF",
+                    "No se encontro un visor de PDF. El archivo se guardo en: " + outputPdfFile);
             }
 
         } catch (Exception e) {
@@ -622,13 +602,13 @@ public class MainController implements Initializable {
             ApiClient api = ApiClient.getInstance();
             JsonObject user = api.getProfile(id_user);
 
-            String nombre = user.has("nombre") ? user.get("nombre").getAsString() : "N/A";
+            String nombre = user.has("nombre") && !user.get("nombre").isJsonNull() ? user.get("nombre").getAsString() : "N/A";
             nombreBD.setText(nombre);
 
-            float emisiones = user.has("emisionesReducidas") ? user.get("emisionesReducidas").getAsFloat() : 0.0f;
+            float emisiones = user.has("emisionesReducidas") && !user.get("emisionesReducidas").isJsonNull() ? user.get("emisionesReducidas").getAsFloat() : 0.0f;
             saldoBD.setText(String.format("%.1f", emisiones) + " kg CO2");
 
-            String permisos = user.has("permisos") ? user.get("permisos").getAsString() : "cliente";
+            String permisos = user.has("permisos") && !user.get("permisos").isJsonNull() ? user.get("permisos").getAsString() : "cliente";
             esAdministrador = permisos != null && permisos.equalsIgnoreCase("administrador");
             rolBD.setText(permisos);
 
@@ -701,26 +681,33 @@ public class MainController implements Initializable {
     private void cargarDatosUsuarios() {
         try {
             ApiClient api = ApiClient.getInstance();
+            System.out.println("[MAIN] Cargando usuarios...");
             JsonArray usuarios = api.getAllUsuarios();
+            System.out.println("[MAIN] Usuarios recibidos: " + usuarios.size());
 
             tablaUsuarioObservable = FXCollections.observableArrayList();
 
             for (JsonElement elem : usuarios) {
                 JsonObject u = elem.getAsJsonObject();
+                System.out.println("[MAIN] Usuario JSON: " + u);
                 int id = u.has("id") ? u.get("id").getAsInt() : 0;
-                float emisiones = u.has("emisionesReducidas") ? u.get("emisionesReducidas").getAsFloat() : 0;
-                String permisos = u.has("permisos") ? u.get("permisos").getAsString() : "cliente";
-                String nombre = u.has("nombre") ? u.get("nombre").getAsString() : "";
+                float emisiones = u.has("emisionesReducidas") && !u.get("emisionesReducidas").isJsonNull() ? u.get("emisionesReducidas").getAsFloat() : 0;
+                String permisos = u.has("permisos") && !u.get("permisos").isJsonNull() ? u.get("permisos").getAsString() : "cliente";
+                String nombre = u.has("nombre") && !u.get("nombre").isJsonNull() ? u.get("nombre").getAsString() : "";
                 int tap = u.has("tap") && !u.get("tap").isJsonNull() ? u.get("tap").getAsInt() : 0;
 
+                System.out.println("[MAIN] -> id=" + id + " nombre=" + nombre + " emisiones=" + emisiones);
                 Usuario usuario = new Usuario(id, emisiones, permisos, nombre, tap);
                 tablaUsuarioObservable.add(usuario);
             }
+
+            System.out.println("[MAIN] Total usuarios cargados: " + tablaUsuarioObservable.size());
 
             if (tablaUsuario != null) {
                 tablaUsuario.setItems(tablaUsuarioObservable);
             }
         } catch (Exception e) {
+            System.err.println("[MAIN] ERROR cargando usuarios: " + e.getMessage());
             e.printStackTrace();
         }
     }
