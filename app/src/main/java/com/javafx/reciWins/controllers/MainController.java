@@ -293,6 +293,7 @@ public class MainController implements Initializable {
     @FXML private AnchorPane tab_graph_content;
     @FXML private ScrollPane scrollPaneGraph;
     @FXML private Button btn_graph;
+    @FXML private Button btn_informes;
     @FXML private Button btn_addProducto;
     @FXML private Button btn_addTransaccion;
     @FXML private Button btn_addUsuario;
@@ -404,14 +405,11 @@ public class MainController implements Initializable {
 
         configurarAnimacionesTab();
 
-        // Grafico e Informes deshabilitados
-        tabMain.getTabs().get(2).setDisable(true);
-        tabMain.getTabs().get(3).setDisable(true);
-        if (btn_graph != null) btn_graph.setDisable(true);
-        if (btn_generarInforme1 != null) btn_generarInforme1.setDisable(true);
-        if (btn_generarInforme2 != null) btn_generarInforme2.setDisable(true);
-        if (btn_exportarPDF1 != null) btn_exportarPDF1.setDisable(true);
-        if (btn_exportarPDF2 != null) btn_exportarPDF2.setDisable(true);
+        // Grafico e Informes ocultos
+        if (tabMain.getTabs().size() > 3) tabMain.getTabs().remove(3);
+        if (tabMain.getTabs().size() > 2) tabMain.getTabs().remove(2);
+        if (btn_graph != null) { btn_graph.setVisible(false); btn_graph.setManaged(false); }
+        if (btn_informes != null) { btn_informes.setVisible(false); btn_informes.setManaged(false); }
     }
 
     private void aplicarAnimacionEntrada() {
