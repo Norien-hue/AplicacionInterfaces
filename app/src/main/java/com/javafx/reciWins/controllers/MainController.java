@@ -265,8 +265,6 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_informes(ActionEvent event) {
-        deseleccionarTodos();
-        tabMain.getSelectionModel().select(3);
     }
 
     private void mostrarError(String titulo, String header, String contenido) {
@@ -406,13 +404,14 @@ public class MainController implements Initializable {
 
         configurarAnimacionesTab();
 
-        configurarInformes();
-
-        tabMain.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            if (newTab != null && newTab.getText().equals("Grafico de Emisiones")) {
-                Platform.runLater(() -> {inicializarGrafico();});
-            }
-        });
+        // Grafico e Informes deshabilitados
+        tabMain.getTabs().get(2).setDisable(true);
+        tabMain.getTabs().get(3).setDisable(true);
+        if (btn_graph != null) btn_graph.setDisable(true);
+        if (btn_generarInforme1 != null) btn_generarInforme1.setDisable(true);
+        if (btn_generarInforme2 != null) btn_generarInforme2.setDisable(true);
+        if (btn_exportarPDF1 != null) btn_exportarPDF1.setDisable(true);
+        if (btn_exportarPDF2 != null) btn_exportarPDF2.setDisable(true);
     }
 
     private void aplicarAnimacionEntrada() {
@@ -569,10 +568,6 @@ public class MainController implements Initializable {
         cargarDatosProductos();
         cargarDatosTransacciones();
         cargarDatosUsuarios();
-
-        if (tabMain.getSelectionModel().getSelectedItem().getText().equals("Grafico de Emisiones")) {
-            inicializarGrafico();
-        }
     }
 
     public static void actualizarVistasDesdeExterno() {
@@ -585,9 +580,6 @@ public class MainController implements Initializable {
 
     @FXML
     void tab_graph(ActionEvent event) {
-        deseleccionarTodos();
-        tabMain.getSelectionModel().select(2);
-        inicializarGrafico();
     }
 
     private void configurarPermisosSegunRol() {
