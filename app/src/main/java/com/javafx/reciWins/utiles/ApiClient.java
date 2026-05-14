@@ -154,7 +154,7 @@ public class ApiClient {
         body.addProperty("nombre", nombre);
         body.addProperty("password", password);
 
-        HttpRequest request = requestBuilder("/api/auth/login")
+        HttpRequest request = requestBuilder("/api/usuarios/login")
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
 
@@ -176,7 +176,7 @@ public class ApiClient {
         body.addProperty("nombre", nombre);
         body.addProperty("password", password);
 
-        HttpRequest request = requestBuilder("/api/auth/register")
+        HttpRequest request = requestBuilder("/api/usuarios/register")
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
 
@@ -190,7 +190,7 @@ public class ApiClient {
      * Obtiene el perfil de un usuario por ID.
      */
     public JsonObject getProfile(int userId) throws Exception {
-        HttpRequest request = requestBuilder("/api/users/" + userId)
+        HttpRequest request = requestBuilder("/api/usuarios/profile/" + userId)
                 .GET()
                 .build();
 
@@ -206,7 +206,7 @@ public class ApiClient {
         body.addProperty("oldPassword", oldPassword);
         body.addProperty("newPassword", newPassword);
 
-        HttpRequest request = requestBuilder("/api/users/" + userId + "/password")
+        HttpRequest request = requestBuilder("/api/usuarios/" + userId + "/password")
                 .PUT(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
 
@@ -219,8 +219,8 @@ public class ApiClient {
      * @return el nuevo TAP generado
      */
     public int requestTap(int userId) throws Exception {
-        HttpRequest request = requestBuilder("/api/users/" + userId + "/tap")
-                .POST(HttpRequest.BodyPublishers.ofString("{}"))
+        HttpRequest request = requestBuilder("/api/usuarios/" + userId + "/tap")
+                .PUT(HttpRequest.BodyPublishers.ofString("{}"))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());

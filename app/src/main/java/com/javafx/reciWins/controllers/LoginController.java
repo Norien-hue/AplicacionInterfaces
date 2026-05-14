@@ -61,18 +61,27 @@ public class LoginController {
         try {
             ApiClient api = ApiClient.getInstance();
             JsonObject result = api.login(nombre, contrasenia);
+            System.out.println("[LOGIN] Respuesta del servidor: " + result);
 
-            if (result.has("id")) {
+            // La API devuelve { "token": "...", "user": { "id": ..., "nombre": ... } }
+            if (result.has("user") && result.getAsJsonObject("user").has("id")) {
+                int idUsuario = result.getAsJsonObject("user").get("id").getAsInt();
+                MainController.id_user = idUsuario;
+                System.out.println("[LOGIN] Login exitoso. ID Usuario: " + idUsuario);
+                return true;
+            } else if (result.has("id")) {
                 int idUsuario = result.get("id").getAsInt();
                 MainController.id_user = idUsuario;
-                System.out.println("Login exitoso. ID Usuario: " + idUsuario);
+                System.out.println("[LOGIN] Login exitoso (formato alternativo). ID Usuario: " + idUsuario);
                 return true;
             } else {
+                System.err.println("[LOGIN] Respuesta inesperada: " + result);
                 mostrarError("Error de login", "Respuesta inesperada del servidor.");
                 return false;
             }
 
         } catch (Exception e) {
+            System.err.println("[LOGIN] Error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             String msg = e.getMessage();
             if (msg != null && (msg.contains("connection") || msg.contains("Connection") || msg.contains("timeout"))) {
                 StartWin.manejarPerdidaConexion(msg);
