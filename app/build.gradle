@@ -1,6 +1,7 @@
 plugins {
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
+  id 'org.beryx.runtime' version '1.13.1'
 }
 
 repositories {
@@ -24,7 +25,7 @@ dependencies {
     implementation 'net.sf.jasperreports:jasperreports:7.0.1'
     implementation 'net.sf.jasperreports:jasperreports-pdf:7.0.0'
     implementation 'net.sf.jasperreports:jasperreports-charts:7.0.1'
-    implementation 'org.openjfx:javafx-web:21.0.1'
+    // javafx-web ya incluido por el plugin javafxplugin v25
     // BCrypt para hash de contraseñas (compatible con Node bcrypt $2b$)
     implementation("at.favre.lib:bcrypt:0.10.2")
 }
@@ -83,5 +84,60 @@ tasks.jar {
             // Esto crea el "Class-Path" dentro del manifiesto del JAR
             'Class-Path': configurations.runtimeClasspath.files.collect { "lib/" + it.name }.join(' ')
         )
+    }
+}
+
+// ============================================================
+// Configuracion para generar instalador Windows con jpackage
+// ============================================================
+runtime {
+    options = [
+        '--strip-debug',
+        '--compress', '2',
+        '--no-header-files',
+        '--no-man-pages',
+    ]
+
+    modules = [
+        'java.base',
+        'java.desktop',
+        'java.logging',
+        'java.naming',
+        'java.net.http',
+        'java.sql',
+        'java.xml',
+        'java.scripting',
+        'java.management',
+        'jdk.jsobject',
+        'jdk.xml.dom',
+        'jdk.unsupported',
+        'jdk.unsupported.desktop',
+    ]
+
+    launcher {
+        noConsole = false  // Mantener consola para diagnostico
+    }
+
+    jpackage {
+        appVersion = '1.0.0'
+        imageName = 'ReciApp'
+        installerName = 'ReciApp'
+        imageOptions = [
+            '--icon', "${project.projectDir}/src/main/resources/icon.ico",
+            '--java-options', '--module-path',
+            '--java-options', '$APPDIR',
+            '--java-options', '--add-modules=javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web',
+            '--java-options', '--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED',
+            '--java-options', '-Dfile.encoding=UTF-8',
+        ]
+        installerOptions = [
+            '--win-dir-chooser',
+            '--win-menu',
+            '--win-shortcut',
+            '--win-shortcut-prompt',
+            '--vendor', 'ReciApp',
+            '--description', 'Aplicacion de escritorio para gestion de reciclaje',
+            '--icon', "${project.projectDir}/src/main/resources/icon.ico",
+        ]
     }
 }
